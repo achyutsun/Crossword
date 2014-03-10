@@ -1,0 +1,39 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+     <item
+        android:id="@+id/action_spell"
+        android:orderInCategory="80"
+        android:showAsAction="never"
+        android:title="@string/action_spell"/>
+    <item
+        android:id="@+id/action_clear"
+        android:orderInCategory="85"
+        android:showAsAction="never"
+        android:title="@string/action_clear"/>
+    <item
+        android:id="@+id/action_open"
+        android:orderInCategory="87"
+        android:showAsAction="never"
+        android:title="@string/action_open"/>
+    <item
+        android:id="@+id/action_save"
+        android:orderInCategory="88"
+        android:showAsAction="never"
+        android:title="@string/action_save"/>
+    <item
+        android:id="@+id/action_web"
+        android:orderInCategory="95"
+        android:showAsAction="never"
+        android:title="@string/action_web"/>
+    <item
+        android:id="@+id/action_bluetooth_on"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_bluetooth_on"/>
+    <item
+        android:id="@+id/action_bluetooth_off"
+        android:orderInCategory="101"
+        android:showAsAction="never"
+        android:title="@string/action_bluetooth_off"/>
+    
+</menu>

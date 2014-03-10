@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="crossword_app_name">Crossword</string>
+    <string name="action_open">Open</string>
+    <string name="action_save">Save</string>
+    <string name="action_import">Import</string>
+    <string name="action_export">Export</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_spell">Spell check</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_web">Web</string>
+    <string name="action_bluetooth_off">Bluetooth off</string>
+    <string name="action_bluetooth_on">Bluetooth on</string>
+    <string name="open_failed">Open failed</string>
+    <string name="save_failed">Save failed</string>
+    <string name="save_successful">Crossword %d saved</string>
+    
+    <string name="text_across">Across</string>
+    <string name="text_down">Down</string>
+    <string name="text_enter">Enter</string>
+    <string name="text_erase">Erase</string>
+    <string name="text_clues">Clues</string>
+    <string name="text_ok">OK</string>
+    <string name="text_yes">Yes</string>
+    <string name="text_no">No</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_bad_fit">Word does not fit</string>
+    <string name="text_enter_word">Enter word</string>
+    <string name="text_threelines">10 The quick brown fox jumps over the lazy dog (5,5,5)</string>
+    <string name="text_no_files">No files</string>
+    <string name="text_no_crossword">No crossword</string>
+    <string name="text_icon">Icon</string>
+    <string name="text_up">Up</string>
+    <string name="text_congrats">Congratulations! You have completed the puzzle</string>
+    <string name="text_importing">Importing %s</string>
+    <string name="text_solution">Solution</string>
+    <string name="text_invalid_solution">Solution not available</string>
+    <string name="text_select_connection">Select connection mode</string>
+    <string name="text_connect">Connect</string>
+    <string name="text_listen">Listen</string>
+    <string name="text_synch_error">Synchronisation error</string>
+    <string name="text_mismatch">Different crosswords</string>
+    <string name="text_press_back_again">Press back again to exit</string>
+    <string name="text_query_continue">Current crossword will be lost.\nContinue?</string>
+    
+    <!--  BluetoothChat -->
+    <string name="send">Send</string>
+    <string name="not_connected">You are not connected to a device</string>
+    <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
+    <string name="title_connecting">Connecting&#8230;</string>
+   	<string name="title_connected_to">Connected to <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="title_not_connected">Listening&#8230;</string>
+    <string name="text_disable_bt">Turn off bluetooth?</string>
+    
+    <!--  DeviceListActivity -->
+    <string name="scanning">Scanning for devices&#8230;</string>
+    <string name="select_device">Select a device to connect</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">No devices found</string>
+    <string name="title_paired_devices">Paired Devices</string>
+    <string name="title_other_devices">Other Available Devices</string>
+    <string name="button_scan">Scan for devices</string>
+
+    <string name="spell_app_name">Spell</string>
+    <string name="action_check">Check word</string>
+    <string name="action_anagram">Anagram</string>
+    <string name="action_crossword">Crossword</string>
+    
+    <string name="text_hint">Word to find</string>
+    <string name="text_no_lexicon">Lexicon not found</string>
+    <string name="text_not_found">No matches found</string>
+    <string name="text_no_data">(No data)</string>
+        
+</resources>
