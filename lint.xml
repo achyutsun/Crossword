@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="DefaultLocale">
+        <ignore path="src\uk\org\downiesoft\crossword\MainActivity.java" />
+        <ignore path="src\uk\org\downiesoft\spell\Lexicon.java" />
+    </issue>
+    <issue id="SetJavaScriptEnabled">
+        <ignore path="src\uk\org\downiesoft\crossword\WebViewFragment.java" />
+    </issue>
+</lint>
