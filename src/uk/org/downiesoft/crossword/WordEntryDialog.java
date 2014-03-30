@@ -20,7 +20,8 @@ import android.widget.Toast;
 
 public class WordEntryDialog extends DialogFragment
 {
-
+	public static final String TAG=WordEntryDialog.class.getName();
+	
 	public interface WordEntryListener
 	{
 		public void onWordEntered(String aWord);

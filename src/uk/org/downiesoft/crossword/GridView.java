@@ -20,7 +20,7 @@ public class GridView extends View
 	private static final int HIGHLIGHT = 0xffffa060;
 	private static final int HIGHLIGHT_ALT = 0xffa0c8ff;
 
-	public interface GridObserver
+	public interface GridViewListener
 	{
 		public void onClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
 	}
@@ -37,9 +37,11 @@ public class GridView extends View
 	private Rect iExtent;
 	private Clue iClue;
 	private CrosswordModel iCrossword;
-	private GridObserver iObserver;
+	private GridViewListener iObserver;
 	private Rect r = new Rect();
 	private Rect iBounds = new Rect();
+	private int mTextSize;
+	private int mNumberSize;
 
 	public GridView(Context context, AttributeSet attrs)
 	{
@@ -53,9 +55,8 @@ public class GridView extends View
 	@Override
 	public void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
-		iPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		iPaint.setTextSize((5*w)/(CrosswordModel.GRID_SIZE*6));
-		iPaint.setStrokeWidth(1.0f);
+		mTextSize=(3*w)/(CrosswordModel.GRID_SIZE*4);
+		mNumberSize=(w)/(CrosswordModel.GRID_SIZE*4);
 		Rect textBounds = new Rect();
 		iPaint.getTextBounds("W", 0, 1, textBounds);
 		iSize = textBounds.width() + 5;
@@ -78,10 +79,13 @@ public class GridView extends View
 	{
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		int iWidth = MeasureSpec.getSize(widthMeasureSpec);
-		int iHeight = Math.min(iWidth, MeasureSpec.getSize(heightMeasureSpec));
-		setMeasuredDimension(iWidth, iHeight);
-		iSize = iWidth / CrosswordModel.GRID_SIZE;
+		int iHeight = MeasureSpec.getSize(heightMeasureSpec);
+		int min=Math.min(iWidth,iHeight);
+		setMeasuredDimension(min, min);
+		iSize = min / CrosswordModel.GRID_SIZE;
 		iMargin = (iWidth - iSize * CrosswordModel.GRID_SIZE) / 2;
+		iWidth=min;
+		iHeight=min;
 	}
 
 	@Override
@@ -96,6 +100,25 @@ public class GridView extends View
 		return iWidth;
 	}
 
+	private void drawNumber(int col, int row, Canvas canvas) {
+		Point pos=new Point(col,row);
+		boolean across=(col==0 || iCrossword.isBlank(col-1,row))
+			&& col<CrosswordModel.GRID_SIZE-1 && !iCrossword.isBlank(col+1,row);
+		boolean down=(row==0 || iCrossword.isBlank(col,row-1))
+			&& row<CrosswordModel.GRID_SIZE-1 && !iCrossword.isBlank(col,row+1);
+		int direction=across?CrosswordModel.CLUE_ACROSS:(down?CrosswordModel.CLUE_DOWN:-1);
+		if (direction!=-1) {
+			Clue clue=iCrossword.clueAt(pos,direction);
+			iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+			iPaint.setTextSize(mNumberSize);
+			iPaint.setTextAlign(Align.LEFT);
+			iPaint.getTextBounds("88", 0, 2, iBounds);
+			iPaint.setColor(Color.BLACK);
+			canvas.drawText(Integer.toString(clue.number()), r.left+1, r.top+1 + iBounds.height(), iPaint);
+		}
+		
+	}
+	
 	private void drawSquare(int col, int row, int color, Canvas canvas)
 	{
 		if (col >= 0 && row >= 0 && col < CrosswordModel.GRID_SIZE && row < CrosswordModel.GRID_SIZE)
@@ -110,6 +133,7 @@ public class GridView extends View
 			iPaint.setStyle(Style.FILL_AND_STROKE);
 			if (!iCrossword.isBlank(col, row))
 			{
+				drawNumber(col,row,canvas);
 				int value = iCrossword.value(col, row);
 				int solution = iCrossword.solution(col, row);
 				String letter=" ";
@@ -126,6 +150,10 @@ public class GridView extends View
 					iPaint.setColor(Color.GREEN);
 					letter=Character.toString((char)solution);
 				}
+				iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+				iPaint.setTextSize(mTextSize);
+				iPaint.setTextAlign(Align.CENTER);
+				iPaint.getTextBounds("W", 0, 1, iBounds);
 				canvas.drawText(letter, r.centerX(), r.centerY() + iBounds.height()/2f, iPaint);
 				iPaint.setStyle(Style.STROKE);
 			}
@@ -136,10 +164,6 @@ public class GridView extends View
 	public void onDraw(Canvas canvas)
 	{
 		iPaint.reset();
-		iPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		iPaint.setTextSize(iSize*5/6);
-		iPaint.setTextAlign(Align.CENTER);
-		iPaint.getTextBounds("W", 0, 1, iBounds);
 		if (iCrossword == null)
 		{
 			String noFiles=iContext.getString(R.string.text_no_crossword);
@@ -169,7 +193,7 @@ public class GridView extends View
 		return iClue;
 	}
 	
-	public void setObserver(GridObserver aObserver)
+	public void setObserver(GridViewListener aObserver)
 	{
 		iObserver = aObserver;
 	}
@@ -308,6 +332,10 @@ public class GridView extends View
 	{
 		if (iClue == null)
 			return;
+		iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		iPaint.setTextSize(mTextSize);
+		iPaint.setTextAlign(Align.CENTER);
+		iPaint.getTextBounds("W", 0, 1, iBounds);
 		Point delta = new Point(1 - iDirection, iDirection);
 		int pos = iCursor.x - iExtent.left + iCursor.y - iExtent.top;
 		int len = iExtent.right - iExtent.left + iExtent.bottom - iExtent.top + 1;

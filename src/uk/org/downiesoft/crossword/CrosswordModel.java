@@ -31,12 +31,22 @@ class CrosswordModel
 
 	public static final String CROSSWORD_HEADER = "#!Crossword";
 
+	private static CrosswordModel sCrossword;
+	
 	int iCrosswordId;
 	ClueLists iClues;
 	boolean iCrosswordValid;
 	int iGrid[][] = new int[GRID_SIZE][GRID_SIZE];
 	int iSolution[][] = new int[GRID_SIZE][GRID_SIZE];
-	  
+
+	public static CrosswordModel getInstance()
+	{
+		if (sCrossword==null) {
+			sCrossword = new CrosswordModel();
+		}
+		return sCrossword;
+	}
+	
 	public int value(Point aPos)
 	{
 		return iGrid[aPos.x][aPos.y];
@@ -425,14 +435,14 @@ class CrosswordModel
 					{
 						incClue=true;
 						Clue solution = aSolution.getClue(CLUE_ACROSS, clueNum);
-						if (solution==null || !enterSolution(pos, CLUE_ACROSS, solution.Text()))
+						if (solution==null || !enterSolution(pos, CLUE_ACROSS, solution.text()))
 							valid=false;
 					}
 					if (extD.height() > 0 && (row == 0 || isBlank(col, row - 1)))
 					{
 						incClue=true;
 						Clue solution = aSolution.getClue(CLUE_DOWN, clueNum);
-						if (solution==null || !enterSolution(pos, CLUE_DOWN, solution.Text()))
+						if (solution==null || !enterSolution(pos, CLUE_DOWN, solution.text()))
 							valid=false;
 					}
 					if (incClue)
@@ -630,7 +640,7 @@ class CrosswordModel
 		for (int i=0; i<len; i++)
 		{
 			int val=aGrid[pos.x][pos.y];
-			if (val!=SQUARE_NONBLANK && val!=(int)aWord.charAt(i))
+			if (val!=SQUARE_NONBLANK && val!=(aWord.charAt(i)&0xDF))
 				return false;
 			pos.x+=delta.x;
 			pos.y+=delta.y;
@@ -638,7 +648,7 @@ class CrosswordModel
 		pos.set(extent.left,extent.top);
 		for (int i=0; i<len; i++)
 		{
-			aGrid[pos.x][pos.y]=(int)aWord.charAt(i);
+			aGrid[pos.x][pos.y]=aWord.charAt(i)&0xDF;
 			pos.x+=delta.x;
 			pos.y+=delta.y;
 		}		

@@ -32,7 +32,7 @@ public class ClueLists
 		int i = 0;
 		while (i < iClues.get(aDirection).size())
 		{
-			if (iClues.get(aDirection).get(i).Number() == aNum)
+			if (iClues.get(aDirection).get(i).number() == aNum)
 			{
 				return (iClues.get(aDirection).get(i));
 			}

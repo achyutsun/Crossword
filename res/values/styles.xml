@@ -1,20 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
     -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo.Light">
+    <style name="AppBaseTheme" parent="android:Theme.Holo">
         <!--
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
         -->
     </style>
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+		<item name="android:listViewStyle">@style/MyListView</item>
     </style>
 
+	<style name="MyActionMode" parent="android:style/Widget.Holo.ActionMode">
+    	<item name="android:background">@color/blue_overlay</item>
+		<item name="android:backgroundSplit">@color/blue_overlay</item>
+		<item name="android:actionModeBackground">@color/blue_overlay</item>
+		<item name="android:actionModeSplitBackground">@color/blue_overlay</item>
+	</style>
+	
+	<style name="MyActionBar" parent="android:style/Widget.Holo.ActionBar">
+		<item name="android:background">@color/grey_overlay</item>
+		<item name="android:backgroundSplit">@color/grey_overlay</item>
+	</style>
+
+	<style name="MyGridView" parent="android:style/Widget.Holo.GridView">
+		<item name="android:selectableItemBackground">@android:color/holo_blue_dark</item>
+	</style>
+
+	<style name="MyListView" parent="android:style/Widget.Holo.ListView">
+		<item name="android:textColorPrimary">@android:color/holo_blue_bright</item>
+		<item name="android:selectableItemBackground">@android:color/holo_blue_dark</item>
+	</style>
 </resources>

@@ -19,7 +19,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -30,7 +30,7 @@ public class SpellActivity extends Activity implements LexiconObserver
 
 	public static final int REQUEST_CROSSWORD = 1024;
 
-	ListView iListView;
+	GridView iGridView;
 	EditText iEditText;
 	Button iCheckButton;
 	Button iAnagramButton;
@@ -46,7 +46,7 @@ public class SpellActivity extends Activity implements LexiconObserver
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.spell_activity);
 
-		iListView = (ListView) this.findViewById(R.id.listView);
+		iGridView = (GridView) this.findViewById(R.id.listView);
 		iEditText = (EditText) this.findViewById(R.id.textView);
 		iEditText.clearFocus();
 		iEditText.setOnEditorActionListener(new OnEditorActionListener()
@@ -57,8 +57,7 @@ public class SpellActivity extends Activity implements LexiconObserver
 				String word = iEditText.getText().toString().toLowerCase();
 				if (word != null && word.length() > 1)
 				{
-					if (iLexicon.check(word, Lexicon.DICT_ALL, Lexicon.DICT_ALL, false))
-						;
+					iLexicon.check(word, Lexicon.DICT_ALL, Lexicon.DICT_ALL, false);
 				}
 				return true;
 			}
@@ -68,7 +67,7 @@ public class SpellActivity extends Activity implements LexiconObserver
 		{
 			setResult(Activity.RESULT_CANCELED);
 			iEditText.setText(intent.getExtras().getString("uk.org.downiesoft.crossword.wordPattern", ""));
-			iListView.setOnItemClickListener(new OnItemClickListener()
+			iGridView.setOnItemClickListener(new OnItemClickListener()
 			{
 
 				@Override
@@ -163,8 +162,8 @@ public class SpellActivity extends Activity implements LexiconObserver
 		iWordList = new ArrayList<String>();
 		iMetric = new ArrayList<Integer>();
 		iAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, iWordList);
-		iListView.setEmptyView(findViewById(R.id.listEmpty));
-		iListView.setAdapter(iAdapter);
+		iGridView.setEmptyView(findViewById(R.id.listEmpty));
+		iGridView.setAdapter(iAdapter);
 	}
 
 	@Override

@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 
 public class CluesFragment extends Fragment
 {
+	public static final String TAG=CluesFragment.class.getName();
+	
 	private FragmentTabHost mTabHost;
 	Bundle[] iClueBundle;
 	CrosswordModel iCrossword;

@@ -6,64 +6,62 @@ import java.io.IOException;
 
 import android.os.Bundle;
 
-public class Clue
-{
+public class Clue {
 
 	int iType;
 	int iNumber;
 	String iText;
+	boolean iSelected;
 
-	Clue()
-	{
+	Clue() {
 		iText = new String();
 	};
-	
-	Clue(Bundle args)
-	{
-		iType=args.getInt("type");
-		iNumber=args.getInt("number");
+
+	Clue(Bundle args) {
+		iType = args.getInt("type");
+		iNumber = args.getInt("number");
 		iText = args.getString("text");
 	}
 
-	Clue(Clue aClue)
-	{
-		iType=aClue.iType;
-		iNumber=aClue.iNumber;
+	Clue(Clue aClue) {
+		iType = aClue.iType;
+		iNumber = aClue.iNumber;
 		iText = new String(aClue.iText);
 	}
 
-	public int Type()
-	{
+	public int type() {
 		return iType;
 	}
 
-	public int Number()
-	{
+	public int number() {
 		return iNumber;
 	}
 
-	public String Text()
-	{
+	public String text() {
 		return iText;
 	};
 
-	public void setType(int aType)
-	{
+	public void setType(int aType) {
 		iType = aType;
 	}
 
-	public void setNumber(int aNumber)
-	{
+	public void setNumber(int aNumber) {
 		iNumber = aNumber;
 	};
 
-	public void setText(String aText)
-	{
+	public void setText(String aText) {
 		iText = new String(aText);
 	};
 
-	public int length()
-	{
+	public void setSelected(boolean aSelected) {
+		iSelected = aSelected;	
+	}
+
+	public boolean isSelected() {
+		return iSelected;
+	}
+
+	public int length() {
 		int bra = iText.lastIndexOf('(');
 		if (bra < 0)
 			return -1;
@@ -73,19 +71,17 @@ public class Clue
 		String value = iText.substring(bra + 1, ket);		
 		int i = 0;
 		int len=0;
-		while (i < value.length())
-		{
+		while (i < value.length()) {
 			int j = i;
-			while (j<value.length() && Character.isDigit(value.charAt(j)))
+			while (j < value.length() && Character.isDigit(value.charAt(j)))
 				j++;
-			len+=Integer.parseInt(value.substring(i,j));
-			i=j+1;
+			len += Integer.parseInt(value.substring(i, j));
+			i = j + 1;
 		}
 		return len;
 	}
-	
-	public int wordLength(int aWordIndex)
-	{
+
+	public int wordLength(int aWordIndex) {
 		int bra = iText.lastIndexOf('(');
 		if (bra < 0)
 			return -1;
@@ -95,8 +91,7 @@ public class Clue
 		String value = iText.substring(bra + 1, ket);
 
 		int i = 0;
-		while (aWordIndex-- > 0)
-		{
+		while (aWordIndex-- > 0) {
 			while (i < value.length() && Character.isDigit(value.charAt(i)))
 				i++;
 			i++;
@@ -113,27 +108,23 @@ public class Clue
 		return Integer.parseInt(value.substring(i, j));
 	}
 
-	public void externalize(DataOutputStream aStream) throws IOException
-	{
+	public void externalize(DataOutputStream aStream) throws IOException {
 		aStream.writeInt(iType);
 		aStream.writeInt(iNumber);
 		aStream.writeUTF(iText);
 	}
 
-	public void internalize(DataInputStream aStream) throws IOException
-	{
+	public void internalize(DataInputStream aStream) throws IOException {
 		iType = aStream.readInt();
 		iNumber = aStream.readInt();
 		iText = aStream.readUTF();
 	}
 
-	public String toString()
-	{
-		return Integer.toString(iNumber)+Character.toString((char)(65+3*iType))+":\t"+iText;
+	public String toString() {
+		return Integer.toString(iNumber) + Character.toString((char)(65 + 3 * iType)) + ":\t" + iText;
 	}
-	
-	public Bundle toArgs()
-	{
+
+	public Bundle toArgs() {
 		Bundle args=new Bundle();
 		args.putInt("type", iType);
 		args.putInt("number", iNumber);

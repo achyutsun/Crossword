@@ -11,13 +11,16 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.util.Log;
 
 public class ClueListFragment extends Fragment
 {
+
+	public static final String TAG=ClueListFragment.class.getName();
 	
 	public interface ClueListListener
 	{
-		void onClueClicked(int aDirection, int aNum);
+		void onClueClicked(int aDirection, int aNum, int aPosition);
 	}
 	
 	ClueListAdapter iAdapter;
@@ -30,7 +33,7 @@ public class ClueListFragment extends Fragment
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		iCrossword = ((MainActivity)getActivity()).getCrossword();
+		iCrossword = CrosswordModel.getInstance();
 	}
 
 	@Override
@@ -77,8 +80,10 @@ public class ClueListFragment extends Fragment
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
 				Clue clue=iAdapter.getItem(position);
-				if (iListener!=null)
-					iListener.onClueClicked(iDirection, clue.iNumber);
+				if (iListener!=null) {
+					Log.d(TAG, String.format("onItemClick(%d)",position));
+					iListener.onClueClicked(iDirection, clue.iNumber, position);
+				}
 			}});
 		return view;
 	}

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#000000"
+    android:orientation="horizontal" >
+
+    <RelativeLayout
+        android:id="@+id/gridLayout"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+		android:orientation="horizontal" >
+
+        <uk.org.downiesoft.crossword.GridView
+            android:id="@+id/gridView"
+			android:layout_alignParentLeft="true" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+		<RelativeLayout
+			android:layout_height="match_parent"
+			android:layout_width="match_parent"
+			android:layout_toRightOf="@id/gridView"
+			android:layout_alignParentRight="true" 
+			android:orientation="vertical" >
+
+			<LinearLayout
+				android:id="@+id/clueListLabels"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" >
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:textSize="@dimen/clue_text_size"
+					android:gravity="center"
+					android:textAlignment="center"
+					android:text="@string/text_across" />
+
+				<View
+					android:layout_width="1dip"
+					android:layout_height="match_parent"
+					android:background="?android:attr/dividerVertical" />
+
+				<TextView
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:textSize="@dimen/clue_text_size"
+					android:gravity="center"
+					android:textAlignment="center"
+					android:text="@string/text_down" />
+			</LinearLayout>
+			
+			<View
+				android:id="@+id/clueListDivider"
+				android:layout_width="match_parent"
+				android:layout_height="1dip"
+				android:layout_below="@id/clueListLabels"
+				android:background="?android:attr/dividerHorizontal" />
+			
+			<LinearLayout
+				android:id="@+id/clueLists"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_below="@id/clueListDivider"
+				android:layout_above="@+id/gridButtons"
+				android:orientation="horizontal" >
+
+				<uk.org.downiesoft.crossword.ClueListView
+					android:id="@+id/cluesListAcross"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:textSize="@dimen/clue_text_size" />
+
+				<View
+					android:layout_width="1dip"
+					android:layout_height="match_parent"
+					android:background="?android:attr/dividerVertical" />
+
+				<uk.org.downiesoft.crossword.ClueListView
+					android:id="@+id/cluesListDown"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:textSize="@dimen/clue_text_size" />
+
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/gridButtons"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_alignParentBottom="true"
+				android:orientation="horizontal" >
+
+				<Button
+					android:id="@+id/gridEnterButton"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="@string/text_enter"
+					android:textSize="18sp" />
+
+				<View
+					android:layout_width="1dip"
+					android:layout_height="match_parent"
+					android:background="?android:attr/dividerVertical" />
+
+				<Button
+					android:id="@+id/gridEraseButton"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="@string/text_erase"
+					android:textSize="18sp" />
+
+				<View
+					android:layout_width="1dip"
+					android:layout_height="match_parent"
+					android:background="?android:attr/dividerVertical" />
+
+				<Button
+					android:id="@+id/gridCluesButton"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:text="@string/text_clues"
+					android:textSize="18sp" />
+			</LinearLayout>
+		</RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/emptyLayout"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:visibility="gone" >
+
+        <TextView
+            android:text="@string/text_no_crossword"
+            android:gravity="center"
+            android:textSize="25sp"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" />
+    </RelativeLayout>
+
+</RelativeLayout>

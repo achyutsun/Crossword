@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ListView
+    <uk.org.downiesoft.crossword.ClueListView
         android:id="@+id/clueList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

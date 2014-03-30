@@ -3,17 +3,17 @@
     <item
         android:id="@+id/action_check"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/action_check"/>
     <item
         android:id="@+id/action_anagram"
         android:orderInCategory="105"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/action_anagram"/>
     <item
         android:id="@+id/action_crossword"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        android:showAsAction="ifRoom|withText"
         android:title="@string/action_crossword"/>
     
 </menu>

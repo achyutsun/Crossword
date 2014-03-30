@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
 import uk.org.downiesoft.crossword.BrowserDialog.BrowserDialogListener;
-import uk.org.downiesoft.crossword.ClueListFragment.ClueListListener;
+import uk.org.downiesoft.crossword.GridFragment.GridFragmentListener;
 import uk.org.downiesoft.crossword.WebViewFragment.WebViewFragmentListener;
 import uk.org.downiesoft.spell.SpellActivity;
 import android.app.Activity;
@@ -34,12 +34,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends FragmentActivity implements BrowserDialogListener, ClueListListener, WebViewFragmentListener,
-		BluetoothListener
+public class MainActivity extends FragmentActivity implements BrowserDialogListener, WebViewFragmentListener,
+		BluetoothListener,GridFragmentListener
 {
-	public static final String TAG = "uk.org.downiesoft.crossword.MainActivity";
 
+	public static final String TAG = "uk.org.downiesoft.crossword.MainActivity";
 	private static final String CROSSWORD_DIR = "Crossword";
+
 	private CrosswordModel iCrossword;
 	private GridFragment iGridFragment;
 	private SharedPreferences iSettings;
@@ -171,7 +172,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_crossword);
-		iCrossword = new CrosswordModel();
+		iCrossword = CrosswordModel.getInstance();
 		iSettings = getSharedPreferences("CROSSWORD_SETTINGS", Context.MODE_PRIVATE);
 		iTitleHandler = new Handler();
 		restore();
@@ -351,16 +352,20 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	void setCrosswordTitle()
 	{
 		String title = getString(R.string.crossword_app_name);
+		String subtitle = null;
 		if (iCrossword.isValid() && iWebManager != null)
 		{
 			title = Integer.toString(iCrossword.crosswordId());
 			WebInfo info = iWebManager.getCrossword(iCrossword.crosswordId());
 			if (info != null)
 			{
-				title += " " + info.dateString();
+				subtitle = info.dateString();
 			}
 		}
 		getActionBar().setTitle(title);
+		if (subtitle!=null) {
+			getActionBar().setSubtitle(subtitle);
+		}
 	}
 
 	@Override
@@ -480,12 +485,6 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	public WebManager getWebManager()
 	{
 		return iWebManager;
-	}
-
-	@Override
-	public void onClueClicked(int aDirection, int aNum)
-	{
-		iGridFragment.onClueClicked(aDirection, aNum);
 	}
 
 	@Override
@@ -672,6 +671,15 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 						synch();
 					}
 				}
+				break;
+			case CluesActivity.REQUEST_CLUE:
+				if (data!=null && data.getExtras()!=null) {
+					int direction = data.getExtras().getInt("direction");
+					int number = data.getExtras().getInt("number");
+					int position = data.getExtras().getInt("position",-1);
+					iGridFragment.clueClicked(direction, number, position);
+				}
+				break;
 		}
 	}
 
@@ -696,4 +704,12 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			iBluetoothManager.sendCrossword(iCrossword);
 		}
 	}
+	
+	@Override
+	public void onClueButtonPressed(Bundle aCurrentClue) {
+		Intent intent = new Intent(this, CluesActivity.class);
+		intent.putExtra("currentClue",aCurrentClue);
+		startActivityForResult(intent, CluesActivity.REQUEST_CLUE);
+	}
+
 }
