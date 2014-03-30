@@ -27,3 +27,8 @@ proguard/
 *.ipr
 *.iws
 .idea/
+
+RCS/*
+
+project.properties
+proguard-project.txt
