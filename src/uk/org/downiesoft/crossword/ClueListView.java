@@ -1,16 +1,16 @@
 package uk.org.downiesoft.crossword;
-import android.widget.ListView;
 import java.util.ArrayList;
+
 import android.content.Context;
 import android.util.AttributeSet;
-import android.graphics.drawable.StateListDrawable;
+import android.view.MotionEvent;
+import android.widget.ListView;
 
 public class ClueListView extends ListView
 {
 	
 	public static final String TAG=ClueListView.class.getName();
 	
-	private ArrayList<Clue> mClueList;
 	private ClueListAdapter iAdapter;
 	private Context mContext;
 	
@@ -24,14 +24,27 @@ public class ClueListView extends ListView
 		mContext = aContext;
 	}
 
+	public ClueListView(Context aContext, AttributeSet aAttr, int aDefStyle) {
+		super(aContext, aAttr, aDefStyle);
+		mContext = aContext;
+	}
+
 	public void setClueList(ArrayList<Clue> aClueList) {
-		mClueList = aClueList;
 		if (aClueList != null) {
 			iAdapter = new ClueListAdapter(mContext,R.layout.clue_list_item,aClueList);
 			setAdapter(iAdapter);
 		}		
 	}
-	
+
+	@Override
+	public boolean onTouchEvent(MotionEvent ev) {
+		try {
+			return super.onTouchEvent(ev);
+		} catch (Exception e) {
+			return true;
+		}
+	}
+
 	public ClueListAdapter getAdapter() {
 		return iAdapter;
 	}

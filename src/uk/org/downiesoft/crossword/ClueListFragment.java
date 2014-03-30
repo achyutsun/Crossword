@@ -64,13 +64,18 @@ public class ClueListFragment extends Fragment
 		ArrayList<Clue> clueList=iCrossword.iClues.getClueList(iDirection);
 		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,clueList);
 		iListView.setAdapter(iAdapter);
-		if (number>=1)
+		if (number>0)
 		{
 			for (int i=0; i<clueList.size(); i++)
 			{
 				if (clueList.get(i).iNumber==number)
 				{
 					iListView.setSelection(i);
+					try {
+						iAdapter.setSelectedClue(i);
+					} catch (NullPointerException e) {
+						// workaround for Android AbsListView bug
+					}
 					break;
 				}
 			}

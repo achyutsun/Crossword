@@ -1,5 +1,6 @@
 package uk.org.downiesoft.crossword;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.util.Log;
@@ -19,15 +21,40 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 	private int resource;
 	private int mSelectedItem=-1;
 	private int mSelectedColour;
+	private ArrayList<Clue> mItems;
 
 	public ClueListAdapter(Context context, int resource, ArrayList<Clue> items)
 	{
 		super(context, resource, items);
 		this.resource = resource;
+		mItems=items;
 		mSelectedColour=context.getResources().getColor(android.R.color.holo_purple);
 		mSelectedColour=(mSelectedColour&0xffffff)|0xa0000000; 
 	}
 	
+	@Override
+	public int getCount()
+	{
+		return mItems.size();
+	}
+
+	@Override
+	public Clue getItem(int position)
+	{
+		return mItems.get(position);
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		return BaseAdapter.IGNORE_ITEM_VIEW_TYPE;
+	}
+	
+	@Override
+	public long getItemId(int position)
+	{
+		return 0;
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
@@ -60,18 +87,15 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 	}
 
 	public void setSelectedClue(Clue aClue) {
-		Log.d(TAG,String.format("setSelectedClue(%s)",aClue!=null?aClue.toString():"null"));
 		if (aClue!=null) {
 			mSelectedItem=getPosition(aClue);
 		} else {
 			mSelectedItem = -1;
 		}
-		Log.d(TAG,String.format("setSelectedClue=%d",mSelectedItem));
 		notifyDataSetChanged();
 	}
 	
 	public void setSelectedClue(int aPosition) {
-		Log.d(TAG,String.format("setSelectedClue(%s)",aPosition));
 		mSelectedItem=aPosition;
 		notifyDataSetChanged();
 	}
