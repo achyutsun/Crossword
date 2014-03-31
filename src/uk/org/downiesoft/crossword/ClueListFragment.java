@@ -62,24 +62,26 @@ public class ClueListFragment extends Fragment
 			number=args.getInt("number", -1);
 		}
 		ArrayList<Clue> clueList=iCrossword.iClues.getClueList(iDirection);
-		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,clueList);
-		iListView.setAdapter(iAdapter);
+		int selected=-1;
 		if (number>0)
 		{
 			for (int i=0; i<clueList.size(); i++)
 			{
 				if (clueList.get(i).iNumber==number)
 				{
-					iListView.setSelection(i);
-					try {
-						iAdapter.setSelectedClue(i);
-					} catch (NullPointerException e) {
-						// workaround for Android AbsListView bug
-					}
-					break;
+//					iListView.setSelection(i);
+//					try {
+//						iAdapter.setSelectedClue(i);
+//					} catch (NullPointerException e) {
+//						// workaround for Android AbsListView bug
+//					}
+//					break;
+					selected = i;
 				}
 			}
 		}
+		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,clueList,selected);
+		iListView.setAdapter(iAdapter);
 		iListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)

@@ -29,9 +29,9 @@ public class ClueListView extends ListView
 		mContext = aContext;
 	}
 
-	public void setClueList(ArrayList<Clue> aClueList) {
+	public void setClueList(ArrayList<Clue> aClueList, int aSelected) {
 		if (aClueList != null) {
-			iAdapter = new ClueListAdapter(mContext,R.layout.clue_list_item,aClueList);
+			iAdapter = new ClueListAdapter(mContext,R.layout.clue_list_item,aClueList, aSelected);
 			setAdapter(iAdapter);
 		}		
 	}

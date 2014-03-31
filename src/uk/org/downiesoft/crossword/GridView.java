@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+//import android.util.Log;
 
 public class GridView extends View
 {
@@ -56,7 +57,7 @@ public class GridView extends View
 	public void onSizeChanged(int w, int h, int oldw, int oldh)
 	{
 		mTextSize=(3*w)/(CrosswordModel.GRID_SIZE*4);
-		mNumberSize=(w)/(CrosswordModel.GRID_SIZE*4);
+		mNumberSize=(5*w)/(CrosswordModel.GRID_SIZE*16);
 		Rect textBounds = new Rect();
 		iPaint.getTextBounds("W", 0, 1, textBounds);
 		iSize = textBounds.width() + 5;
@@ -101,61 +102,91 @@ public class GridView extends View
 	}
 
 	private void drawNumber(int col, int row, Canvas canvas) {
-		Point pos=new Point(col,row);
-		boolean across=(col==0 || iCrossword.isBlank(col-1,row))
-			&& col<CrosswordModel.GRID_SIZE-1 && !iCrossword.isBlank(col+1,row);
-		boolean down=(row==0 || iCrossword.isBlank(col,row-1))
-			&& row<CrosswordModel.GRID_SIZE-1 && !iCrossword.isBlank(col,row+1);
-		int direction=across?CrosswordModel.CLUE_ACROSS:(down?CrosswordModel.CLUE_DOWN:-1);
-		if (direction!=-1) {
-			Clue clue=iCrossword.clueAt(pos,direction);
-			iPaint.setTypeface(Typeface.DEFAULT_BOLD);
-			iPaint.setTextSize(mNumberSize);
-			iPaint.setTextAlign(Align.LEFT);
-			iPaint.getTextBounds("88", 0, 2, iBounds);
-			iPaint.setColor(Color.BLACK);
-			canvas.drawText(Integer.toString(clue.number()), r.left+1, r.top+1 + iBounds.height(), iPaint);
+		Point pos=new Point(col, row);
+		boolean across=(col == 0 || iCrossword.isBlank(col - 1, row))
+			&& col < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col + 1, row);
+		boolean down=(row == 0 || iCrossword.isBlank(col, row - 1))
+			&& row < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col, row + 1);
+		int direction=across ?CrosswordModel.CLUE_ACROSS: (down ?CrosswordModel.CLUE_DOWN: -1);
+		if (direction != -1) {
+			r.set(iMargin + col * iSize, iMargin + row * iSize, iMargin + (col + 1) * iSize, iMargin + (row + 1) * iSize);
+			Clue clue=iCrossword.clueAt(pos, direction);
+			if (clue!=null) {
+				canvas.drawText(Integer.toString(clue.number()), r.left + 1, r.top + 1 + iBounds.height(), iPaint);
+			}
 		}
 		
 	}
 	
-	private void drawSquare(int col, int row, int color, Canvas canvas)
-	{
-		if (col >= 0 && row >= 0 && col < CrosswordModel.GRID_SIZE && row < CrosswordModel.GRID_SIZE)
+	private void drawNumbers(Canvas canvas) {
+		iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		iPaint.setTextSize(mNumberSize);
+		iPaint.setTextAlign(Align.LEFT);
+		iPaint.getTextBounds("88", 0, 2, iBounds);
+		iPaint.setColor(Color.BLACK);
+		for (int col=0; col < CrosswordModel.GRID_SIZE; col++) {
+			for (int row=0; row < CrosswordModel.GRID_SIZE; row++) {
+				drawNumber(col,row,canvas);
+			}
+		}
+	}
+
+	private void drawLetter(int col, int row, Canvas canvas) {
+		if (!iCrossword.isBlank(col, row))
 		{
 			r.set(iMargin + col * iSize, iMargin + row * iSize, iMargin + (col + 1) * iSize, iMargin + (row + 1) * iSize);
-			iPaint.setStyle(Style.FILL);
-			iPaint.setColor(iCrossword.isBlank(col, row) ? Color.BLACK : color);
-			canvas.drawRect(r, iPaint);
-			iPaint.setStyle(Style.STROKE);
-			iPaint.setColor(Color.BLACK);
-			canvas.drawRect(r, iPaint);
-			iPaint.setStyle(Style.FILL_AND_STROKE);
-			if (!iCrossword.isBlank(col, row))
+			int value = iCrossword.value(col, row);
+			int solution = iCrossword.solution(col, row);
+			String letter=" ";
+			if (value!=CrosswordModel.SQUARE_NONBLANK)
 			{
-				drawNumber(col,row,canvas);
-				int value = iCrossword.value(col, row);
-				int solution = iCrossword.solution(col, row);
-				String letter=" ";
-				if (value!=CrosswordModel.SQUARE_NONBLANK)
-				{
-					if (solution==CrosswordModel.SQUARE_BLANK || solution==value)
-						iPaint.setColor(Color.BLACK);
-					else
-						iPaint.setColor(Color.RED);
-					letter=Character.toString((char)value);
+				if (solution==CrosswordModel.SQUARE_BLANK || solution==value)
+					iPaint.setColor(Color.BLACK);
+				else
+					iPaint.setColor(Color.RED);
+				letter=Character.toString((char)value);
+			}
+			else if (solution!=CrosswordModel.SQUARE_NONBLANK)
+			{
+				iPaint.setColor(Color.GREEN);
+				letter=Character.toString((char)solution);
+			}
+			canvas.drawText(letter, r.centerX(), r.centerY() + iBounds.height()/2f, iPaint);
+		}		
+	}
+	
+	private void drawLetters(Canvas canvas) {
+		iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		iPaint.setTextSize(mTextSize);
+		iPaint.setTextAlign(Align.CENTER);
+		iPaint.getTextBounds("W", 0, 1, iBounds);
+		iPaint.setStyle(Style.STROKE);
+		for (int col=0; col < CrosswordModel.GRID_SIZE; col++) {
+			for (int row=0; row < CrosswordModel.GRID_SIZE; row++) {
+				drawLetter(col,row,canvas);
+			}
+		}		
+	}
+	
+	private void drawSquare(int col, int row, int color, Canvas canvas) {
+		r.set(iMargin + col * iSize, iMargin + row * iSize, iMargin + (col + 1) * iSize, iMargin + (row + 1) * iSize);
+		iPaint.setStrokeWidth(0);
+		iPaint.setStyle(Style.FILL);
+		iPaint.setColor(iCrossword.isBlank(col, row) ? Color.BLACK : color);
+		canvas.drawRect(r, iPaint);
+		iPaint.setStyle(Style.STROKE);
+		iPaint.setColor(Color.BLACK);
+		canvas.drawRect(r, iPaint);
+		iPaint.setStyle(Style.FILL_AND_STROKE);		
+	}
+	
+	private void drawSquares(Canvas canvas) {
+		for (int col=0; col < CrosswordModel.GRID_SIZE; col++) {
+			for (int row=0; row < CrosswordModel.GRID_SIZE; row++) {
+				if (col >= 0 && row >= 0 && col < CrosswordModel.GRID_SIZE && row < CrosswordModel.GRID_SIZE) {
+					int color=iCrossword.isBlank(col, row) ? Color.BLACK : Color.WHITE;
+					drawSquare(col,row,color,canvas);
 				}
-				else if (solution!=CrosswordModel.SQUARE_NONBLANK)
-				{
-					iPaint.setColor(Color.GREEN);
-					letter=Character.toString((char)solution);
-				}
-				iPaint.setTypeface(Typeface.DEFAULT_BOLD);
-				iPaint.setTextSize(mTextSize);
-				iPaint.setTextAlign(Align.CENTER);
-				iPaint.getTextBounds("W", 0, 1, iBounds);
-				canvas.drawText(letter, r.centerX(), r.centerY() + iBounds.height()/2f, iPaint);
-				iPaint.setStyle(Style.STROKE);
 			}
 		}
 	}
@@ -163,6 +194,8 @@ public class GridView extends View
 	@Override
 	public void onDraw(Canvas canvas)
 	{
+		long start=System.currentTimeMillis();
+		//Log.d(TAG,String.format("onDraw start"));
 		iPaint.reset();
 		if (iCrossword == null)
 		{
@@ -176,16 +209,12 @@ public class GridView extends View
 		}
 		else
 		{
-			iPaint.setStrokeWidth(0);
-			for (int row = 0; row < CrosswordModel.GRID_SIZE; row++)
-			{
-				for (int col = 0; col < CrosswordModel.GRID_SIZE; col++)
-				{
-					drawSquare(col, row, iCrossword.isBlank(col, row) ? Color.BLACK : Color.WHITE, canvas);
-				}
-			}
+			drawSquares(canvas);
+			drawNumbers(canvas);
+			drawLetters(canvas);
 		}
 		highlightCurrentClue(true, canvas);
+		//Log.d(TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
 	}
 
 	public Clue getCurrentClue()
@@ -221,7 +250,7 @@ public class GridView extends View
 		return iDirection;
 	}
 	
-	public void setCursor(int aX, int aY, int aDirection)
+	public void setCursor(int aX, int aY, int aDirection, boolean aNotifyListener)
 	{
 		iCursor.set(aX, aY);
 		iDirection = aDirection;
@@ -246,7 +275,7 @@ public class GridView extends View
 			iDirection = 1 - iDirection;
 			iExtent = iCrossword.getClueExtent(iCursor, iDirection);
 		}
-		if (iClue!=null && iObserver!=null)
+		if (iClue!=null && iObserver!=null && aNotifyListener)
 		{
 			iObserver.onClueSelected(iClue,iCursor.x,iCursor.y,iDirection);
 		}
@@ -357,6 +386,18 @@ public class GridView extends View
 		for (int i = 0; i < len; i++)
 		{
 			drawSquare(sq.x, sq.y, aOn ? (colour != 0 ? HIGHLIGHT_ALT : HIGHLIGHT) : Color.WHITE, aCanvas);
+			iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+			iPaint.setTextSize(mTextSize);
+			iPaint.setTextAlign(Align.CENTER);
+			iPaint.getTextBounds("W", 0, 1, iBounds);
+			iPaint.setStyle(Style.STROKE);
+			drawLetter(sq.x, sq.y, aCanvas);
+			iPaint.setTypeface(Typeface.DEFAULT_BOLD);
+			iPaint.setTextSize(mNumberSize);
+			iPaint.setTextAlign(Align.LEFT);
+			iPaint.getTextBounds("88", 0, 2, iBounds);
+			iPaint.setColor(Color.BLACK);
+			drawNumber(sq.x,sq.y,aCanvas);
 			sq.x += delta.x;
 			sq.y += delta.y;
 			if (--wordlen == 0)
@@ -366,6 +407,7 @@ public class GridView extends View
 				colour ^= 1;
 			}
 		}
+		
 	}
 
 	public void dumpGrid()

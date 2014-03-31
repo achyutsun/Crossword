@@ -18,18 +18,24 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 {
 	public static final String TAG=ClueListAdapter.class.getName();
 	
+	private static class ViewHolder {
+		TextView mNumberView;
+		TextView mTextView;
+	}
+	
 	private int resource;
 	private int mSelectedItem=-1;
 	private int mSelectedColour;
 	private ArrayList<Clue> mItems;
 
-	public ClueListAdapter(Context context, int resource, ArrayList<Clue> items)
+	public ClueListAdapter(Context context, int resource, ArrayList<Clue> items, int selected)
 	{
 		super(context, resource, items);
 		this.resource = resource;
 		mItems=items;
 		mSelectedColour=context.getResources().getColor(android.R.color.holo_purple);
-		mSelectedColour=(mSelectedColour&0xffffff)|0xa0000000; 
+		mSelectedColour=(mSelectedColour&0xffffff)|0xa0000000;
+		mSelectedItem=selected;
 	}
 	
 	@Override
@@ -43,23 +49,29 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 	{
 		return mItems.get(position);
 	}
-
-	@Override
-	public int getItemViewType(int position) {
-		return BaseAdapter.IGNORE_ITEM_VIEW_TYPE;
-	}
 	
 	@Override
 	public long getItemId(int position)
 	{
+		Clue clue=mItems.get(position);
+		return clue.iType*256+clue.iNumber;
+	}
+
+	@Override
+	public int getItemViewType(int position) {
 		return 0;
 	}
 
 	@Override
+	public int getViewTypeCount() {
+		return 1;
+	}
+	
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		LinearLayout clueItemView;
-
+		ViewHolder holder;
 		Clue item = getItem(position);
 
 		String clueNumber = Integer.toString(item.iNumber);
@@ -71,31 +83,25 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 			LayoutInflater li;
 			li = (LayoutInflater) getContext().getSystemService(inflater);
 			li.inflate(resource, clueItemView, true);
-		} else
-		{
+			holder = new ViewHolder();
+			holder.mNumberView = (TextView) clueItemView.findViewById(R.id.rowNumber);
+			holder.mTextView = (TextView) clueItemView.findViewById(R.id.rowText);
+			clueItemView.setTag(holder);
+		} else {
+			holder = (ViewHolder)convertView.getTag();
 			clueItemView = (LinearLayout) convertView;
 		}
 
-		TextView numberView = (TextView) clueItemView.findViewById(R.id.rowNumber);
-		TextView textView = (TextView) clueItemView.findViewById(R.id.rowText);
 
-		numberView.setText(clueNumber);
-		textView.setText(item.iText);
+		holder.mNumberView.setText(clueNumber);
+		holder.mTextView.setText(item.iText);
 		clueItemView.setBackgroundColor(position==mSelectedItem ?mSelectedColour:0);
 
 		return clueItemView;
 	}
 
-	public void setSelectedClue(Clue aClue) {
-		if (aClue!=null) {
-			mSelectedItem=getPosition(aClue);
-		} else {
-			mSelectedItem = -1;
-		}
-		notifyDataSetChanged();
-	}
-	
 	public void setSelectedClue(int aPosition) {
+		Log.d(TAG,String.format("setSelectedClue(%d)",aPosition));
 		mSelectedItem=aPosition;
 		notifyDataSetChanged();
 	}
