@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#000000"
     android:orientation="horizontal" >
 
     <RelativeLayout
@@ -68,11 +67,13 @@
 				android:layout_above="@+id/gridButtons"
 				android:orientation="horizontal" >
 
-				<uk.org.downiesoft.crossword.ClueListView
+				<ListView
 					android:id="@+id/cluesListAcross"
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
 					android:layout_weight="1"
+					android:choiceMode="singleChoice"
+					android:listSelector="@drawable/cluelist_selector"
 					android:textSize="@dimen/clue_list_text_size" />
 
 				<View
@@ -80,11 +81,13 @@
 					android:layout_height="match_parent"
 					android:background="?android:attr/dividerVertical" />
 
-				<uk.org.downiesoft.crossword.ClueListView
+				<ListView
 					android:id="@+id/cluesListDown"
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
 					android:layout_weight="1"
+					android:choiceMode="singleChoice"
+					android:listSelector="@drawable/cluelist_selector"
 					android:textSize="@dimen/clue_list_text_size" />
 
 			</LinearLayout>

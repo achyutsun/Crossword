@@ -19,13 +19,15 @@ import android.widget.Toast;
 import android.app.Activity;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
-//import android.util.Log;
+import android.util.Log;
 import android.opengl.Visibility;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.Adapter;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ListAdapter;
+import android.widget.ArrayAdapter;
 
 public class GridFragment extends Fragment implements GridView.GridViewListener, WordEntryDialog.WordEntryListener {
 
@@ -40,7 +42,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 	private RelativeLayout iEmptyLayout;
 	private GridView iGridView;
 	private TextView iTextView;
-	private ClueListView[] iClueListViews;
+	private ListView[] iClueListViews;
 	private Button iEnterButton;
 	private Button iEraseButton;
 	private Button iCluesButton;
@@ -49,20 +51,49 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 	private int iCursorX=0;
 	private int iCursorY=0;
 	private int iCursorDirection=CrosswordModel.CLUE_ACROSS;
+	
 	private boolean iGuardBackKey=false;
 	private long iBackTimestampMillis=0;
 	private final int iBackTimeoutMillis=3000;
 	private GridFragmentListener iListener;
+	private Clue mClickedClue;
 
 	private class OnClueListItemClickListener implements ListView.OnItemClickListener {
 
 		@Override
 		public void onItemClick(AdapterView<?> adapterView, View viewGroup, int position, long id) {
-			ClueListAdapter adapter =((ClueListView)adapterView).getAdapter();
+			Log.d(TAG,String.format("onItemClick(%d)",position));
+			ClueListAdapter adapter = (ClueListAdapter)adapterView.getAdapter();
 			Clue clue=adapter.getItem(position);
 //			adapter.setSelectedClue(position);
 			GridFragment.this.clueClicked(clue.type(), clue.number(), position);
 		}
+	}
+
+	private class OnClueListItemSelectedListener implements ListView.OnItemSelectedListener {
+
+		@Override
+		public void onItemSelected(AdapterView<?> adapterView, View viewGroup, int position, long id) {
+			Log.d(TAG,String.format("onItemSelected(%d)",position));
+			ClueListAdapter adapter = (ClueListAdapter)adapterView.getAdapter();
+			Clue clue=adapter.getItem(position);
+			int direction=clue.type();
+			iClueListViews[1-direction].setItemChecked(-1,false);
+			iClueListViews[1-direction].clearChoices();
+			iClueListViews[1-direction].invalidate();
+			iClueListViews[direction].setItemChecked(position,true);
+			iClueListViews[direction].requestFocus();
+			Point pos=iCrossword.locateClue(clue.type(),clue.number());
+			if (pos!=null) {
+				iGridView.setCursor(pos.x,pos.y,direction,false);
+			}
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> p1) {
+			// TODO: Implement this method
+		}
+		
 	}
 
 	@Override
@@ -83,9 +114,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		iEmptyLayout = (RelativeLayout)iView.findViewById(R.id.emptyLayout);
 		iGridView = (GridView) iView.findViewById(R.id.gridView);
 		iTextView = (TextView) iView.findViewById(R.id.clueText);
-		iClueListViews = new ClueListView[2];
-		iClueListViews[0] = (ClueListView) iView.findViewById(R.id.cluesListAcross);
-		iClueListViews[1] = (ClueListView) iView.findViewById(R.id.cluesListDown);
+		iClueListViews = new ListView[2];
+		iClueListViews[0] = (ListView) iView.findViewById(R.id.cluesListAcross);
+		iClueListViews[1] = (ListView) iView.findViewById(R.id.cluesListDown);
 		iEnterButton = (Button) iView.findViewById(R.id.gridEnterButton);
 		iEraseButton = (Button) iView.findViewById(R.id.gridEraseButton);
 		iCluesButton = (Button) iView.findViewById(R.id.gridCluesButton);
@@ -156,14 +187,18 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		}
 		Clue clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
 		int position = iCrossword.clues().getClueList(iCursorDirection).indexOf(clue);		
-		for (int i=0; i < 2; i++) {
-			if (iClueListViews[i] != null) {
-				iClueListViews[i].setClueList(iCrossword.clues().getClueList(i),i==iCursorDirection?position:-1);
+		if (iClueListViews[0] != null) {
+			for (int i=0; i < 2; i++) {
+				iClueListViews[i].setAdapter(new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.clues().getClueList(i),
+					i==iCursorDirection?position:-1));
 				iClueListViews[i].setOnItemClickListener(new OnClueListItemClickListener());
+				iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
 //					iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
 			}
+			iClueListViews[iCursorDirection].setItemChecked(position,true);
+			iClueListViews[iCursorDirection].setSelection(position);
 		}
-		iClueListViews[iCursorDirection].setSelection(position);
+		
 		if (iCrossword != null && iCrossword.isValid()) {
 			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, false);
 		}
@@ -257,11 +292,15 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		iCursorDirection = aCursorDirection;
 		saveState();
 		if (aClue!=null && iClueListViews[aCursorDirection]!=null) {
-			ClueListAdapter adapter = iClueListViews[aCursorDirection].getAdapter();
+			ClueListAdapter adapter = (ClueListAdapter)iClueListViews[aCursorDirection].getAdapter();
 			int index=adapter.getPosition(aClue);
-			iClueListViews[iCursorDirection].getAdapter().setSelectedClue(index);
-			iClueListViews[1-iCursorDirection].getAdapter().setSelectedClue(-1);
+			iClueListViews[1-iCursorDirection].setItemChecked(-1,false);
+			iClueListViews[1-iCursorDirection].clearChoices();
+			iClueListViews[1-iCursorDirection].invalidate();
+			iClueListViews[iCursorDirection].setItemChecked(index,true);
+			iClueListViews[iCursorDirection].setSelection(index);
 			iClueListViews[aCursorDirection].smoothScrollToPosition(index);
+			iClueListViews[aCursorDirection].requestFocus();
 		}
 	}
 
@@ -291,18 +330,23 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 			iCursorX = pos.x;
 			iCursorY = pos.y;
 			iCursorDirection = aDirection;
-			if (iClueListViews[iCursorDirection]!=null) {
-				ClueListAdapter adapter = iClueListViews[iCursorDirection].getAdapter();
-				if (aPosition!=adapter.getSelectedCluePosition()) {
-					iClueListViews[iCursorDirection].getAdapter().setSelectedClue(aPosition);
-					iClueListViews[1-iCursorDirection].getAdapter().setSelectedClue(-1);
-					iClueListViews[iCursorDirection].smoothScrollToPosition(aPosition);
-				} else {
-					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
-					FragmentManager fm = getActivity().getSupportFragmentManager();
-					iWordEntry = WordEntryDialog.getInstance(iGridView.getCurrentClue(), "", hint, GridFragment.this);
-					iWordEntry.show(fm, WordEntryDialog.TAG);
-				}
+			if (iClueListViews[0]!=null) {
+				iClueListViews[1-iCursorDirection].setItemChecked(-1,false);
+				iClueListViews[1-iCursorDirection].clearChoices();
+				iClueListViews[1-iCursorDirection].invalidate();
+				
+					Clue clue=iCrossword.clueAt(pos, aDirection);
+					if ((mClickedClue != null && clue.equals(mClickedClue)) || (aPosition == iClueListViews[iCursorDirection].getSelectedItemPosition() 
+						&& aPosition == iClueListViews[iCursorDirection].getCheckedItemPosition())) {
+						String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
+						FragmentManager fm = getActivity().getSupportFragmentManager();
+						iWordEntry = WordEntryDialog.getInstance(iGridView.getCurrentClue(), "", hint, GridFragment.this);
+						iWordEntry.show(fm, WordEntryDialog.TAG);
+					} else {
+						mClickedClue = clue;
+						iClueListViews[iCursorDirection].setSelection(aPosition);					
+						iClueListViews[iCursorDirection].setItemChecked(aPosition, true);
+					}
 			}
 			iGridView.setCursor(pos.x, pos.y, aDirection,false);			
 		}

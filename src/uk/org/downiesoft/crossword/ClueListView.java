@@ -17,16 +17,22 @@ public class ClueListView extends ListView
 	public ClueListView(Context aContext) {
 		super(aContext);
 		mContext = aContext;
+//		setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+//		setSelector(R.drawable.cluelist_selector);
 	}
 	
 	public ClueListView(Context aContext, AttributeSet aAttr) {
 		super(aContext, aAttr);
 		mContext = aContext;
+//		setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+//		setSelector(R.drawable.cluelist_selector);
 	}
 
 	public ClueListView(Context aContext, AttributeSet aAttr, int aDefStyle) {
 		super(aContext, aAttr, aDefStyle);
 		mContext = aContext;
+//		setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+//		setSelector(R.drawable.cluelist_selector);
 	}
 
 	public void setClueList(ArrayList<Clue> aClueList, int aSelected) {
@@ -43,10 +49,6 @@ public class ClueListView extends ListView
 		} catch (Exception e) {
 			return true;
 		}
-	}
-
-	public ClueListAdapter getAdapter() {
-		return iAdapter;
 	}
 
 }

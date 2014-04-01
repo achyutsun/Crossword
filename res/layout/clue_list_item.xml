@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+	android:background="@drawable/cluelist_background"
     android:orientation="horizontal" >
     
   <TextView
@@ -12,6 +13,7 @@
       android:padding="@dimen/clue_list_padding"
       android:singleLine="true"
       android:textIsSelectable="false"
+	  android:background="@android:color/transparent"
       android:textSize="@dimen/clue_text_size" />
 
   <TextView
@@ -22,6 +24,7 @@
       android:padding="@dimen/clue_list_padding"
       android:singleLine="false"
       android:textIsSelectable="false"
+	  android:background="@android:color/transparent"
       android:textSize="@dimen/clue_text_size" />
 
 </LinearLayout>

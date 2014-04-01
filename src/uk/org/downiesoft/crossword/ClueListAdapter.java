@@ -95,18 +95,18 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 
 		holder.mNumberView.setText(clueNumber);
 		holder.mTextView.setText(item.iText);
-		clueItemView.setBackgroundColor(position==mSelectedItem ?mSelectedColour:0);
+//		clueItemView.setBackgroundColor(position==mSelectedItem ?mSelectedColour:0);
 
 		return clueItemView;
 	}
 
-	public void setSelectedClue(int aPosition) {
-		Log.d(TAG,String.format("setSelectedClue(%d)",aPosition));
-		mSelectedItem=aPosition;
-		notifyDataSetChanged();
+	public void xsetSelectedClue(int aPosition) {
+//		Log.d(TAG,String.format("setSelectedClue(%d)",aPosition));
+//		mSelectedItem=aPosition;
+//		notifyDataSetChanged();
 	}
 
-	public int getSelectedCluePosition() {
+	public int xgetSelectedCluePosition() {
 		return mSelectedItem;
 	}
 }

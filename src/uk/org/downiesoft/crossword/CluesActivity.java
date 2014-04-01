@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
-public class CluesActivity extends FragmentActivity //implements ClueListFragment.ClueListListener
+public class CluesActivity extends FragmentActivity implements ClueListFragment.ClueListListener
 {
 
 	public static final String TAG=CluesActivity.class.getName();
