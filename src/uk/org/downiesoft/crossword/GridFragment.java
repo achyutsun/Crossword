@@ -28,6 +28,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ListAdapter;
 import android.widget.ArrayAdapter;
+import android.content.res.Configuration;
 
 public class GridFragment extends Fragment implements GridView.GridViewListener, WordEntryDialog.WordEntryListener {
 
@@ -200,7 +201,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		}
 		
 		if (iCrossword != null && iCrossword.isValid()) {
-			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, false);
+			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
 		}
 	}
 
@@ -235,6 +236,12 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		iGuardBackKey = false;
 	}
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		// only called for keyboard visibility changes on word entry dialog
+	}
+
+	
 	public void getSavedState() {
 		SharedPreferences settings=getActivity().getSharedPreferences("CROSSWORD_SETTING", Context.MODE_PRIVATE);
 		iCursorX = settings.getInt("cursorX", 0);
