@@ -200,9 +200,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 			iClueListViews[iCursorDirection].setSelection(position);
 		}
 		
-		if (iCrossword != null && iCrossword.isValid()) {
-			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
-		}
 	}
 
 	@Override
@@ -212,8 +209,8 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		iGridView.setObserver(this);
 		iGridView.setCrossword(iCrossword);
 		if (iCrossword != null && iCrossword.isValid()) {
-			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, false);
-		}	
+			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
+		}
 	}
 
 	@Override
