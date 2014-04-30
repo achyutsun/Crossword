@@ -25,7 +25,7 @@ public class CluesActivity extends FragmentActivity implements ClueListFragment.
 		Bundle args=intent.getExtras().getBundle("currentClue");
 		cluesFragment.setArguments(args);
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().add(R.id.cluesContainer, cluesFragment, CluesFragment.TAG).commit();
+		fm.beginTransaction().replace(R.id.cluesContainer, cluesFragment, CluesFragment.TAG).commit();
 	}
 	
 	@Override
