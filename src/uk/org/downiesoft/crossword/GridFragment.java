@@ -154,7 +154,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 				@Override
 				public void onClick(View arg0) {
 					iCrossword.eraseWord(new Point(iCursorX, iCursorY), iCursorDirection);
-					iGridView.invalidate();
+					iGridView.redraw();
 				}
 			});
 		if (iTextView != null) {
@@ -370,7 +370,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 
 	public void update() {
 		if (iGridView != null)
-			iGridView.invalidate();
+			iGridView.redraw();
 	}
 
 	public String getClueText() {
@@ -383,7 +383,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 
 	public void enterWord(String aWord) {
 		if (iCrossword.enterWord(new Point(iCursorX, iCursorY), iCursorDirection, aWord)) {
-			iGridView.invalidate();
+			iGridView.redraw();
 		}
 	}
 
