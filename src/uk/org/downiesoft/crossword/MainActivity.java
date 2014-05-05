@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
 import uk.org.downiesoft.crossword.BrowserDialog.BrowserDialogListener;
-import uk.org.downiesoft.crossword.GridFragment.GridFragmentListener;
 import uk.org.downiesoft.crossword.WebViewFragment.WebViewFragmentListener;
 import uk.org.downiesoft.spell.SpellActivity;
 import android.app.Activity;
@@ -35,7 +34,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements BrowserDialogListener, WebViewFragmentListener,
-		BluetoothListener,GridFragmentListener
+		BluetoothListener
 {
 
 	public static final String TAG = "uk.org.downiesoft.crossword.MainActivity";
@@ -436,34 +435,15 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 
 			}
 		}
-		try
-		{
-			DataOutputStream os = new DataOutputStream(openFileOutput("webinfo", Context.MODE_PRIVATE));
-			if (iWebManager != null)
-				iWebManager.externalize(os);
-			os.flush();
-			os.close();
-		}
-		catch (IOException e)
-		{
-
-		}
-
+		if (iWebManager != null)
+			iWebManager.store(this);
 	}
 
 	public void restore()
 	{
-		try
-		{
-			iWebManager = new WebManager();
-			DataInputStream is = new DataInputStream(openFileInput("webinfo"));
-			iWebManager.internalize(is);
-			is.close();
-		}
-		catch (IOException e)
-		{
-		}
-
+		iWebManager=WebManager.getInstance();
+		iWebManager.restore(this);
+		
 		try
 		{
 			DataInputStream is = new DataInputStream(openFileInput("current.xwd"));
@@ -473,18 +453,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 		}
 		catch (IOException e)
 		{
-
 		}
-	}
-
-	public CrosswordModel getCrossword()
-	{
-		return iCrossword;
-	}
-
-	public WebManager getWebManager()
-	{
-		return iWebManager;
 	}
 
 	@Override
@@ -513,7 +482,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			{
 				iCrosswordReceived = false;
 				iBTServer = false;
-				iBluetoothManager = new BluetoothManager(MainActivity.this, MainActivity.this);
+				iBluetoothManager = BluetoothManager.getInstance(MainActivity.this, MainActivity.this);
 				iBluetoothManager.setup();
 				if (!iBluetoothManager.bluetoothEnabled())
 				{
@@ -538,7 +507,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			{
 				iCrosswordReceived = false;
 				iBTServer = true;
-				iBluetoothManager = new BluetoothManager(MainActivity.this, MainActivity.this);
+				iBluetoothManager = BluetoothManager.getInstance(MainActivity.this, MainActivity.this);
 				iBluetoothManager.setup();
 				if (!iBluetoothManager.bluetoothEnabled())
 				{
@@ -668,18 +637,12 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 					{
 						iGridFragment.enterWord(word.toUpperCase());
 						store();
-						synch();
+						BluetoothManager.synch(iCrossword);
 					}
 				}
 				break;
-			case CluesActivity.REQUEST_CLUE:
-				if (data!=null && data.getExtras()!=null) {
-					int direction = data.getExtras().getInt("direction");
-					int number = data.getExtras().getInt("number");
-					int position = data.getExtras().getInt("position",-1);
-					iGridFragment.clueClicked(direction, number, position);
-				}
-				break;
+			default:
+				super.onActivityResult(requestCode,resultCode,data);
 		}
 	}
 
@@ -695,21 +658,6 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			}
 		}
 		return super.onKeyDown(keyCode, event);
-	}
-
-	public void synch()
-	{
-		if (iBluetoothManager != null && iBluetoothManager.isActive())
-		{
-			iBluetoothManager.sendCrossword(iCrossword);
-		}
-	}
-	
-	@Override
-	public void onClueButtonPressed(Bundle aCurrentClue) {
-		Intent intent = new Intent(this, CluesActivity.class);
-		intent.putExtra("currentClue",aCurrentClue);
-		startActivityForResult(intent, CluesActivity.REQUEST_CLUE);
 	}
 
 }

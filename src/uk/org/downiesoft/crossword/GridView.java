@@ -74,7 +74,12 @@ public class GridView extends View {
 	@Override
 	public void onSizeChanged(int w, int h, int oldw, int oldh) {
 		mTextSize = (3 * w) / (CrosswordModel.GRID_SIZE * 4);
-		mNumberSize = (5 * w) / (CrosswordModel.GRID_SIZE * 16);
+		mNumberSize = (1 * w) / (CrosswordModel.GRID_SIZE * 4);
+		if (mTextSize < 50 ) {
+			mTextSize = (5 * w) / (CrosswordModel.GRID_SIZE * 6);			
+			mNumberSize = 0;
+		}
+		Log.d(TAG,String.format("onSizeChanged: %s %s = %s %s",w, h, mTextSize, mNumberSize));
 		Rect textBounds = new Rect();
 		iPaint.getTextBounds("W", 0, 1, textBounds);
 		if (h > w) {
@@ -97,13 +102,21 @@ public class GridView extends View {
 		mLetterPaint.setTextAlign(Align.CENTER);
 		mLetterPaint.getTextBounds("W", 0, 1, iLetterBounds);
 		mLetterPaint.setStyle(Style.STROKE);
-
-		mNumberPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		mNumberPaint.setTextSize(mNumberSize);
-		mNumberPaint.setTextAlign(Align.LEFT);
-		mNumberPaint.getTextBounds("88", 0, 2, iNumberBounds);
-		mNumberPaint.setColor(Color.BLACK);
-
+		mLetterPaint.setAntiAlias(true);
+		mLetterPaint.setLinearText(true);
+		mLetterPaint.setSubpixelText(true);
+		
+		if (mNumberSize>0) {
+			mNumberPaint.setTypeface(Typeface.DEFAULT_BOLD);
+			mNumberPaint.setTextSize(mNumberSize);
+			mNumberPaint.setTextAlign(Align.LEFT);
+			mNumberPaint.getTextBounds("88", 0, 2, iNumberBounds);
+			mNumberPaint.setColor(Color.BLACK);
+			mNumberPaint.setAntiAlias(true);
+			mNumberPaint.setLinearText(true);
+			mNumberPaint.setSubpixelText(true);
+		}
+		
 		redraw();
 	}
 
@@ -131,20 +144,21 @@ public class GridView extends View {
 	}
 
 	private void drawNumber(int col, int row, Canvas canvas) {
-		Point pos=new Point(col, row);
-		boolean across=(col == 0 || iCrossword.isBlank(col - 1, row))
-			&& col < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col + 1, row);
-		boolean down=(row == 0 || iCrossword.isBlank(col, row - 1))
-			&& row < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col, row + 1);
-		int direction=across ?CrosswordModel.CLUE_ACROSS: (down ?CrosswordModel.CLUE_DOWN: -1);
-		if (direction != -1) {
-			r.set(col * iSize, row * iSize, (col + 1) * iSize, (row + 1) * iSize);
-			Clue clue=iCrossword.clueAt(pos, direction);
-			if (clue != null) {
-				canvas.drawText(Integer.toString(clue.number()), r.left + 1, r.top + 1 + iNumberBounds.height(), mNumberPaint);
+		if (mNumberSize > 0) {
+			Point pos=new Point(col, row);
+			boolean across=(col == 0 || iCrossword.isBlank(col - 1, row))
+				&& col < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col + 1, row);
+			boolean down=(row == 0 || iCrossword.isBlank(col, row - 1))
+				&& row < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col, row + 1);
+			int direction=across ?CrosswordModel.CLUE_ACROSS: (down ?CrosswordModel.CLUE_DOWN: -1);
+			if (direction != -1) {
+				r.set(col * iSize, row * iSize, (col + 1) * iSize, (row + 1) * iSize);
+				Clue clue=iCrossword.clueAt(pos, direction);
+				if (clue != null) {
+					canvas.drawText(Integer.toString(clue.number()), r.left + 1, r.top + 1 + iNumberBounds.height(), mNumberPaint);
+				}
 			}
 		}
-
 	}
 
 	private void drawNumbers(Canvas canvas) {
@@ -195,12 +209,16 @@ public class GridView extends View {
 		iPaint.setStyle(Style.FILL_AND_STROKE);		
 	}
 
+	private void drawSquare(int col, int row, Canvas canvas) {
+		int color=iCrossword.isBlank(col, row) ? Color.BLACK : Color.WHITE;
+		drawSquare(col, row, color, canvas);
+	}
+
 	private void drawSquares(Canvas canvas) {
 		for (int col=0; col < CrosswordModel.GRID_SIZE; col++) {
 			for (int row=0; row < CrosswordModel.GRID_SIZE; row++) {
 				if (col >= 0 && row >= 0 && col < CrosswordModel.GRID_SIZE && row < CrosswordModel.GRID_SIZE) {
-					int color=iCrossword.isBlank(col, row) ? Color.BLACK : Color.WHITE;
-					drawSquare(col, row, color, canvas);
+					drawSquare(col, row, canvas);
 				}
 			}
 		}
@@ -212,6 +230,15 @@ public class GridView extends View {
 		//Log.d(TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
 	}
 
+	public void redraw(Rect aRect) {
+		for (int x=aRect.left; x < aRect.right; x++) {
+			for (int y=aRect.top; y < aRect.bottom; y++) {
+				drawSquare(x,y,mBackCanvas);
+			}
+		} 
+		
+	}
+	
 	public void redraw() {
 		//Log.d(TAG,String.format("onDraw start"));
 		iPaint.reset();
@@ -390,6 +417,11 @@ public class GridView extends View {
 		return false;
 	}
 
+	public void highlightCurrentClue(boolean aOn) {
+		highlightCurrentClue(aOn,mBackCanvas);
+		invalidate();
+	}
+	
 	private void highlightCurrentClue(boolean aOn, Canvas aCanvas) {
 		if (iClue == null || aCanvas == null)
 			return;

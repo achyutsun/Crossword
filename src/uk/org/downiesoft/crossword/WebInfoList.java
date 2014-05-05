@@ -39,7 +39,7 @@ public class WebInfoList extends Fragment
 					iListener.onWebInfoListItemSelected(item);
 			}
 		});
-		iWebInfo = ((MainActivity)getActivity()).getWebManager().getWebInfo();
+		iWebInfo = WebManager.getInstance().getWebInfo();
 		iAdapter = new WebInfoAdapter(getActivity(), R.layout.web_info_item, iWebInfo);
 		iListView.setAdapter(iAdapter);
 		return iView;

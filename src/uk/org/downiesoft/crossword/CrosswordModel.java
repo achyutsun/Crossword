@@ -47,6 +47,12 @@ class CrosswordModel
 		return sCrossword;
 	}
 	
+	public CrosswordModel()
+	{
+		iClues = new ClueLists();
+		reset();
+	}
+
 	public int value(Point aPos)
 	{
 		return iGrid[aPos.x][aPos.y];
@@ -105,12 +111,6 @@ class CrosswordModel
 	public boolean isValid()
 	{
 		return iCrosswordValid;
-	}
-
-	public CrosswordModel()
-	{
-		iClues = new ClueLists();
-		reset();
 	}
 
 	void clearAnswers()

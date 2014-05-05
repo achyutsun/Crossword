@@ -43,6 +43,8 @@ public class BluetoothManager
 	public static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
 	public static final int REQUEST_ENABLE_BT = 2;
 
+	private static BluetoothManager sManagerInstance;
+	
 	// Layout Views
 	private Activity mActivity;
 
@@ -99,7 +101,7 @@ public class BluetoothManager
 					mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
 					Toast.makeText(mActivity.getApplicationContext(), "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT)
 							.show();
-					crossword=((MainActivity)mActivity).getCrossword();
+					crossword=CrosswordModel.getInstance();
 					if (D)
 						Log.d(TAG, "crossword valid: " + crossword.isValid());
 					if (crossword.isValid())
@@ -113,8 +115,15 @@ public class BluetoothManager
 			}
 		}
 	};
+	
+	public static BluetoothManager getInstance(Activity activity, BluetoothListener listener) {
+		if (sManagerInstance==null) {
+			sManagerInstance = new BluetoothManager(activity,listener);
+		}
+		return sManagerInstance;
+	}
 
-	public BluetoothManager(Activity activity, BluetoothListener listener)
+	private BluetoothManager(Activity activity, BluetoothListener listener)
 	{
 		mActivity = activity;
 		mListener = listener;
@@ -282,4 +291,13 @@ public class BluetoothManager
 		mBTService.connect(device);
 	}
 
+	public static void synch(CrosswordModel iCrossword)
+	{
+		if (sManagerInstance!=null && sManagerInstance.isActive())
+		{
+			sManagerInstance.sendCrossword(iCrossword);
+		}
+	}
+
+	
 }

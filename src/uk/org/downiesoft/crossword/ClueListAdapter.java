@@ -24,18 +24,13 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 	}
 	
 	private int resource;
-	private int mSelectedItem=-1;
-	private int mSelectedColour;
 	private ArrayList<Clue> mItems;
 
-	public ClueListAdapter(Context context, int resource, ArrayList<Clue> items, int selected)
+	public ClueListAdapter(Context context, int resource, ArrayList<Clue> items)
 	{
 		super(context, resource, items);
 		this.resource = resource;
 		mItems=items;
-		mSelectedColour=context.getResources().getColor(android.R.color.holo_purple);
-		mSelectedColour=(mSelectedColour&0xffffff)|0xa0000000;
-		mSelectedItem=selected;
 	}
 	
 	@Override
@@ -95,18 +90,8 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 
 		holder.mNumberView.setText(clueNumber);
 		holder.mTextView.setText(item.iText);
-//		clueItemView.setBackgroundColor(position==mSelectedItem ?mSelectedColour:0);
 
 		return clueItemView;
 	}
 
-	public void xsetSelectedClue(int aPosition) {
-//		Log.d(TAG,String.format("setSelectedClue(%d)",aPosition));
-//		mSelectedItem=aPosition;
-//		notifyDataSetChanged();
-	}
-
-	public int xgetSelectedCluePosition() {
-		return mSelectedItem;
-	}
 }

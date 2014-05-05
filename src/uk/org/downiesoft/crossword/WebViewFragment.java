@@ -42,7 +42,6 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	private WebManager iWebManager;
 	private Button iImportButton;
 	private Button iSolutionButton;
-	private WebManager iInfo;
 	private String iUrl;
 	private int iState = STATE_NULL;
 	private WebViewFragmentListener iListener;
@@ -131,15 +130,13 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		iWebView = (WebView) v.findViewById(R.id.webView);
 		iImportButton = (Button) v.findViewById(R.id.webImportButton);
 		iSolutionButton = (Button) v.findViewById(R.id.webSolutionButton);
-		iWebManager = ((MainActivity) getActivity()).getWebManager();
+		iWebManager = WebManager.getInstance();
 		iWebView.getSettings().setJavaScriptEnabled(true);
 		iWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
 		iWebView.setWebViewClient(iWebViewClient);
-		iInfo = ((MainActivity) getActivity()).getWebManager();
 		iState = STATE_INDEX;
 		iWebView.loadUrl(iUrl);
 		iImportButton.setOnClickListener(new OnClickListener()
-
 		{
 			@Override
 			public void onClick(View arg0)
@@ -159,7 +156,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 			@Override
 			public void onClick(View arg0)
 			{
-				int id = ((MainActivity) getActivity()).getCrossword().crosswordId();
+				int id = CrosswordModel.getInstance().crosswordId();
 				int searchId = iWebManager.getCrossword(id).searchId();
 				iWebView.setWebViewClient(iWebViewClient);
 				iState = STATE_SOLUTION;
@@ -207,8 +204,8 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 					line = line.substring(line.indexOf(SEARCH_ID) + SEARCH_ID.length());
 					line = line.substring(line.indexOf('>') + 1);
 					date = line.substring(0, line.indexOf('<'));
-					if (iInfo != null)
-						iInfo.insert(new WebInfo(crosswordId, searchId, date));
+					if (iWebManager != null)
+						iWebManager.insert(new WebInfo(crosswordId, searchId, date));
 				}
 				line = is.readLine();
 			}

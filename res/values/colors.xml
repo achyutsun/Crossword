@@ -4,4 +4,5 @@
     <color name="blue_overlay">#602080e0</color>
     <color name="grey_overlay">#C0aaaaaa</color>
     <color name="grey_solid">#ff888888</color>
+    <color name="grey_background">#80303030</color>
 </resources>

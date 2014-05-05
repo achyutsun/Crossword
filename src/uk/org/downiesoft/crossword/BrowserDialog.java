@@ -112,7 +112,7 @@ public class BrowserDialog extends DialogFragment
 			if (aName!=null && files[i].getName().compareTo(aName)==0)
 				selected=i;
 		}
-		iBrowserAdapter = new BrowserAdapter(getActivity(), R.layout.browser_item, iFileList, ((MainActivity)getActivity()).getWebManager());
+		iBrowserAdapter = new BrowserAdapter(getActivity(), R.layout.browser_item, iFileList, WebManager.getInstance());
 		iListView.setAdapter(iBrowserAdapter);
 		iListView.setSelection(selected);
 	}

@@ -29,14 +29,16 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ListAdapter;
 import android.widget.ArrayAdapter;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.EditText;
+import android.view.Gravity;
+import android.content.Intent;
 
-public class GridFragment extends Fragment implements GridView.GridViewListener, WordEntryDialog.WordEntryListener {
+public class GridFragment extends Fragment implements GridView.GridViewListener {
 
 	public static final String TAG=GridFragment.class.getName();
-
-	public interface GridFragmentListener {
-		public void onClueButtonPressed(Bundle aCurrentClue);
-	}
 
 	private View iView;
 	private RelativeLayout iGridLayout;
@@ -48,7 +50,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 	private Button iEraseButton;
 	private Button iCluesButton;
 	private CrosswordModel iCrossword;
-	private WordEntryDialog iWordEntry;
 	private int iCursorX=0;
 	private int iCursorY=0;
 	private int iCursorDirection=CrosswordModel.CLUE_ACROSS;
@@ -56,8 +57,26 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 	private boolean iGuardBackKey=false;
 	private long iBackTimestampMillis=0;
 	private final int iBackTimeoutMillis=3000;
-	private GridFragmentListener iListener;
 	private Clue mClickedClue;
+	private Handler mHandler = new Handler();
+	
+	private class CancelChoice implements Runnable {
+		
+		private ListView mListView;
+		
+		public CancelChoice(ListView aList) {
+			mListView = aList;	
+		}
+		
+		@Override
+		public void run() {
+			if (mListView.getCheckedItemCount()>0) {
+				mListView.setItemChecked(mListView.getCheckedItemPosition(),false);
+				mListView.invalidate();
+			}
+		}
+		
+	}
 
 	private class OnClueListItemClickListener implements ListView.OnItemClickListener {
 
@@ -66,47 +85,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 			Log.d(TAG,String.format("onItemClick(%d)",position));
 			ClueListAdapter adapter = (ClueListAdapter)adapterView.getAdapter();
 			Clue clue=adapter.getItem(position);
-//			adapter.setSelectedClue(position);
 			GridFragment.this.clueClicked(clue.type(), clue.number(), position);
 		}
 	}
-
-	private class OnClueListItemSelectedListener implements ListView.OnItemSelectedListener {
-
-		@Override
-		public void onItemSelected(AdapterView<?> adapterView, View viewGroup, int position, long id) {
-			Log.d(TAG,String.format("onItemSelected(%d)",position));
-			ClueListAdapter adapter = (ClueListAdapter)adapterView.getAdapter();
-			Clue clue=adapter.getItem(position);
-			int direction=clue.type();
-			iClueListViews[1-direction].setItemChecked(-1,false);
-			iClueListViews[1-direction].clearChoices();
-			iClueListViews[1-direction].invalidate();
-			iClueListViews[direction].setItemChecked(position,true);
-			iClueListViews[direction].requestFocus();
-			Point pos=iCrossword.locateClue(clue.type(),clue.number());
-			if (pos!=null) {
-				iGridView.setCursor(pos.x,pos.y,direction,false);
-			}
-		}
-
-		@Override
-		public void onNothingSelected(AdapterView<?> p1) {
-			// TODO: Implement this method
-		}
-		
-	}
-
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		try {
-			iListener = (GridFragmentListener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement " + GridFragmentListener.class.getName());
-		}
-	}
-
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -121,7 +102,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		iEnterButton = (Button) iView.findViewById(R.id.gridEnterButton);
 		iEraseButton = (Button) iView.findViewById(R.id.gridEraseButton);
 		iCluesButton = (Button) iView.findViewById(R.id.gridCluesButton);
-		iCrossword = ((MainActivity)getActivity()).getCrossword();
+		iCrossword = CrosswordModel.getInstance();
 
 		if (iCrossword == null || !iCrossword.isValid()) {
 			iGridLayout.setVisibility(View.GONE);
@@ -136,17 +117,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		}
 		iEnterButton.setOnClickListener(new OnClickListener()
 			{
-
 				@Override
 				public void onClick(View arg0) {
 					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
-					FragmentManager fm = getActivity().getSupportFragmentManager();
-					iWordEntry = WordEntryDialog.getInstance(iGridView.getCurrentClue(), "", hint, GridFragment.this);
-					iWordEntry.show(fm, WordEntryDialog.TAG);
-//					FragmentTransaction ft = fm.beginTransaction();
-//					ft.replace(R.id.fragmentContainer, iWordEntry, "word_entry");
-//					ft.addToBackStack("word_entry");
-//					ft.commit();
+					wordEntryDialog(iGridView.getCurrentClue(), "", hint);
 				}
 			});
 		iEraseButton.setOnClickListener(new OnClickListener()
@@ -154,7 +128,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 				@Override
 				public void onClick(View arg0) {
 					iCrossword.eraseWord(new Point(iCursorX, iCursorY), iCursorDirection);
-					iGridView.redraw();
+					iGridView.highlightCurrentClue(true);
 				}
 			});
 		if (iTextView != null) {
@@ -166,7 +140,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 						Bundle args=new Bundle();
 						args.putInt("direction", clue.iType);
 						args.putInt("number", clue.iNumber);
-						iListener.onClueButtonPressed(args);
+						Intent intent = new Intent(getActivity(), CluesActivity.class);
+						intent.putExtra("currentClue",args);
+						startActivityForResult(intent, CluesActivity.REQUEST_CLUE);
 					}
 				});
 		} else {
@@ -190,10 +166,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 		int position = iCrossword.clues().getClueList(iCursorDirection).indexOf(clue);		
 		if (iClueListViews[0] != null) {
 			for (int i=0; i < 2; i++) {
-				iClueListViews[i].setAdapter(new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.clues().getClueList(i),
-					i==iCursorDirection?position:-1));
+				iClueListViews[i].setAdapter(new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.clues().getClueList(i)));
 				iClueListViews[i].setOnItemClickListener(new OnClueListItemClickListener());
-				iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
+				iClueListViews[i].setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+//				iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
 //					iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
 			}
 			iClueListViews[iCursorDirection].setItemChecked(position,true);
@@ -302,30 +278,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 			iClueListViews[1-iCursorDirection].clearChoices();
 			iClueListViews[1-iCursorDirection].invalidate();
 			iClueListViews[iCursorDirection].setItemChecked(index,true);
+			mClickedClue = aClue;
 			iClueListViews[iCursorDirection].setSelection(index);
-			iClueListViews[aCursorDirection].smoothScrollToPosition(index);
 			iClueListViews[aCursorDirection].requestFocus();
 		}
-	}
-
-	@Override
-	public void onWordEntered(String aWord) {
-		enterWord(aWord);
-		((MainActivity)getActivity()).synch();
-		//FragmentManager fm = getActivity().getSupportFragmentManager();
-		//fm.popBackStack("word_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-		if (iCrossword.crosswordCompleted()) {
-			Toast.makeText(getActivity(), R.string.text_congrats, Toast.LENGTH_LONG).show();
-		}
-	}
-
-	@Override
-	public void onWordEntryCancelled() {
-		FragmentManager fm = getActivity().getSupportFragmentManager();
-		fm.popBackStack("word_entry", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-		Fragment frag=fm.findFragmentByTag("word_entry");
-		if (frag != null)
-			fm.beginTransaction().remove(frag).commit();
 	}
 
 	public void clueClicked(int aDirection, int aNum, int aPosition) {
@@ -335,22 +291,20 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 			iCursorY = pos.y;
 			iCursorDirection = aDirection;
 			if (iClueListViews[0]!=null) {
-				iClueListViews[1-iCursorDirection].setItemChecked(-1,false);
-				iClueListViews[1-iCursorDirection].clearChoices();
-				iClueListViews[1-iCursorDirection].invalidate();
-				
-					Clue clue=iCrossword.clueAt(pos, aDirection);
-					if ((mClickedClue != null && clue.equals(mClickedClue)) || (aPosition == iClueListViews[iCursorDirection].getSelectedItemPosition() 
-						&& aPosition == iClueListViews[iCursorDirection].getCheckedItemPosition())) {
-						String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
-						FragmentManager fm = getActivity().getSupportFragmentManager();
-						iWordEntry = WordEntryDialog.getInstance(iGridView.getCurrentClue(), "", hint, GridFragment.this);
-						iWordEntry.show(fm, WordEntryDialog.TAG);
-					} else {
-						mClickedClue = clue;
-						iClueListViews[iCursorDirection].setSelection(aPosition);					
-						iClueListViews[iCursorDirection].setItemChecked(aPosition, true);
-					}
+				ListView clueList=iClueListViews[1-iCursorDirection];
+				if (clueList.getCheckedItemCount()>0) {
+					mHandler.post(new CancelChoice(clueList));
+//					clueList.setItemChecked(clueList.getCheckedItemPosition(),false);
+				}
+
+				Clue clue=iCrossword.clueAt(pos, aDirection);
+				if ((mClickedClue != null && clue.equals(mClickedClue)) || (aPosition == iClueListViews[iCursorDirection].getSelectedItemPosition() 
+					&& aPosition == iClueListViews[iCursorDirection].getCheckedItemPosition())) {
+					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
+					wordEntryDialog(iGridView.getCurrentClue(), "", hint);
+				} else {
+					mClickedClue = clue;
+				}
 			}
 			iGridView.setCursor(pos.x, pos.y, aDirection,false);			
 		}
@@ -383,8 +337,70 @@ public class GridFragment extends Fragment implements GridView.GridViewListener,
 
 	public void enterWord(String aWord) {
 		if (iCrossword.enterWord(new Point(iCursorX, iCursorY), iCursorDirection, aWord)) {
-			iGridView.redraw();
+			iGridView.highlightCurrentClue(true);
 		}
 	}
 
+	private void wordEntryDialog(Clue aClue, String aWord, final String aHint) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setCancelable(true);
+		builder.setTitle(R.string.text_enter_word);
+		View dialog = getActivity().getLayoutInflater().inflate(R.layout.word_entry, null);
+		final TextView clue = (TextView)dialog.findViewById(R.id.entryClue);
+		final EditText word = (EditText)dialog.findViewById(R.id.entryEditText);
+		clue.setText(aClue.toString());
+		word.setText(aWord);
+		word.setHint(aHint);
+		builder.setView(dialog);
+		builder.setInverseBackgroundForced(true);
+		builder.setPositiveButton(R.string.text_ok, null);
+		builder.setNegativeButton(R.string.text_cancel, new DialogInterface.OnClickListener()
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+		final AlertDialog alert = builder.create();
+		alert.show();
+		alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View p1) {
+					String entered = word.getText().toString().toUpperCase().replace(" ", "");
+					String hint = aHint.toUpperCase().replace('*', '.');
+					if (entered.matches(hint)) {
+						enterWord(entered);
+						BluetoothManager.synch(iCrossword);
+						if (iCrossword.crosswordCompleted()) {
+							Toast.makeText(getActivity(), R.string.text_congrats, Toast.LENGTH_LONG).show();
+						}
+						alert.dismiss();
+					} else {
+						Toast toast = Toast.makeText(getActivity(), R.string.text_bad_fit, Toast.LENGTH_SHORT);
+						toast.setGravity(Gravity.CENTER, 0, 0);
+						toast.show();						
+					}
+				}
+			});
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		switch (requestCode)
+		{
+			case CluesActivity.REQUEST_CLUE:
+				if (data!=null && data.getExtras()!=null) {
+					int direction = data.getExtras().getInt("direction");
+					int number = data.getExtras().getInt("number");
+					int position = data.getExtras().getInt("position",-1);
+					clueClicked(direction, number, position);
+				}
+				break;
+			default:
+				super.onActivityResult(requestCode,resultCode,data);
+		}
+	}
+
+	
 }
