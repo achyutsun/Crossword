@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.widget.EditText;
 import android.view.Gravity;
 import android.content.Intent;
+import android.view.inputmethod.*;
 
 public class GridFragment extends Fragment implements GridView.GridViewListener {
 
@@ -374,6 +375,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 						BluetoothManager.synch(iCrossword);
 						if (iCrossword.crosswordCompleted()) {
 							Toast.makeText(getActivity(), R.string.text_congrats, Toast.LENGTH_LONG).show();
+						}
+						if (alert.getCurrentFocus()!=null) {
+							InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+							inputMethodManager.hideSoftInputFromWindow(alert.getCurrentFocus().getWindowToken(), 0);
 						}
 						alert.dismiss();
 					} else {
