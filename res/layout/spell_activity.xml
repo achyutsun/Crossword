@@ -65,7 +65,7 @@
        android:padding="5dp"
        android:layout_width="match_parent" 
        android:layout_height="wrap_content"
-        android:columnWidth="200dp"
+        android:columnWidth="150dp"
         android:gravity="center"
         android:horizontalSpacing="5dp"
         android:numColumns="auto_fit"
