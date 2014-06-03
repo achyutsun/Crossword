@@ -12,7 +12,7 @@
         android:title="@string/action_anagram"/>
     <item
         android:id="@+id/action_crossword"
-        android:orderInCategory="100"
+        android:orderInCategory="110"
         android:showAsAction="ifRoom|withText"
         android:title="@string/action_crossword"/>
     

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.org.downiesoft.crossword"
-    android:versionCode="7"
+    android:versionCode="9"
     android:versionName="2.0" >
 
     <uses-sdk
@@ -21,7 +21,6 @@
         <activity
             android:name="uk.org.downiesoft.crossword.MainActivity"
             android:label="@string/crossword_app_name"
-            android:configChanges="keyboardHidden"
             android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,9 +39,12 @@
             android:name="uk.org.downiesoft.spell.SpellActivity"
             android:icon="@drawable/ic_launcher_spell"
             android:label="@string/spell_app_name"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:windowSoftInputMode="stateHidden" >
-            <intent-filter>
+            android:windowSoftInputMode="stateHidden|adjustResize"
+			android:uiOptions="splitActionBarWhenNarrow" >
+			<meta-data
+				android:name="android.support.UI_OPTIONS"
+				android:value="splitActionBarWhenNarrow" />
+			<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>

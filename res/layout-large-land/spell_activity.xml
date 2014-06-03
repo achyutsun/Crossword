@@ -40,34 +40,6 @@
 			<requestFocus />
 		</EditText>
 
-		<LinearLayout
-			android:id="@+id/buttons"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content" >
-
-			<Button
-				android:id="@+id/checkButton"
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:text="@string/action_check" />
-
-			<Button
-				android:id="@+id/anagramButton"
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:text="@string/action_anagram" />
-
-			<Button
-				android:id="@+id/crosswordButton"
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_weight="1"
-				android:text="@string/action_crossword" />
-
-		</LinearLayout>
-
 		<GridView
 			android:id="@+id/listView"
 			android:padding="5dp"

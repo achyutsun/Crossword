@@ -23,6 +23,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
+import android.view.*;
 
 @SuppressLint("DefaultLocale")
 public class SpellActivity extends Activity implements LexiconObserver
@@ -32,9 +33,6 @@ public class SpellActivity extends Activity implements LexiconObserver
 
 	GridView iGridView;
 	EditText iEditText;
-	Button iCheckButton;
-	Button iAnagramButton;
-	Button iCrosswordButton;
 	ArrayList<String> iWordList;
 	ArrayList<Integer> iMetric;
 	ArrayAdapter<String> iAdapter;
@@ -104,13 +102,25 @@ public class SpellActivity extends Activity implements LexiconObserver
 			Toast.makeText(this, R.string.text_no_lexicon, Toast.LENGTH_LONG).show();
 			finish();
 		}
-		iCheckButton = (Button) findViewById(R.id.checkButton);
-		iCheckButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View arg0)
-			{
-				String word = iEditText.getText().toString().replace(" ", "");
+
+		iWordList = new ArrayList<String>();
+		iMetric = new ArrayList<Integer>();
+		iAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, iWordList);
+		iGridView.setEmptyView(findViewById(R.id.listEmpty));
+		iGridView.setAdapter(iAdapter);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.spell_menu,menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		String word = iEditText.getText().toString().replace(" ", "");
+		switch (item.getItemId()) {
+			case R.id.action_check:
 				if (word.length() > 2)
 				{
 					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -120,34 +130,8 @@ public class SpellActivity extends Activity implements LexiconObserver
 					iAdapter.notifyDataSetChanged();
 					iLexicon.check(word, Lexicon.DICT_ALL, Lexicon.DICT_ALL, true);
 				}
-
-			}
-		});
-		iCrosswordButton = (Button) findViewById(R.id.crosswordButton);
-		iCrosswordButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View arg0)
-			{
-				String word = iEditText.getText().toString().replace(" ", "");
-				if (word.length() > 2)
-				{
-					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(iEditText.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
-					iWordList.clear();
-					iMetric.clear();
-					iAdapter.notifyDataSetChanged();
-					iLexicon.xWordMatch(word, true);
-				}
-			}
-		});
-		iAnagramButton = (Button) findViewById(R.id.anagramButton);
-		iAnagramButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View arg0)
-			{
-				String word = iEditText.getText().toString().replace(" ", "");
+				return true;
+			case R.id.action_anagram:
 				if (word.length() > 2)
 				{
 					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -157,13 +141,20 @@ public class SpellActivity extends Activity implements LexiconObserver
 					iAdapter.notifyDataSetChanged();
 					iLexicon.anagram(word, false, Lexicon.DICT_ALL, Lexicon.LEVEL_CHAMPIONSHIP);
 				}
-			}
-		});
-		iWordList = new ArrayList<String>();
-		iMetric = new ArrayList<Integer>();
-		iAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, iWordList);
-		iGridView.setEmptyView(findViewById(R.id.listEmpty));
-		iGridView.setAdapter(iAdapter);
+				return true;
+			case R.id.action_crossword:
+				if (word.length() > 2)
+				{
+					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(iEditText.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+					iWordList.clear();
+					iMetric.clear();
+					iAdapter.notifyDataSetChanged();
+					iLexicon.xWordMatch(word, true);
+				}
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
