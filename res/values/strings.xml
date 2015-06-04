@@ -63,7 +63,7 @@
     <string name="button_scan">Scan for devices</string>
 
     <string name="spell_app_name">Spell</string>
-    <string name="action_check">Check word</string>
+    <string name="action_check">Check</string>
     <string name="action_anagram">Anagram</string>
     <string name="action_crossword">Crossword</string>
     

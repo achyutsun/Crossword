@@ -19,6 +19,7 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
 		<item name="android:listViewStyle">@style/MyListView</item>
+		<item name="android:actionModeStyle">@style/MyActionMode</item>
     </style>
 
 	<style name="MyActionMode" parent="android:style/Widget.Holo.ActionMode">

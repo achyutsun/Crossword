@@ -185,6 +185,7 @@ public class GridView extends View {
 				mLetterPaint.setColor(Color.GREEN);
 				letter = Character.toString((char)solution);
 			}
+			mLetterPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 			canvas.drawText(letter, r.centerX(), r.centerY() + iLetterBounds.height() / 2f, mLetterPaint);
 		}		
 	}
