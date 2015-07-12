@@ -179,6 +179,8 @@ class CrosswordModel
 	public boolean saveCrossword(Context aContext)
 	{
 		String path = Environment.getExternalStorageDirectory().toString() + File.separatorChar + "Crossword";
+		File dir = new File(path);
+		dir.mkdir();
 		path+=File.separatorChar+Integer.toString(iCrosswordId)+".xwd";
 		try
 		{
