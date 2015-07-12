@@ -20,6 +20,8 @@ public class Lexicon
 {
 	private static final String TAG = "uk.org.downiesoft.spell.Lexicon";
 
+	private static final int INDEX_VERSION = 0x10;
+	
 	public interface LexiconObserver
 	{
 		public boolean reportMatch(String aMatch, int aDistance);
@@ -130,7 +132,7 @@ public class Lexicon
 		iContext = aContext;
 		iLexicon = bufferLexicon("lexicon.lst");
 		iObserver = aObserver;
-		makeIndexes();
+		loadIndexes();
 		iSearchContext = new SearchContext();
 	}
 
@@ -179,11 +181,12 @@ public class Lexicon
 		return readWord(iPos, aDict);
 	}
 
-	private void makeIndexes()
+	private void loadIndexes()
 	{
-		File indexFile = new File(iContext.getFilesDir().toString() + File.separatorChar + "index.idx");
-		File indexFile2 = new File(iContext.getFilesDir().toString() + File.separatorChar + "index2.idx");
-		if (!indexFile.exists() || !indexFile2.exists())
+		iIndex = loadIndex("index.idx");
+		iIndex2 = loadIndex("index2.idx");
+		
+		if (iIndex == null || iIndex2 == null) 
 		{
 			iIndex = new ArrayList<IndexEntry>();
 			iIndex2 = new ArrayList<IndexEntry>();
@@ -212,7 +215,7 @@ public class Lexicon
 						if (!prev.equalsIgnoreCase(current))
 						{
 							iIndex.add(new IndexEntry(prev, start, count));
-							start = iPos;
+							start = prevPos;
 							count = 0;
 							prev = new String(current);
 						}
@@ -240,6 +243,7 @@ public class Lexicon
 		try
 		{
 			DataOutputStream os = new DataOutputStream(iContext.openFileOutput(aName, Context.MODE_PRIVATE));
+			os.write(INDEX_VERSION);
 			os.writeInt(aIndex.size());
 			for (IndexEntry entry : aIndex)
 				entry.externalize(os);
@@ -256,15 +260,22 @@ public class Lexicon
 		try
 		{
 			DataInputStream is = new DataInputStream(iContext.openFileInput(aName));
-			int size = is.readInt();
-			ArrayList<IndexEntry> index = new ArrayList<IndexEntry>(size);
-			for (int i = 0; i < size; i++)
-			{
-				IndexEntry entry = new IndexEntry();
-				index.add(entry.internalize(is));
+			int version = is.read();
+			if (version == INDEX_VERSION) {
+				int size = is.readInt();
+				ArrayList<IndexEntry> index = new ArrayList<IndexEntry>(size);
+				for (int i = 0; i < size; i++) {
+					IndexEntry entry = new IndexEntry();
+					index.add(entry.internalize(is));
+				}
+				is.close();
+				return index;
+			} else {
+				is.close();
+				return null;
 			}
-			return index;
-		}
+
+		} 
 		catch (IOException e)
 		{
 			return null;
