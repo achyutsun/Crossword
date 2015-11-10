@@ -30,7 +30,7 @@ public class CluesActivity extends FragmentActivity implements ClueListFragment.
 	
 	@Override
 	public void onClueClicked(int aDirection, int aNum, int aPosition) {
-		Log.d(TAG, String.format("onClueClicked(%d,%d)",aDirection, aNum));
+		MainActivity.debug(1, TAG, String.format("onClueClicked(%d,%d)",aDirection, aNum));
 		Intent intent=new Intent();
 		Bundle extras=new Bundle();
 		extras.putInt("direction", aDirection);

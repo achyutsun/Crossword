@@ -13,6 +13,7 @@ public class WebManager
 	private static WebManager sManagerInstance;
 	
 	private ArrayList<WebInfo> iWebInfo;
+	private WebInfoAdapter iWebInfoAdapter;
 
 	public static WebManager getInstance() {
 		if (sManagerInstance==null) {
@@ -44,12 +45,22 @@ public class WebManager
 				break;
 		}
 		iWebInfo.add(i,aInfo);
+		if (iWebInfoAdapter != null) {
+			iWebInfoAdapter.notifyDataSetChanged();
+		}
 		return i;
 	}
 	
 	public ArrayList<WebInfo> getWebInfo()
 	{
 		return iWebInfo;
+	}
+	
+	public WebInfoAdapter getAdapter(Context aContext) {
+		if (iWebInfoAdapter == null) {
+			iWebInfoAdapter = new WebInfoAdapter(aContext, R.layout.web_info_item, iWebInfo);
+		}
+		return iWebInfoAdapter;
 	}
 	
 	public WebInfo getCrossword(int aCrosswordId)

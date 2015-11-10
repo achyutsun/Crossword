@@ -25,6 +25,9 @@ import android.webkit.JavascriptInterface;
 
 public class WebViewFragment extends Fragment implements WebInfoListListener
 {
+	
+	public static final String TAG = WebViewFragment.class.getName();
+	
 	public interface WebViewFragmentListener
 	{
 		void importPuzzle(String html);
@@ -69,6 +72,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 					if (iListener != null)
 						iListener.importPuzzle(html);
 				}
+				break;
 				case STATE_INDEX:
 				{
 					getCrosswordInfo(html);
@@ -98,7 +102,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		@Override
 		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
 		{
-			Log.d("uk.org.downiesoft.crossword.WebViewClient", String.format("Description: %s, URL %s", description, failingUrl));
+			MainActivity.debug(1, "uk.org.downiesoft.crossword.WebViewClient", String.format("Description: %s, URL %s", description, failingUrl));
 		}
 	};
 
@@ -199,6 +203,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 					searchId = Integer.parseInt(line.substring(0, line.indexOf('"')));
 					line = line.substring(line.indexOf(CROSSWORD_ID) + CROSSWORD_ID.length());
 					line = line.substring(0, line.indexOf('<'));
+					MainActivity.debug(1, TAG,String.format("line='%s'",line));
 					crosswordId = Integer.parseInt(line.replace(",", ""));
 					line = is.readLine();
 					line = line.substring(line.indexOf(SEARCH_ID) + SEARCH_ID.length());
@@ -212,7 +217,8 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		}
 		catch (Exception e)
 		{
-			Log.d("uk.org.downiesoft.crossword.getCrosswordInfo", "exception " + e.toString() + " " + e.getMessage());
+			MainActivity.debug(1, "uk.org.downiesoft.crossword.getCrosswordInfo", "exception " + e.toString() + " " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

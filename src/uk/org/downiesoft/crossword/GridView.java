@@ -79,7 +79,7 @@ public class GridView extends View {
 			mTextSize = (5 * w) / (CrosswordModel.GRID_SIZE * 6);			
 			mNumberSize = 0;
 		}
-		Log.d(TAG,String.format("onSizeChanged: %s %s = %s %s",w, h, mTextSize, mNumberSize));
+		MainActivity.debug(1, TAG,String.format("onSizeChanged: %s %s = %s %s",w, h, mTextSize, mNumberSize));
 		Rect textBounds = new Rect();
 		iPaint.getTextBounds("W", 0, 1, textBounds);
 		if (h > w) {
@@ -228,36 +228,39 @@ public class GridView extends View {
 	@Override
 	public void onDraw(Canvas canvas) {
 		canvas.drawBitmap(mBackBmp, mMatrix, iPaint);
-		//Log.d(TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
+		//MainActivity.debug(1, TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
 	}
 
-	public void redraw(Rect aRect) {
-		for (int x=aRect.left; x < aRect.right; x++) {
-			for (int y=aRect.top; y < aRect.bottom; y++) {
-				drawSquare(x,y,mBackCanvas);
-			}
-		} 
-		
-	}
+//	public void redraw(Rect aRect) {
+//		if (mBackCanvas != null) {
+//			for (int x=aRect.left; x < aRect.right; x++) {
+//				for (int y=aRect.top; y < aRect.bottom; y++) {
+//					drawSquare(x, y, mBackCanvas);
+//				}
+//			} 
+//		}
+//	}
 	
 	public void redraw() {
-		//Log.d(TAG,String.format("onDraw start"));
-		iPaint.reset();
-		if (iCrossword == null) {
-			String noFiles=iContext.getString(R.string.text_no_crossword);
-			mBackCanvas.drawColor(Color.BLACK);
-			iPaint.setTypeface(Typeface.DEFAULT);
-			iPaint.setTextSize(50f);
-			iPaint.setTextAlign(Align.CENTER);
-			Rect bounds=new Rect();
-			iPaint.getTextBounds(noFiles, 0, 1, bounds);
-			mBackCanvas.drawText(noFiles, iWidth / 2, (iHeight - bounds.height()) / 2, iPaint);
-		} else {
-			drawSquares(mBackCanvas);
-			drawNumbers(mBackCanvas);
-			drawLetters(mBackCanvas);
+		MainActivity.debug(1, TAG,String.format("redraw start %s",iCrossword));
+		if (mBackCanvas != null) {
+			iPaint.reset();
+			if (iCrossword == null) {
+				String noFiles=iContext.getString(R.string.text_no_crossword);
+				mBackCanvas.drawColor(Color.BLACK);
+				iPaint.setTypeface(Typeface.DEFAULT);
+				iPaint.setTextSize(50f);
+				iPaint.setTextAlign(Align.CENTER);
+				Rect bounds=new Rect();
+				iPaint.getTextBounds(noFiles, 0, 1, bounds);
+				mBackCanvas.drawText(noFiles, iWidth / 2, (iHeight - bounds.height()) / 2, iPaint);
+			} else {
+				drawSquares(mBackCanvas);
+				drawNumbers(mBackCanvas);
+				drawLetters(mBackCanvas);
+			}
+			highlightCurrentClue(true, mBackCanvas);		
 		}
-		highlightCurrentClue(true, mBackCanvas);		
 	}
 
 	public Clue getCurrentClue() {
@@ -269,9 +272,9 @@ public class GridView extends View {
 	}
 
 	public void setCrossword(CrosswordModel aCrossword) {
+		MainActivity.debug(1, TAG,String.format("setCrossword(%s): %s",aCrossword, this));
 		iCrossword = aCrossword;
-		//if (iCrossword!=null && iCrossword.isValid())
-		//	setCursor(0,0,CrosswordModel.CLUE_ACROSS);
+		redraw();
 		invalidate();
 	}
 
@@ -288,34 +291,38 @@ public class GridView extends View {
 	}
 
 	public void setCursor(int aX, int aY, int aDirection, boolean aNotifyListener) {
-		if (iCursor.x == aX && iCursor.y == aY && iDirection == aDirection) {
-			return;
-		}
-		highlightCurrentClue(false, mBackCanvas);
-		iCursor.set(aX, aY);
-		iDirection = aDirection;
-		Point delta = new Point(1 - aDirection, aDirection);
-		while (iCrossword.withinGrid(iCursor) && iCrossword.isBlank(iCursor)) {
-			iCursor.x += delta.x;
-			iCursor.y += delta.y;
-		}
-		if (!iCrossword.withinGrid(iCursor)) {
-			do
-			{
-				iCursor.x -= delta.x;
-				iCursor.y -= delta.y;
-			} while (iCrossword.withinGrid(iCursor) && iCrossword.isBlank(iCursor));
-		}
-		iClue = iCrossword.clueAt(iCursor, iDirection);
-		iExtent = iCrossword.getClueExtent(iCursor, iDirection);
-		if (iExtent.width() == 0 && iExtent.height() == 0) {
-			iDirection = 1 - iDirection;
+		if (iCursor.x == aX && iCursor.y == aY && iDirection == aDirection && iClue != null) {
+			highlightCurrentClue(true);
+		} else {
+			highlightCurrentClue(false, mBackCanvas);
+			iCursor.set(aX, aY);
+			iDirection = aDirection;
+			Point delta = new Point(1 - aDirection, aDirection);
+			while (iCrossword.withinGrid(iCursor) && iCrossword.isBlank(iCursor)) {
+				iCursor.x += delta.x;
+				iCursor.y += delta.y;
+			}
+			if (!iCrossword.withinGrid(iCursor)) {
+				do
+				{
+					iCursor.x -= delta.x;
+					iCursor.y -= delta.y;
+				} while (iCrossword.withinGrid(iCursor) && iCrossword.isBlank(iCursor));
+			}
+			iClue = iCrossword.clueAt(iCursor, iDirection);
 			iExtent = iCrossword.getClueExtent(iCursor, iDirection);
+			if (iExtent.width() == 0 && iExtent.height() == 0) {
+				iDirection = 1 - iDirection;
+				iExtent = iCrossword.getClueExtent(iCursor, iDirection);
+			}
+			if (iClue != null && iObserver != null && aNotifyListener) {
+				iObserver.onClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+			}
+			highlightCurrentClue(true, mBackCanvas);
 		}
-		if (iClue != null && iObserver != null && aNotifyListener) {
-			iObserver.onClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
-		}
-		highlightCurrentClue(true, mBackCanvas);
+		redraw();
+		MainActivity.debug(1, TAG, String.format("<setCursor(%s,%s,%s) %s", iCursor.x, iCursor.y, iDirection, iClue));
+
 		invalidate();
 	}
 
@@ -329,7 +336,7 @@ public class GridView extends View {
 		inverse.mapPoints(points);
 		int col = (int) (points[0] / (float) iSize);
 		int row = (int) (points[1] / (float) iSize);
-		Log.d(TAG,String.format("onTouchEvent: (%3.1f,%3.1f),(%3.1f,%3.1f),(%d,%d)",x,y,points[0],points[1],col,row));
+		MainActivity.debug(1, TAG,String.format("onTouchEvent: (%3.1f,%3.1f),(%3.1f,%3.1f),(%d,%d)",x,y,points[0],points[1],col,row));
 		Point pos = new Point(col, row);
 		Rect extent;
 		boolean invalidated = false;
@@ -488,10 +495,10 @@ public class GridView extends View {
 		float[] matrixValues = new float[9];
 		mMatrix.getValues(matrixValues);
 		aOffset.set(matrixValues[Matrix.MTRANS_X], matrixValues[Matrix.MTRANS_Y]);
-		//Log.d(TAG, String.format("getRotatedCoords: offset=(%.1f, %.1f)", aOffset.x, aOffset.y));
-		//Log.d(TAG, String.format("getRotatedCoords: (%.1f, %.1f)", aOffset.x, aOffset.y));
+		//MainActivity.debug(1, TAG, String.format("getRotatedCoords: offset=(%.1f, %.1f)", aOffset.x, aOffset.y));
+		//MainActivity.debug(1, TAG, String.format("getRotatedCoords: (%.1f, %.1f)", aOffset.x, aOffset.y));
 		aBmpSize.set(iWidth * mImageScale, iHeight * mImageScale);
-		//Log.d(TAG, String.format("getRotatedCoords: offset=(%.1f, %.1f)", aOffset.x, aOffset.y));
+		//MainActivity.debug(1, TAG, String.format("getRotatedCoords: offset=(%.1f, %.1f)", aOffset.x, aOffset.y));
 	}
 
 
@@ -501,12 +508,12 @@ public class GridView extends View {
 		int dispW = iWidth;
 		int dispH = iHeight;
 		getRotatedCoords(bmpSize, offset);
-		//Log.d(TAG, String.format("centreImage: bmpSize=(%.1f, %.1f)", bmpSize.x, bmpSize.y));
-		//Log.d(TAG, String.format("centreImage: displaySize=(%d, %d)", mDisplayParams.mDisplaySize.x, mDisplayParams.mDisplaySize.y));
+		//MainActivity.debug(1, TAG, String.format("centreImage: bmpSize=(%.1f, %.1f)", bmpSize.x, bmpSize.y));
+		//MainActivity.debug(1, TAG, String.format("centreImage: displaySize=(%d, %d)", mDisplayParams.mDisplaySize.x, mDisplayParams.mDisplaySize.y));
 		PointF margins=new PointF();
 		margins.x = bmpSize.x >= dispW ? 0 : (dispW - bmpSize.x) / 2;
 		margins.y = bmpSize.y >= dispH ? 0 : (dispH - bmpSize.y) / 2;
-		//Log.d(TAG, String.format("centreImage: margins=(%.1f, %.1f)", margins.x, margins.y));
+		//MainActivity.debug(1, TAG, String.format("centreImage: margins=(%.1f, %.1f)", margins.x, margins.y));
 		float dx = 0;
 		float dy = 0;
 		if (offset.x > margins.x) 
@@ -517,7 +524,7 @@ public class GridView extends View {
 			dy = margins.y - offset.y;
 		if (offset.y + dy + bmpSize.y < dispH - margins.y)
 			dy = dispH - margins.y - bmpSize.y - offset.y - dy;
-		//Log.d(TAG, String.format("centreImage: dx=%f, dy=%f", dx, dy));
+		//MainActivity.debug(1, TAG, String.format("centreImage: dx=%f, dy=%f", dx, dy));
 		if (dx != 0 || dy != 0) {
 			matrix.postTranslate(dx, dy);
 		}
@@ -533,8 +540,8 @@ public class GridView extends View {
 	}
 
 	private void scaleBitmap(float aScaleFactor, float aFocusX, float aFocusY) {
-		//Log.d(TAG,String.format("scaleBitmap(%3.2f,%3.2f,%3.2f)", aScaleFactor, aFocusX, aFocusY));
-		//Log.d(TAG,String.format("mImageScale=%3.2f, mImageParams.mScale=%3.2f, mMinimumScale=%3.2f", mImageScale, mImageParams.mScale, mMinimumScale));
+		//MainActivity.debug(1, TAG,String.format("scaleBitmap(%3.2f,%3.2f,%3.2f)", aScaleFactor, aFocusX, aFocusY));
+		//MainActivity.debug(1, TAG,String.format("mImageScale=%3.2f, mImageParams.mScale=%3.2f, mMinimumScale=%3.2f", mImageScale, mImageParams.mScale, mMinimumScale));
 		if (mImageScale * aScaleFactor < 1)
 			aScaleFactor = 1 / mImageScale;
 		if (mImageScale * aScaleFactor > 2)

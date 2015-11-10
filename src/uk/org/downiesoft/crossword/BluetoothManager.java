@@ -66,7 +66,7 @@ public class BluetoothManager
 		{
 			CrosswordModel crossword=null;
 			if (D)
-				Log.d(TAG, "handleMessage: " + msg.what);
+				MainActivity.debug(1, TAG, "handleMessage: " + msg.what);
 			switch (msg.what)
 			{
 				case MESSAGE_STATE_CHANGE:
@@ -103,7 +103,7 @@ public class BluetoothManager
 							.show();
 					crossword=CrosswordModel.getInstance();
 					if (D)
-						Log.d(TAG, "crossword valid: " + crossword.isValid());
+						MainActivity.debug(1, TAG, "crossword valid: " + crossword.isValid());
 					if (crossword.isValid())
 						sendCrossword(crossword);
 					break;
@@ -133,7 +133,7 @@ public class BluetoothManager
 
 	public void setup()
 	{
-		Log.d(TAG, "setupChat()");
+		MainActivity.debug(1, TAG, "setupChat()");
 		// Initialize the BluetoothService to perform bluetooth connections
 		mBTService = new BluetoothService(mActivity, mHandler);
 	}
@@ -254,7 +254,7 @@ public class BluetoothManager
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		if (D)
-			Log.d(TAG, "onActivityResult " + resultCode);
+			MainActivity.debug(1, TAG, "onActivityResult " + resultCode);
 		switch (requestCode)
 		{
 			case REQUEST_CONNECT_DEVICE_SECURE:
@@ -274,7 +274,7 @@ public class BluetoothManager
 				else
 				{
 					// User did not enable Bluetooth or an error occurred
-					Log.d(TAG, "BT not enabled");
+					MainActivity.debug(1, TAG, "BT not enabled");
 					Toast.makeText(mActivity, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
 					mActivity.finish();
 				}

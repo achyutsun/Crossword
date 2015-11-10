@@ -15,6 +15,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
+import uk.org.downiesoft.crossword.MainActivity;
 
 public class Lexicon
 {
@@ -223,7 +224,7 @@ public class Lexicon
 					}
 					catch (StringIndexOutOfBoundsException e)
 					{
-						Log.d(TAG, String.format("substr failed [%s][%s]", word, prevword));
+						MainActivity.debug(1, TAG, String.format("substr failed [%s][%s]", word, prevword));
 					}
 				}
 				count++;
@@ -646,7 +647,7 @@ public class Lexicon
 							{
 								if (contained(iSearchContext.iLetterSet, cand))
 								{
-									Log.d(TAG, String.format("publish %s %d %d %s %d %d %d", cand, iPos, indexPtr, entry.iPrefix,
+									MainActivity.debug(1, TAG, String.format("publish %s %d %d %s %d %d %d", cand, iPos, indexPtr, entry.iPrefix,
 											entry.iStart, entry.iCount, wordCount));
 									publishProgress(new SearchResult(cand, lLen - wLen));
 								}

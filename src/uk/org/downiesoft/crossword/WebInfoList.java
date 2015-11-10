@@ -20,7 +20,6 @@ public class WebInfoList extends Fragment
 	
 	private View iView;
 	private ListView iListView;
-	private ArrayList<WebInfo> iWebInfo;
 	private WebInfoAdapter iAdapter;
 	private WebInfoListListener iListener;
 	
@@ -39,8 +38,7 @@ public class WebInfoList extends Fragment
 					iListener.onWebInfoListItemSelected(item);
 			}
 		});
-		iWebInfo = WebManager.getInstance().getWebInfo();
-		iAdapter = new WebInfoAdapter(getActivity(), R.layout.web_info_item, iWebInfo);
+		iAdapter = WebManager.getInstance().getAdapter(getActivity());
 		iListView.setAdapter(iAdapter);
 		return iView;
 	}

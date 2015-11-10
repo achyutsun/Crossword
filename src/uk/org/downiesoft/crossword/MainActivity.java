@@ -39,7 +39,8 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 
 	public static final String TAG = "uk.org.downiesoft.crossword.MainActivity";
 	private static final String CROSSWORD_DIR = "Crossword";
-
+	private static final int sDebug = 0;
+	
 	private CrosswordModel iCrossword;
 	private GridFragment iGridFragment;
 	private SharedPreferences iSettings;
@@ -51,6 +52,12 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	private boolean iBTServer = false;
 	private boolean iBTEnabled = false;
 
+	
+	public static void debug(int aLevel, String aTag, String aText) {
+		if (aLevel <= sDebug) {
+			Log.d(aTag, aText);
+		}
+	}
 	private class TitleSetter implements Runnable
 	{
 
@@ -88,7 +95,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			}
 			catch (Exception e)
 			{
-				Log.d("uk.org.downiesoft.crossword.ImportPuzzle", e.toString() + ":" + e.getMessage());
+				MainActivity.debug(1, "uk.org.downiesoft.crossword.ImportPuzzle", e.toString() + ":" + e.getMessage());
 				e.printStackTrace();
 			}
 			return null;
@@ -129,7 +136,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 		@Override
 		protected Boolean doInBackground(String... html)
 		{
-			Log.d("uk.org.downiesoft.crossword.ImportSolutionTask", html[0]);
+			MainActivity.debug(1, "uk.org.downiesoft.crossword.ImportSolutionTask", html[0]);
 			boolean retval = false;
 			try
 			{
@@ -141,7 +148,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			}
 			catch (Exception e)
 			{
-				Log.d("uk.org.downiesoft.crossword.ImportSolution", e.toString() + ":" + e.getMessage());
+				MainActivity.debug(1, "uk.org.downiesoft.crossword.ImportSolution", e.toString() + ":" + e.getMessage());
 				e.printStackTrace();
 			}
 			return Boolean.valueOf(retval);
@@ -169,6 +176,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		MainActivity.debug(1, TAG,String.format("onCreate(%s)",iCrossword));
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_crossword);
 		iCrossword = CrosswordModel.getInstance();
@@ -184,6 +192,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	@Override
 	public void onStart()
 	{
+		MainActivity.debug(1, TAG,String.format("onStart(%s)",iCrossword));
 		super.onStart();
 		// if (iBluetoothManager!=null && iBluetoothManager.isActive())
 		// iBluetoothManager.setup();
@@ -193,6 +202,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	@Override
 	public void onResume()
 	{
+		MainActivity.debug(1, TAG,String.format("onResume(%s)",iCrossword));
 		super.onResume();
 		restore();
 		if (iCrossword.isValid())
@@ -204,6 +214,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	@Override
 	public void onPause()
 	{
+		MainActivity.debug(1, TAG,String.format("onPause(%s)",iCrossword));
 		super.onPause();
 		store();
 	}
@@ -393,6 +404,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 				}
 				else
 				{
+					CrosswordModel.setInstance(newCrossword);
 					iCrossword = newCrossword;
 					currentFile = aFile.toString();
 					iGridFragment.setCrossword(iCrossword);

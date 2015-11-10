@@ -47,6 +47,10 @@ class CrosswordModel
 		return sCrossword;
 	}
 	
+	public static final void setInstance(CrosswordModel aCrossword) {
+		sCrossword = aCrossword;
+	}
+	
 	public CrosswordModel()
 	{
 		iClues = new ClueLists();
@@ -204,7 +208,7 @@ class CrosswordModel
 		for (int row = 0; row < GRID_SIZE; row++)
 		{
 			line = is.readLine();
-			Log.d(TAG,"OpenCrossword: row="+line);
+			MainActivity.debug(1, TAG,"OpenCrossword: row="+line);
 			for (int col = 0; col < GRID_SIZE && col < line.length(); col++)
 			{
 				char ch = line.charAt(col);
@@ -239,7 +243,7 @@ class CrosswordModel
 		line = is.readLine();
 		while (line != null)
 		{
-			Log.d(TAG,"OpenCrossword: clue="+line);
+			MainActivity.debug(1, TAG,"OpenCrossword: clue="+line);
 			if (line.equalsIgnoreCase("Down"))
 			{
 				direction = CLUE_DOWN;
@@ -396,8 +400,10 @@ class CrosswordModel
 			iClues = clues;
 			iCrosswordId = id;
 			iCrosswordValid = true;
-			for (int i = 0; i < 15 * 15; i++)
+			for (int i = 0; i < 15 * 15; i++) {
 				iGrid[i % 15][i / 15] = grid[i % 15][i / 15];
+				iSolution[i % 15][i / 15] = 0;
+			}
 			return true;
 		}
 		catch (Exception e)
@@ -744,8 +750,13 @@ class CrosswordModel
 				int val=value(col,row);
 				rowBuff.append(isBlank(col,row)?'*':(val==CrosswordModel.SQUARE_NONBLANK?' ':(char)val));
 			}
-			Log.d(aTag,String.format("Row %2d %s", row, rowBuff.toString()));
+			MainActivity.debug(1, aTag,String.format("Row %2d %s", row, rowBuff.toString()));
 		}
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s(%s)",TAG,this.iCrosswordId);
 	}
 
 }

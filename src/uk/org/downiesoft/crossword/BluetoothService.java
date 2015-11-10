@@ -79,7 +79,7 @@ public class BluetoothService {
      * @param state  An integer defining the current connection state
      */
     private synchronized void setState(int state) {
-        if (D) Log.d(TAG, "setState() " + mState + " -> " + state);
+        if (D) MainActivity.debug(1, TAG, "setState() " + mState + " -> " + state);
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
@@ -96,7 +96,7 @@ public class BluetoothService {
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume() */
     public synchronized void start() {
-        if (D) Log.d(TAG, "start");
+        if (D) MainActivity.debug(1, TAG, "start");
 
         // Cancel any thread attempting to make a connection
         if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -119,7 +119,7 @@ public class BluetoothService {
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
     public synchronized void connect(BluetoothDevice device) {
-        if (D) Log.d(TAG, "connect to: " + device);
+        if (D) MainActivity.debug(1, TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
@@ -142,7 +142,7 @@ public class BluetoothService {
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device, final String socketType) {
-        if (D) Log.d(TAG, "connected, Socket Type:" + socketType);
+        if (D) MainActivity.debug(1, TAG, "connected, Socket Type:" + socketType);
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -174,7 +174,7 @@ public class BluetoothService {
      * Stop all threads
      */
     public synchronized void stop(boolean disableBT) {
-        if (D) Log.d(TAG, "stop");
+        if (D) MainActivity.debug(1, TAG, "stop");
 
         if (mConnectThread != null) {
             mConnectThread.cancel();
@@ -267,7 +267,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            if (D) Log.d(TAG, "Socket Type: " + mSocketType +
+            if (D) MainActivity.debug(1, TAG, "Socket Type: " + mSocketType +
                     "BEGIN mAcceptThread" + this);
             setName("AcceptThread" + mSocketType);
 
@@ -312,7 +312,7 @@ public class BluetoothService {
         }
 
         public void cancel() {
-            if (D) Log.d(TAG, "Socket Type" + mSocketType + "cancel " + this);
+            if (D) MainActivity.debug(1, TAG, "Socket Type" + mSocketType + "cancel " + this);
             try {
                 mmServerSocket.close();
             } catch (IOException e) {
@@ -408,7 +408,7 @@ public class BluetoothService {
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
-            Log.d(TAG, "create ConnectedThread: " + socketType);
+            MainActivity.debug(1, TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;

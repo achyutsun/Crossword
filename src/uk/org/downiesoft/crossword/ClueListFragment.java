@@ -68,7 +68,7 @@ public class ClueListFragment extends Fragment
 			{
 				Clue clue=iAdapter.getItem(position);
 				if (iListener!=null) {
-					Log.d(TAG, String.format("onItemClick(%d)",position));
+					MainActivity.debug(1, TAG, String.format("onItemClick(%d)",position));
 					iListener.onClueClicked(iDirection, clue.iNumber, position);
 				}
 			}});

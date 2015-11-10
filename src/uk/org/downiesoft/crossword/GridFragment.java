@@ -83,7 +83,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 
 		@Override
 		public void onItemClick(AdapterView<?> adapterView, View viewGroup, int position, long id) {
-			Log.d(TAG,String.format("onItemClick(%d)",position));
+			MainActivity.debug(1, TAG,String.format("onItemClick(%d)",position));
 			ClueListAdapter adapter = (ClueListAdapter)adapterView.getAdapter();
 			Clue clue=adapter.getItem(position);
 			GridFragment.this.clueClicked(clue.type(), clue.number(), position);
@@ -92,6 +92,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		MainActivity.debug(1, TAG,String.format("onCreateView %s",this));
 		iView = inflater.inflate(R.layout.crossword_grid, container, false);
 		iGridLayout = (RelativeLayout)iView.findViewById(R.id.gridLayout);
 		iEmptyLayout = (RelativeLayout)iView.findViewById(R.id.emptyLayout);
@@ -154,16 +155,21 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 
 	@Override 
 	public void onActivityCreated(Bundle savedInstanceState) {
+		MainActivity.debug(1, TAG,String.format("onActivityCreated(%s)",savedInstanceState));
 		super.onActivityCreated(savedInstanceState);
-		
+		iCrossword = CrosswordModel.getInstance();
+		iGridView.setCrossword(iCrossword);
+		getSavedState();
 		if (savedInstanceState != null) {
-			iCursorX = savedInstanceState.getInt("cursorX", 0);
-			iCursorY = savedInstanceState.getInt("cursorY", 0);
-			iCursorDirection = savedInstanceState.getInt("cursorDirection", CrosswordModel.CLUE_ACROSS);
-		} else {
-			getSavedState();
+			iCursorX = savedInstanceState.getInt("cursorX", iCursorX);
+			iCursorY = savedInstanceState.getInt("cursorY", iCursorY);
+			iCursorDirection = savedInstanceState.getInt("cursorDirection", iCursorDirection);
 		}
 		Clue clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
+		if (clue == null) {
+			resetClue();
+			clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
+		}
 		int position = iCrossword.clues().getClueList(iCursorDirection).indexOf(clue);		
 		if (iClueListViews[0] != null) {
 			for (int i=0; i < 2; i++) {
@@ -176,7 +182,11 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			iClueListViews[iCursorDirection].setItemChecked(position,true);
 			iClueListViews[iCursorDirection].setSelection(position);
 		}
-		
+		if (iGridView != null) {
+			iGridView.setCursor(iCursorX,iCursorY,iCursorDirection,true);
+			iGridView.redraw();
+		}
+		MainActivity.debug(1, TAG,String.format("<onActivityCreated(%s,%s,%s) %s",iCursorX, iCursorY, iCursorDirection,clue));
 	}
 
 	@Override
@@ -184,10 +194,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		super.onResume();
 		iGuardBackKey = true;
 		iGridView.setObserver(this);
-		iGridView.setCrossword(iCrossword);
-		if (iCrossword != null && iCrossword.isValid()) {
-			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
-		}
+//		iGridView.setCrossword(iCrossword);
+//		if (iCrossword != null && iCrossword.isValid()) {
+//			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
+//		}
 	}
 
 	@Override
@@ -233,6 +243,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	}
 
 	public void setCrossword(CrosswordModel aCrossword) {
+		MainActivity.debug(1, TAG,String.format("setCrossword(%s): %s",aCrossword, this));
 		iCrossword = aCrossword;
 		if (iGridView != null) {
 			iGridView.setCrossword(iCrossword);
@@ -254,7 +265,15 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 					for (int dir=CrosswordModel.CLUE_ACROSS; dir <= CrosswordModel.CLUE_DOWN; dir++) {
 						Clue clue=iCrossword.clueAt(pos, dir);
 						if (clue != null) {
-							iGridView.setCursor(pos.x, pos.y, dir, false);
+							MainActivity.debug(1, TAG,String.format("resetClue(%s)",clue));
+							if (iGridView != null) {
+								iCursorX = pos.x;
+								iCursorY = pos.y;
+								iCursorDirection = dir;
+								saveState();
+								iGridView.setCursor(pos.x, pos.y, dir, false);
+								iGridView.redraw();
+							}
 							if (iTextView != null)
 								iTextView.setText(clue.toString());
 							return;
