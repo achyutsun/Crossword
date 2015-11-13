@@ -310,6 +310,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			iCursorX = pos.x;
 			iCursorY = pos.y;
 			iCursorDirection = aDirection;
+			Clue clue=iCrossword.clueAt(pos, aDirection);
 			if (iClueListViews[0]!=null) {
 				ListView clueList=iClueListViews[1-iCursorDirection];
 				if (clueList.getCheckedItemCount()>0) {
@@ -317,7 +318,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 //					clueList.setItemChecked(clueList.getCheckedItemPosition(),false);
 				}
 
-				Clue clue=iCrossword.clueAt(pos, aDirection);
 				if ((mClickedClue != null && clue.equals(mClickedClue)) || (aPosition == iClueListViews[iCursorDirection].getSelectedItemPosition() 
 					&& aPosition == iClueListViews[iCursorDirection].getCheckedItemPosition())) {
 					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
@@ -326,7 +326,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 					mClickedClue = clue;
 				}
 			}
-			iGridView.setCursor(pos.x, pos.y, aDirection,false);			
+			iGridView.setCursor(pos.x, pos.y, aDirection,false);
+			iTextView.setText(clue.toString());
+			
 		}
 	}
 
