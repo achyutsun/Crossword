@@ -133,7 +133,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 					iGridView.highlightCurrentClue(true);
 				}
 			});
-		if (iTextView != null) {
+		if (iTextView != null && iCluesButton != null) {
 			iCluesButton.setOnClickListener(new OnClickListener()
 				{
 					@Override
@@ -147,7 +147,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 						startActivityForResult(intent, CluesActivity.REQUEST_CLUE);
 					}
 				});
-		} else {
+		} else if (iCluesButton != null) {
 			iCluesButton.setVisibility(View.GONE);
 		}
 		return iView;
@@ -327,7 +327,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 				}
 			}
 			iGridView.setCursor(pos.x, pos.y, aDirection,false);
-			iTextView.setText(clue.toString());
+			if (iTextView != null) {
+				iTextView.setText(clue.toString());
+			}
 			
 		}
 	}
