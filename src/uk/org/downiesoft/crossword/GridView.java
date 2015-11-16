@@ -20,6 +20,7 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.ScaleGestureDetector;
 import android.graphics.PointF;
 import android.util.Log;
+import android.util.DisplayMetrics;
 //import android.util.Log;
 
 public class GridView extends View {
@@ -121,10 +122,44 @@ public class GridView extends View {
 	@Override
 	public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		int wmode = MeasureSpec.getMode(widthMeasureSpec);
+		int hmode = MeasureSpec.getMode(heightMeasureSpec);
 		int width = MeasureSpec.getSize(widthMeasureSpec);
 		int height = MeasureSpec.getSize(heightMeasureSpec);
-		if (width<height) {
-			width = height;
+		switch (wmode) {
+			case MeasureSpec.EXACTLY:
+				switch (hmode) {
+					case MeasureSpec.EXACTLY:
+						break;
+					case MeasureSpec.UNSPECIFIED:
+					case MeasureSpec.AT_MOST:
+						if (height > width) {
+							height = width;
+						}
+				}
+				break;
+			case MeasureSpec.UNSPECIFIED:
+				switch (hmode) {
+					case MeasureSpec.EXACTLY:
+						width = height;
+						break;
+					case MeasureSpec.UNSPECIFIED:
+						break;
+					case MeasureSpec.AT_MOST:
+						width = height;
+				}
+				break;
+			case MeasureSpec.AT_MOST:
+				switch (hmode) {
+					case MeasureSpec.EXACTLY:
+						break;
+					case MeasureSpec.UNSPECIFIED:
+						height = width;
+						break;
+					case MeasureSpec.AT_MOST:
+						break;
+				}
+				break;
 		}
 		setMeasuredDimension(width, height);			
 		MainActivity.debug(1,TAG, String.format("onMeasure(%s,%s)=(%s,%s)",MeasureSpec.toString(widthMeasureSpec),MeasureSpec.toString(heightMeasureSpec),width,height));
