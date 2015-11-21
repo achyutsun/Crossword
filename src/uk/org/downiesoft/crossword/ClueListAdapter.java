@@ -34,35 +34,6 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 	}
 	
 	@Override
-	public int getCount()
-	{
-		return mItems.size();
-	}
-
-	@Override
-	public Clue getItem(int position)
-	{
-		return mItems.get(position);
-	}
-	
-	@Override
-	public long getItemId(int position)
-	{
-		Clue clue=mItems.get(position);
-		return clue.iType*256+clue.iNumber;
-	}
-
-	@Override
-	public int getItemViewType(int position) {
-		return 0;
-	}
-
-	@Override
-	public int getViewTypeCount() {
-		return 1;
-	}
-	
-	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		LinearLayout clueItemView;
@@ -75,8 +46,7 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 		{
 			clueItemView = new LinearLayout(getContext());
 			String inflater = Context.LAYOUT_INFLATER_SERVICE;
-			LayoutInflater li;
-			li = (LayoutInflater) getContext().getSystemService(inflater);
+			LayoutInflater li = (LayoutInflater) getContext().getSystemService(inflater);
 			li.inflate(resource, clueItemView, true);
 			holder = new ViewHolder();
 			holder.mNumberView = (TextView) clueItemView.findViewById(R.id.rowNumber);

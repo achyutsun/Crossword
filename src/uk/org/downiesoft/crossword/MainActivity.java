@@ -32,17 +32,19 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import android.widget.ListView;
 
 public class MainActivity extends FragmentActivity implements BrowserDialogListener, WebViewFragmentListener,
-		BluetoothListener
+		BluetoothListener, ClueListFragment.ClueListListener
 {
 
 	public static final String TAG = "uk.org.downiesoft.crossword.MainActivity";
 	private static final String CROSSWORD_DIR = "Crossword";
-	private static final int sDebug = 0;
+	private static final int sDebug = 1;
 	
 	private CrosswordModel iCrossword;
 	private GridFragment iGridFragment;
+	private CluesFragment iCluesFragment;
 	private SharedPreferences iSettings;
 	private WebManager iWebManager;
 	private Handler iTitleHandler;
@@ -51,6 +53,8 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	private boolean iCrosswordReceived = false;
 	private boolean iBTServer = false;
 	private boolean iBTEnabled = false;
+	private int mClueDirection = -1;
+	private int mCluePosition = -1;
 
 	
 	public static void debug(int aLevel, String aTag, String aText) {
@@ -185,8 +189,12 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 		restore();
 		if (iGridFragment == null)
 			iGridFragment = new GridFragment();
+		if (iCluesFragment == null) {
+			iCluesFragment = new CluesFragment();
+		}
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(R.id.fragmentContainer, iGridFragment, "GridFragment").commit();
+		fm.beginTransaction().replace(R.id.fragmentContainer, iGridFragment, GridFragment.TAG).commit();
+		fm.beginTransaction().replace(R.id.cluesContainer, iCluesFragment, CluesFragment.TAG).commit();
 	}
 
 	@Override
@@ -608,6 +616,28 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 		}
 	}
 
+	@Override
+	public void onClueClicked(int aDirection, int aNum, int aPosition) {
+		mClueDirection = aDirection;
+		mCluePosition = aPosition;
+		if (iGridFragment != null) {
+			iGridFragment.clueClicked(aDirection, aNum, aPosition);
+		}
+	}
+
+	@Override
+	public int onClueListCreated(ClueListFragment aClueList, int aDirection) {
+		if (iCluesFragment != null) {
+			iCluesFragment.setClueList(aDirection,aClueList);
+			if (aDirection == mClueDirection) {
+				return mCluePosition;
+			}
+		}
+		return -1;
+	}
+
+
+	
 	public void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		switch (requestCode)

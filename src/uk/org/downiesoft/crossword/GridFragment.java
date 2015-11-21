@@ -36,6 +36,9 @@ import android.widget.EditText;
 import android.view.Gravity;
 import android.content.Intent;
 import android.view.inputmethod.*;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class GridFragment extends Fragment implements GridView.GridViewListener {
 
@@ -43,13 +46,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 
 	private View iView;
 	private RelativeLayout iGridLayout;
-	private RelativeLayout iEmptyLayout;
+	private TextView iEmptyView;
 	private GridView iGridView;
 	private TextView iTextView;
-	private ListView[] iClueListViews;
-	private Button iEnterButton;
-	private Button iEraseButton;
-	private Button iCluesButton;
 	private CrosswordModel iCrossword;
 	private int iCursorX=0;
 	private int iCursorY=0;
@@ -60,25 +59,9 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	private final int iBackTimeoutMillis=3000;
 	private Clue mClickedClue;
 	private Handler mHandler = new Handler();
+	private CluesFragment mCluesFragment;
 	
-	private class CancelChoice implements Runnable {
-		
-		private ListView mListView;
-		
-		public CancelChoice(ListView aList) {
-			mListView = aList;	
-		}
-		
-		@Override
-		public void run() {
-			if (mListView.getCheckedItemCount()>0) {
-				mListView.setItemChecked(mListView.getCheckedItemPosition(),false);
-				mListView.invalidate();
-			}
-		}
-		
-	}
-
+	
 	private class OnClueListItemClickListener implements ListView.OnItemClickListener {
 
 		@Override
@@ -95,61 +78,23 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		MainActivity.debug(1, TAG,String.format("onCreateView %s",this));
 		iView = inflater.inflate(R.layout.crossword_grid, container, false);
 		iGridLayout = (RelativeLayout)iView.findViewById(R.id.gridLayout);
-		iEmptyLayout = (RelativeLayout)iView.findViewById(R.id.emptyLayout);
+		iEmptyView = (TextView)iView.findViewById(R.id.emptyLayout);
 		iGridView = (GridView) iView.findViewById(R.id.gridView);
 		iTextView = (TextView) iView.findViewById(R.id.clueText);
-		iClueListViews = new ListView[2];
-		iClueListViews[0] = (ListView) iView.findViewById(R.id.cluesListAcross);
-		iClueListViews[1] = (ListView) iView.findViewById(R.id.cluesListDown);
-		iEnterButton = (Button) iView.findViewById(R.id.gridEnterButton);
-		iEraseButton = (Button) iView.findViewById(R.id.gridEraseButton);
-		iCluesButton = (Button) iView.findViewById(R.id.gridCluesButton);
 		iCrossword = CrosswordModel.getInstance();
 
 		if (iCrossword == null || !iCrossword.isValid()) {
 			iGridLayout.setVisibility(View.GONE);
-			iEmptyLayout.setVisibility(View.VISIBLE);
+			iEmptyView.setVisibility(View.VISIBLE);
 		} else {
 			iGridLayout.setVisibility(View.VISIBLE);
-			iEmptyLayout.setVisibility(View.GONE);
+			iEmptyView.setVisibility(View.GONE);
 		}
 		if (iGridView != null) {
 			iGridView.setObserver(this);
 			iGridView.setCrossword(iCrossword);
 		}
-		iEnterButton.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View arg0) {
-					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
-					wordEntryDialog(iGridView.getCurrentClue(), "", hint);
-				}
-			});
-		iEraseButton.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View arg0) {
-					iCrossword.eraseWord(new Point(iCursorX, iCursorY), iCursorDirection);
-					iGridView.highlightCurrentClue(true);
-				}
-			});
-		if (iTextView != null && iCluesButton != null) {
-			iCluesButton.setOnClickListener(new OnClickListener()
-				{
-					@Override
-					public void onClick(View arg0) {
-						Clue clue=iCrossword.clueAt(new Point(iCursorX, iCursorY), iCursorDirection);
-						Bundle args=new Bundle();
-						args.putInt("direction", clue.iType);
-						args.putInt("number", clue.iNumber);
-						Intent intent = new Intent(getActivity(), CluesActivity.class);
-						intent.putExtra("currentClue",args);
-						startActivityForResult(intent, CluesActivity.REQUEST_CLUE);
-					}
-				});
-		} else if (iCluesButton != null) {
-			iCluesButton.setVisibility(View.GONE);
-		}
+		setHasOptionsMenu(true);
 		return iView;
 	}
 
@@ -170,18 +115,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			resetClue();
 			clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
 		}
-		int position = iCrossword.clues().getClueList(iCursorDirection).indexOf(clue);		
-		if (iClueListViews[0] != null) {
-			for (int i=0; i < 2; i++) {
-				iClueListViews[i].setAdapter(new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.clues().getClueList(i)));
-				iClueListViews[i].setOnItemClickListener(new OnClueListItemClickListener());
-				iClueListViews[i].setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-//				iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
-//					iClueListViews[i].setOnItemSelectedListener(new OnClueListItemSelectedListener());
-			}
-			iClueListViews[iCursorDirection].setItemChecked(position,true);
-			iClueListViews[iCursorDirection].setSelection(position);
-		}
 		if (iGridView != null) {
 			iGridView.setCursor(iCursorX,iCursorY,iCursorDirection,true);
 			iGridView.redraw();
@@ -194,6 +127,12 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		super.onResume();
 		iGuardBackKey = true;
 		iGridView.setObserver(this);
+		Clue clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
+		int position = iCrossword.getClueLists().getClueList(iCursorDirection).indexOf(clue);
+		mCluesFragment = (CluesFragment)getActivity().getSupportFragmentManager().findFragmentByTag(CluesFragment.TAG);
+		if (mCluesFragment != null) {
+			mCluesFragment.setClue(clue, position, iCursorDirection);
+		}
 //		iGridView.setCrossword(iCrossword);
 //		if (iCrossword != null && iCrossword.isValid()) {
 //			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
@@ -225,6 +164,30 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		// only called for keyboard visibility changes on word entry dialog
 	}
 
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		inflater.inflate(R.menu.grid_fragment,menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO: Implement this method
+		switch (item.getItemId()) {
+			case R.id.action_enter:
+				String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
+				wordEntryDialog(iGridView.getCurrentClue(), "", hint);
+				return true;
+			case R.id.action_erase:
+				iCrossword.eraseWord(new Point(iCursorX, iCursorY), iCursorDirection);
+				iGridView.highlightCurrentClue(true);
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
+		
+	}
+
+
 	
 	public void getSavedState() {
 		SharedPreferences settings=getActivity().getSharedPreferences("CROSSWORD_SETTING", Context.MODE_PRIVATE);
@@ -250,10 +213,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		}
 		if (iCrossword == null || !iCrossword.isValid()) {
 			iGridLayout.setVisibility(View.GONE);
-			iEmptyLayout.setVisibility(View.VISIBLE);
+			iEmptyView.setVisibility(View.VISIBLE);
 		} else {
 			iGridLayout.setVisibility(View.VISIBLE);
-			iEmptyLayout.setVisibility(View.GONE);
+			iEmptyView.setVisibility(View.GONE);
 		}
 	}
 
@@ -284,6 +247,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 
 	@Override
 	public void onClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
+		MainActivity.debug(1,TAG,String.format("onClueSelected(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
 		if (aClue != null && iTextView!=null) {
 			iTextView.setText(aClue.toString());
 		}
@@ -291,16 +255,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		iCursorY = aCursorY;
 		iCursorDirection = aCursorDirection;
 		saveState();
-		if (aClue!=null && iClueListViews[aCursorDirection]!=null) {
-			ClueListAdapter adapter = (ClueListAdapter)iClueListViews[aCursorDirection].getAdapter();
-			int index=adapter.getPosition(aClue);
-			iClueListViews[1-iCursorDirection].setItemChecked(-1,false);
-			iClueListViews[1-iCursorDirection].clearChoices();
-			iClueListViews[1-iCursorDirection].invalidate();
-			iClueListViews[iCursorDirection].setItemChecked(index,true);
+		if (aClue!=null && mCluesFragment != null) {
 			mClickedClue = aClue;
-			iClueListViews[iCursorDirection].setSelection(index);
-			iClueListViews[aCursorDirection].requestFocus();
+			int index = iCrossword.getClueLists().getClueIndex(aCursorDirection, aClue);
+			mCluesFragment.setClue(aClue, index, aCursorDirection);
 		}
 	}
 
@@ -311,15 +269,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			iCursorY = pos.y;
 			iCursorDirection = aDirection;
 			Clue clue=iCrossword.clueAt(pos, aDirection);
-			if (iClueListViews[0]!=null) {
-				ListView clueList=iClueListViews[1-iCursorDirection];
-				if (clueList.getCheckedItemCount()>0) {
-					mHandler.post(new CancelChoice(clueList));
-//					clueList.setItemChecked(clueList.getCheckedItemPosition(),false);
-				}
-
-				if ((mClickedClue != null && clue.equals(mClickedClue)) || (aPosition == iClueListViews[iCursorDirection].getSelectedItemPosition() 
-					&& aPosition == iClueListViews[iCursorDirection].getCheckedItemPosition())) {
+			if (mCluesFragment != null) {
+				int index = iCrossword.getClueLists().getClueIndex(iCursorDirection, clue);
+				mCluesFragment.setClue(clue, index, iCursorDirection);
+				if (mClickedClue != null && clue.equals(mClickedClue)) {
 					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
 					wordEntryDialog(iGridView.getCurrentClue(), "", hint);
 				} else {
@@ -366,6 +319,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	}
 
 	private void wordEntryDialog(Clue aClue, String aWord, final String aHint) {
+		iGridView.requestFocusFromTouch();
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setCancelable(true);
 		builder.setTitle(R.string.text_enter_word);
@@ -378,15 +332,20 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		builder.setView(dialog);
 		builder.setInverseBackgroundForced(true);
 		builder.setPositiveButton(R.string.text_ok, null);
-		builder.setNegativeButton(R.string.text_cancel, new DialogInterface.OnClickListener()
-			{
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			});
+		builder.setNegativeButton(R.string.text_cancel,null);
 		final AlertDialog alert = builder.create();
 		alert.show();
+		alert.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View p1) {
+					if (alert.getCurrentFocus() != null) {
+						InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+						inputMethodManager.hideSoftInputFromWindow(alert.getCurrentFocus().getWindowToken(), 0);
+					}
+					alert.dismiss();
+				}
+			});
 		alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new OnClickListener() {
 
 				@Override

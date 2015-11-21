@@ -20,6 +20,7 @@ public class ClueListFragment extends Fragment
 	
 	public interface ClueListListener
 	{
+		int onClueListCreated(ClueListFragment aClueList, int aDirection);
 		void onClueClicked(int aDirection, int aNum, int aPosition);
 	}
 	
@@ -67,12 +68,33 @@ public class ClueListFragment extends Fragment
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
 				Clue clue=iAdapter.getItem(position);
-				if (iListener!=null) {
-					MainActivity.debug(1, TAG, String.format("onItemClick(%d)",position));
-					iListener.onClueClicked(iDirection, clue.iNumber, position);
-				}
+				MainActivity.debug(1, TAG, String.format("onItemClick(%d): %s %s", position, iListView, iListView.getChoiceMode()));
+				iListener.onClueClicked(iDirection, clue.iNumber, position);
 			}});
+		int selected = iListener.onClueListCreated(this, iDirection);
+		if (selected>=0) {
+			iListView.setItemChecked(selected,true);
+			iListView.setSelection(selected);
+		}
+		MainActivity.debug(1, TAG, String.format("onCreateView: %s %s", iListView, iListView.getChoiceMode()));
 		return view;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		int selected = iCrossword.getClueLists().getSelectedClueIndex(iDirection);
+		if (selected >= 0) {
+			iListView.setItemChecked(selected, true);
+			iListView.setSelection(selected);
+		} else {
+			iListView.clearChoices();
+		}
+	}
+	
+	public void setItemChecked(int position, boolean checked) {
+		iListView.setItemChecked(position, checked);
+		iListView.setSelection(position);
 	}
 	
 }

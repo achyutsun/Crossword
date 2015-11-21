@@ -25,11 +25,6 @@
 		</shape>
 	</item>
 
-	 <item android:state_activated="true">
-		<shape>
-			    	<solid android:drawable="@android:color/holo_purple" />
-		</shape>
-	</item>
 	    <item android:drawable="@android:color/transparent"></item>
 
 </selector>

@@ -9,7 +9,9 @@ public class ClueLists
 {
 
 	private ArrayList<ArrayList<Clue>> iClues;
-
+	private int mSelectedDirection;
+	private int mSelectedIndex;
+	
 	public ClueLists()
 	{
 		iClues = new ArrayList<ArrayList<Clue>>(2);
@@ -84,9 +86,24 @@ public class ClueLists
 		return iClues.get(aDirection).get(aIndex);
 	}
 	
+	public int getClueIndex(int aDirection, Clue aClue) {
+		return iClues.get(aDirection).indexOf(aClue);
+	}
+	
 	public ArrayList<Clue> getClueList(int aDirection)
 	{
 		return iClues.get(aDirection%2);
 	}
+	
+	public void setSelectedClue(int aDirection, int aIndex) {
+		mSelectedDirection = aDirection;
+		mSelectedIndex = aIndex;
+	}
 
+	public int getSelectedClueIndex(int aDirection) {
+		if (aDirection == mSelectedDirection) {
+			return mSelectedIndex;
+		}
+		return -1;
+	}
 }

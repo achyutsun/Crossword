@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.widget.ListView;
 
 public class CluesActivity extends FragmentActivity implements ClueListFragment.ClueListListener
 {
@@ -40,5 +41,12 @@ public class CluesActivity extends FragmentActivity implements ClueListFragment.
 		setResult(REQUEST_CLUE,intent);
 		finish();
 	}
+
+	@Override
+	public int onClueListCreated(ClueListFragment aClueList, int aDirection) {
+		// TODO: Implement this method
+		return -1;
+	}
+
 
 }

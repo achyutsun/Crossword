@@ -107,7 +107,7 @@ class CrosswordModel
 		return iCrosswordId;
 	}
 
-	public ClueLists clues()
+	public ClueLists getClueLists()
 	{
 		return iClues;
 	};

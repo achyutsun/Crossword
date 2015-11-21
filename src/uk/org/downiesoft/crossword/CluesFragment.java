@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentTabHost;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 public class CluesFragment extends Fragment
 {
@@ -13,13 +14,18 @@ public class CluesFragment extends Fragment
 	
 	private FragmentTabHost mTabHost;
 	Bundle[] iClueBundle;
+	ClueListFragment[] iClueLists;
 	CrosswordModel iCrossword;
-
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		iClueBundle = new Bundle[2];
+		if (iClueLists==null) {
+			iClueLists = new ClueListFragment[2];
+		}
+		iCrossword = CrosswordModel.getInstance();
 		for (int i=CrosswordModel.CLUE_ACROSS; i<=CrosswordModel.CLUE_DOWN; i++)
 		{
 			iClueBundle[i]=new Bundle();
@@ -40,11 +46,28 @@ public class CluesFragment extends Fragment
 				iClueBundle[direction].putInt("number",number);
 		}
 		mTabHost = new FragmentTabHost(getActivity());
-		mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.clueList);
+		mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.cluesContainer);
 		mTabHost.addTab(mTabHost.newTabSpec("Across").setIndicator("Across"), ClueListFragment.class, iClueBundle[CrosswordModel.CLUE_ACROSS]);
 		mTabHost.addTab(mTabHost.newTabSpec("Down").setIndicator("Down"), ClueListFragment.class, iClueBundle[CrosswordModel.CLUE_DOWN]);
 		mTabHost.setCurrentTab(direction);
 		return mTabHost;
+	}
+	
+	public void setClueList(int direction, ClueListFragment clueList) {
+		if (iClueLists==null) {
+			iClueLists = new ClueListFragment[2];
+		}
+		iClueLists[direction] = clueList;
+	}
+	
+	public void setClue(Clue clue, int index, int direction) {
+		mTabHost.setCurrentTab(direction);
+		ClueListFragment clueList = iClueLists[direction];
+		MainActivity.debug(1,TAG, String.format("setClue(%s,%s): %s",index,direction,clueList));
+		if (clueList != null) {
+			clueList.setItemChecked(index,true);
+		}
+		iCrossword.getClueLists().setSelectedClue(direction, index);
 	}
 
 }

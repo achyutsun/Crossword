@@ -81,6 +81,16 @@ public class Clue {
 		return len;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o.getClass().equals(Clue.class)) {
+			Clue clue = (Clue)o;
+			return clue.iNumber == this.iNumber && clue.iType == this.iType && this.iText.equals(clue.iText);
+		}
+		return false;
+	}
+
+	
 	public int wordLength(int aWordIndex) {
 		int bra = iText.lastIndexOf('(');
 		if (bra < 0)

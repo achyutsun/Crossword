@@ -2,6 +2,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="crossword_app_name">Crossword</string>
+    <string name="action_enter">Enter</string>
+    <string name="action_erase">Erase</string>
     <string name="action_open">Open</string>
     <string name="action_save">Save</string>
     <string name="action_import">Import</string>
