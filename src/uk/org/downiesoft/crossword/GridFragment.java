@@ -262,6 +262,21 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		}
 	}
 
+	@Override
+	public void onSelectedClueTapped(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
+		MainActivity.debug(1,TAG,String.format("onSelectedClueTapped(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
+		iCursorX = aCursorX;
+		iCursorY = aCursorY;
+		iCursorDirection = aCursorDirection;
+		saveState();
+		if (aClue!=null) {
+			String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
+			wordEntryDialog(aClue, "", hint);
+		}
+	}
+
+
+	
 	public void clueClicked(int aDirection, int aNum, int aPosition) {
 		if (aPosition >= 0) {
 			Point pos=iCrossword.locateClue(aDirection, aNum);

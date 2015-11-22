@@ -102,7 +102,7 @@ public class ClueListFragment extends Fragment
 		MainActivity.debug(1, TAG, String.format("onResume: %s %s", iDirection, selected));
 		if (selected >= 0) {
 			iListView.setItemChecked(selected, true);
-			iListView.smoothScrollToPosition(selected);
+			iListView.setSelection(selected);
 		} else {
 			iListView.clearChoices();
 		}

@@ -6,7 +6,8 @@
 	<FrameLayout
 		android:id="@+id/fragmentContainer"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="0dp"
+		android:layout_weight="60"
 	/>
 	<View
 		android:layout_width="match_parent"
@@ -16,7 +17,7 @@
 	<FrameLayout
 		android:id="@+id/cluesContainer"
 		android:layout_width="match_parent"
-		android:layout_weight="50"
+		android:layout_weight="40"
 		android:layout_height="0dp"
 	/>
 

@@ -33,6 +33,7 @@ public class GridView extends View {
 
 	public interface GridViewListener {
 		public void onClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
+		public void onSelectedClueTapped(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
 	}
 
 	private Context iContext;
@@ -394,20 +395,23 @@ public class GridView extends View {
 				return false;
 			case MotionEvent.ACTION_UP:
 				if (iCrossword.withinGrid(pos) && !iCrossword.isBlank(pos)) {
-					if (iCursor.equals(col, row)) {
+					if (iCursor.equals(col, row) && iAnchor.equals(iCursor)) {
 						extent = iCrossword.getClueExtent(pos, 1 - iDirection);
 						if (extent.width() > 0 || extent.height() > 0) {
 							highlightCurrentClue(false, mBackCanvas);
 							iDirection = 1 - iDirection;
 							invalidated = true;
-						} else
+						} else {
+							iObserver.onSelectedClueTapped(iClue, iCursor.x, iCursor.y, iDirection);
+							highlightCurrentClue(true, mBackCanvas);
 							return true;
+						}
 					} else {
 						int direction=iDirection;
 						highlightCurrentClue(false, mBackCanvas);
-						if (Math.abs(col - iAnchor.x) > Math.abs(row - iAnchor.y))
+						if (Math.abs(col - iAnchor.x) > 5 * Math.abs(row - iAnchor.y))
 							direction = CrosswordModel.CLUE_ACROSS;
-						else if (Math.abs(col - iAnchor.x) < Math.abs(row - iAnchor.y))
+						else if (5 * Math.abs(col - iAnchor.x) < Math.abs(row - iAnchor.y))
 							direction = CrosswordModel.CLUE_DOWN;
 						extent = iCrossword.getClueExtent(pos, direction);
 						switch (direction) {
