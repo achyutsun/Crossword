@@ -287,6 +287,16 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		}
 	}
 
+	public void clueDoubleClicked(int aDirection, int aNum, int aPosition) {
+		if (aPosition >= 0) {
+			Point pos=iCrossword.locateClue(aDirection, aNum);
+			iCursorX = pos.x;
+			iCursorY = pos.y;
+			iCursorDirection = aDirection;
+			String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
+			wordEntryDialog(iGridView.getCurrentClue(), "", hint);
+		}
+	}
 	public boolean offerBackKeyEvent() {
 		if (iGuardBackKey) {
 	    	long now=System.currentTimeMillis();

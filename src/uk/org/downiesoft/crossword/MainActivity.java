@@ -626,6 +626,16 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	}
 
 	@Override
+	public void onClueLongClicked(int aDirection, int aNum, int aPosition) {
+		mClueDirection = aDirection;
+		mCluePosition = aPosition;
+		if (iGridFragment != null) {
+			iGridFragment.clueDoubleClicked(aDirection, aNum, aPosition);
+		}
+	}
+
+	
+	@Override
 	public int onClueListCreated(ClueListFragment aClueList, int aDirection) {
 		if (iCluesFragment != null) {
 			iCluesFragment.setClueList(aDirection,aClueList);

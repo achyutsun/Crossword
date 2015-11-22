@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.util.Log;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class ClueListFragment extends Fragment
 {
@@ -22,6 +23,7 @@ public class ClueListFragment extends Fragment
 	{
 		int onClueListCreated(ClueListFragment aClueList, int aDirection);
 		void onClueClicked(int aDirection, int aNum, int aPosition);
+		void onClueLongClicked(int aDirection, int aNum, int aPosition);
 	}
 	
 	ClueListAdapter iAdapter;
@@ -68,9 +70,22 @@ public class ClueListFragment extends Fragment
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
 			{
 				Clue clue=iAdapter.getItem(position);
-				MainActivity.debug(1, TAG, String.format("onItemClick(%d): %s %s", position, iListView, iListView.getChoiceMode()));
+				MainActivity.debug(1, TAG, String.format("onItemClick(%d): %s", position, iListView.isItemChecked(position)));
 				iListener.onClueClicked(iDirection, clue.iNumber, position);
 			}});
+		iListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+				{
+					Clue clue=iAdapter.getItem(position);
+					MainActivity.debug(1, TAG, String.format("onItemLongClick(%d): %s", position, iListView.isItemChecked(position)));
+					if (iListView.isItemChecked(position)) {
+						iListener.onClueLongClicked(iDirection, clue.iNumber, position);
+					} else {
+						iListener.onClueClicked(iDirection, clue.iNumber, position);
+					}
+					return true;
+				}});
 		int selected = iListener.onClueListCreated(this, iDirection);
 		if (selected>=0) {
 			iListView.setItemChecked(selected,true);
@@ -94,7 +109,7 @@ public class ClueListFragment extends Fragment
 	
 	public void setItemChecked(int position, boolean checked) {
 		iListView.setItemChecked(position, checked);
-		iListView.setSelection(position);
+		iListView.smoothScrollToPosition(position);
 	}
 	
 }

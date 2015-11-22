@@ -13,6 +13,7 @@ import android.widget.ListView;
 public class CluesActivity extends FragmentActivity implements ClueListFragment.ClueListListener
 {
 
+
 	public static final String TAG=CluesActivity.class.getName();
 	public static final int REQUEST_CLUE=4096;	
 	
@@ -48,5 +49,10 @@ public class CluesActivity extends FragmentActivity implements ClueListFragment.
 		return -1;
 	}
 
+	@Override
+	public void onClueLongClicked(int aDirection, int aNum, int aPosition) {
+		// TODO: Implement this method
+	}
 
+	
 }

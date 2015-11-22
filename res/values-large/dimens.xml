@@ -5,7 +5,7 @@
          screen margins) for sw720dp devices (e.g. 10" tablets) in landscape here.
     -->
     <dimen name="activity_horizontal_margin">128dp</dimen>
-    <dimen name="clue_text_size">20dp</dimen>
+    <dimen name="clue_text_size">17dp</dimen>
     <dimen name="clue_list_text_size">20dp</dimen>
     <dimen name="clue_list_padding">3dp</dimen>
     <dimen name="button_size">60dp</dimen>

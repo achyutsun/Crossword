@@ -157,8 +157,9 @@ public class GridView extends View {
 						height = width;
 						break;
 					case MeasureSpec.AT_MOST:
-						width = Math.min(width,height);
-						height = width;
+						if (height > width) {
+							height = width;
+						}
 						break;
 				}
 				break;
