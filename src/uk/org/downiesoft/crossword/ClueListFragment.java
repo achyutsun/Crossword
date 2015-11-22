@@ -99,9 +99,10 @@ public class ClueListFragment extends Fragment
 	public void onResume() {
 		super.onResume();
 		int selected = iCrossword.getClueLists().getSelectedClueIndex(iDirection);
+		MainActivity.debug(1, TAG, String.format("onResume: %s %s", iDirection, selected));
 		if (selected >= 0) {
 			iListView.setItemChecked(selected, true);
-			iListView.setSelection(selected);
+			iListView.smoothScrollToPosition(selected);
 		} else {
 			iListView.clearChoices();
 		}

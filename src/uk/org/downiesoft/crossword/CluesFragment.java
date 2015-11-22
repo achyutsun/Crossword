@@ -52,7 +52,8 @@ public class CluesFragment extends Fragment
 		mTabHost.setCurrentTab(direction);
 		return mTabHost;
 	}
-	
+
+	@Override
 	public void setClueList(int direction, ClueListFragment clueList) {
 		if (iClueLists==null) {
 			iClueLists = new ClueListFragment[2];

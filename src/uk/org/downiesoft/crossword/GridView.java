@@ -21,6 +21,8 @@ import android.view.ScaleGestureDetector;
 import android.graphics.PointF;
 import android.util.Log;
 import android.util.DisplayMetrics;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.PorterDuff;
 //import android.util.Log;
 
 public class GridView extends View {
@@ -39,7 +41,8 @@ public class GridView extends View {
 	private Paint mNumberPaint;
 	private int iWidth;
 	private int iHeight;
-	private int iSize;
+	private int iVSize;
+	private int iHSize;
 	private int iHMargin;
 	private int iVMargin;
 	private int iDirection = CrosswordModel.CLUE_ACROSS;
@@ -79,21 +82,31 @@ public class GridView extends View {
 		}
 		Rect textBounds = new Rect();
 		iPaint.getTextBounds("W", 0, 1, textBounds);
-		if (h > w) {
-			iWidth = w;
-			iHeight = iWidth;
-		} else {
-			iWidth = w;
-			iHeight = h;
+		iWidth = w;
+		iHeight = h;
+//		if (h > w) {
+//			iWidth = w;
+//			iHeight = iWidth;
+//		} else {
+//			iWidth = w;
+//			iHeight = h;
+//		}
+
+		iHSize = iWidth / CrosswordModel.GRID_SIZE;
+		iVSize = iHeight / CrosswordModel.GRID_SIZE;
+		if (iHSize*4 > iVSize*5) {
+			iHSize = iVSize * 5 / 4;
 		}
-		iSize = Math.min(iWidth,iHeight) / CrosswordModel.GRID_SIZE;
-		iHMargin = (iWidth - iSize * CrosswordModel.GRID_SIZE) / 2;
-		iVMargin = (iHeight - iSize * CrosswordModel.GRID_SIZE) / 2;
-		mBackBmp = Bitmap.createBitmap(iSize*CrosswordModel.GRID_SIZE, iSize*CrosswordModel.GRID_SIZE, Bitmap.Config.ARGB_8888);
+		if (iVSize*4 > iHSize*5) {
+			iVSize = iHSize * 5 / 4;
+		}
+		iHMargin = (iWidth - iHSize * CrosswordModel.GRID_SIZE) / 2;
+		iVMargin = (iHeight - iVSize * CrosswordModel.GRID_SIZE) / 2;
+		mBackBmp = Bitmap.createBitmap(iHSize*CrosswordModel.GRID_SIZE, iVSize*CrosswordModel.GRID_SIZE, Bitmap.Config.ARGB_8888);
 		mBackCanvas = new Canvas(mBackBmp);
 		mMatrix = new Matrix();
 		mMatrix.postTranslate(iHMargin, iVMargin);
-		
+
 		mLetterPaint.setTypeface(Typeface.DEFAULT_BOLD);
 		mLetterPaint.setTextSize(mTextSize);
 		mLetterPaint.setTextAlign(Align.CENTER);
@@ -102,7 +115,7 @@ public class GridView extends View {
 		mLetterPaint.setAntiAlias(true);
 		mLetterPaint.setLinearText(true);
 		mLetterPaint.setSubpixelText(true);
-		
+
 		if (mNumberSize>0) {
 			mNumberPaint.setTypeface(Typeface.DEFAULT_BOLD);
 			mNumberPaint.setTextSize(mNumberSize);
@@ -113,8 +126,8 @@ public class GridView extends View {
 			mNumberPaint.setLinearText(true);
 			mNumberPaint.setSubpixelText(true);
 		}
-		MainActivity.debug(1, TAG,String.format("onSizeChanged(%s,%s) = (%s,%s) %s (%s,%s) %s %s", w, h, iWidth, iHeight, iSize, iHMargin, iVMargin, mTextSize, mNumberSize));
-		
+		MainActivity.debug(1, TAG,String.format("onSizeChanged(%s,%s) = (%s,%s) (%s,%s) (%s,%s) %s %s", w, h, iWidth, iHeight, iHSize, iVSize, iHMargin, iVMargin, mTextSize, mNumberSize));
+
 		redraw();
 		invalidate();
 	}
@@ -133,9 +146,7 @@ public class GridView extends View {
 						break;
 					case MeasureSpec.UNSPECIFIED:
 					case MeasureSpec.AT_MOST:
-						if (height > width) {
-							height = width;
-						}
+						break;
 				}
 				break;
 			case MeasureSpec.UNSPECIFIED:
@@ -152,14 +163,12 @@ public class GridView extends View {
 			case MeasureSpec.AT_MOST:
 				switch (hmode) {
 					case MeasureSpec.EXACTLY:
+
 						break;
 					case MeasureSpec.UNSPECIFIED:
 						height = width;
 						break;
 					case MeasureSpec.AT_MOST:
-						if (height > width) {
-							height = width;
-						}
 						break;
 				}
 				break;
@@ -187,7 +196,7 @@ public class GridView extends View {
 				&& row < CrosswordModel.GRID_SIZE - 1 && !iCrossword.isBlank(col, row + 1);
 			int direction=across ?CrosswordModel.CLUE_ACROSS: (down ?CrosswordModel.CLUE_DOWN: -1);
 			if (direction != -1) {
-				r.set(col * iSize, row * iSize, (col + 1) * iSize, (row + 1) * iSize);
+				r.set(col * iHSize, row * iVSize, (col + 1) * iHSize, (row + 1) * iVSize);
 				Clue clue=iCrossword.clueAt(pos, direction);
 				if (clue != null) {
 					canvas.drawText(Integer.toString(clue.number()), r.left + 1, r.top + 1 + iNumberBounds.height(), mNumberPaint);
@@ -206,7 +215,7 @@ public class GridView extends View {
 
 	private void drawLetter(int col, int row, Canvas canvas) {
 		if (!iCrossword.isBlank(col, row)) {
-			r.set(col * iSize, row * iSize, (col + 1) * iSize, (row + 1) * iSize);
+			r.set(col * iHSize, row * iVSize, (col + 1) * iHSize, (row + 1) * iVSize);
 			int value = iCrossword.value(col, row);
 			int solution = iCrossword.solution(col, row);
 			String letter=" ";
@@ -234,7 +243,7 @@ public class GridView extends View {
 	}
 
 	private void drawSquare(int col, int row, int color, Canvas canvas) {
-		r.set(col * iSize, row * iSize, (col + 1) * iSize, (row + 1) * iSize);
+		r.set(col * iHSize, row * iVSize, (col + 1) * iHSize, (row + 1) * iVSize);
 		iPaint.setStrokeWidth(0);
 		iPaint.setStyle(Style.FILL);
 		iPaint.setColor(iCrossword.isBlank(col, row) ? Color.BLACK : color);
@@ -262,7 +271,7 @@ public class GridView extends View {
 
 	@Override
 	public void onDraw(Canvas canvas) {
-		canvas.drawColor(Color.GRAY);
+		canvas.drawColor(Color.TRANSPARENT,PorterDuff.Mode.CLEAR);
 		canvas.drawBitmap(mBackBmp, mMatrix, iPaint);
 		//MainActivity.debug(1, TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
 	}
@@ -276,7 +285,7 @@ public class GridView extends View {
 //			} 
 //		}
 //	}
-	
+
 	public void redraw() {
 		MainActivity.debug(1, TAG,String.format("redraw start %s",iCrossword));
 		if (mBackCanvas != null) {
@@ -370,8 +379,8 @@ public class GridView extends View {
 		Matrix inverse=new Matrix();
 		mMatrix.invert(inverse);
 		inverse.mapPoints(points);
-		int col = (int) (points[0] / (float) iSize);
-		int row = (int) (points[1] / (float) iSize);
+		int col = (int) (points[0] / (float) iHSize);
+		int row = (int) (points[1] / (float) iVSize);
 		MainActivity.debug(2, TAG, String.format("onTouchEvent: (%3.1f,%3.1f),(%3.1f,%3.1f),(%d,%d)", x, y, points[0], points[1], col, row));
 		Point pos = new Point(col, row);
 		Rect extent;
@@ -437,7 +446,7 @@ public class GridView extends View {
 		highlightCurrentClue(aOn,mBackCanvas);
 		invalidate();
 	}
-	
+
 	private void highlightCurrentClue(boolean aOn, Canvas aCanvas) {
 		if (iClue == null || aCanvas == null)
 			return;
