@@ -22,18 +22,15 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
 import android.webkit.JavascriptInterface;
+import android.content.Intent;
 
 public class WebViewFragment extends Fragment implements WebInfoListListener
 {
 	
 	public static final String TAG = WebViewFragment.class.getName();
 	
-	public interface WebViewFragmentListener
-	{
-		void importPuzzle(String html);
-
-		void importSolution(String html);
-	}
+	public static final int IMPORT_PUZZLE = 1;
+	public static final int IMPORT_SOLUTION = 2;
 
 	private final int STATE_NULL = 0;
 	private final int STATE_INDEX = 1;
@@ -47,7 +44,6 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	private Button iSolutionButton;
 	private String iUrl;
 	private int iState = STATE_NULL;
-	private WebViewFragmentListener iListener;
 	private Handler iWebViewClientHandler = new Handler();
 	private Runnable iWebViewClientSetter = new Runnable()
 	{
@@ -69,8 +65,11 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 			{
 				case STATE_IMPORT:
 				{
-					if (iListener != null)
-						iListener.importPuzzle(html);
+					Intent result = new Intent();
+					result.putExtra("import",IMPORT_PUZZLE);
+					result.putExtra("html",html);
+					getActivity().setResult(Activity.RESULT_OK,result);
+					getActivity().finish();
 				}
 				break;
 				case STATE_INDEX:
@@ -80,8 +79,11 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 				}
 				case STATE_SOLUTION:
 				{
-					if (iListener != null)
-						iListener.importSolution(html);
+					Intent result = new Intent();
+					result.putExtra("import",IMPORT_SOLUTION);
+					result.putExtra("html",html);
+					getActivity().setResult(Activity.RESULT_OK,result);
+					getActivity().finish();
 					break;
 				}
 			}
@@ -105,20 +107,6 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 			MainActivity.debug(1, "uk.org.downiesoft.crossword.WebViewClient", String.format("Description: %s, URL %s", description, failingUrl));
 		}
 	};
-
-	@Override
-	public void onAttach(Activity activity)
-	{
-		super.onAttach(activity);
-		try
-		{
-			iListener = (WebViewFragmentListener) activity;
-		}
-		catch (ClassCastException e)
-		{
-			throw new ClassCastException(activity.toString() + " must implement WebViewFragmentListListener");
-		}
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -149,7 +137,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 				FragmentTransaction ft = fm.beginTransaction();
 				WebInfoList infoList = new WebInfoList();
 				infoList.setListener(WebViewFragment.this);
-				ft.replace(R.id.fragmentContainer, infoList, "web_info_list");
+				ft.replace(R.id.webContainer, infoList, "web_info_list");
 				ft.addToBackStack("web_view_fragment");
 				ft.commit();
 
@@ -225,36 +213,14 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	@Override
 	public void onWebInfoListItemSelected(final WebInfo aWebInfo)
 	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setCancelable(true);
-		builder.setTitle(R.string.action_import);
-		builder.setMessage(R.string.text_query_continue);
-		builder.setPositiveButton(R.string.text_ok, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				WebViewFragment.this.iCrosswordId = Integer.toString(aWebInfo.crosswordId());
-				String searchId = Integer.toString(aWebInfo.searchId());
-				String message = getActivity().getString(R.string.text_importing);
-				Toast.makeText(getActivity(), String.format(message, iCrosswordId), Toast.LENGTH_LONG).show();
-				iState = STATE_IMPORT;
-				iWebView.setWebViewClient(iWebViewClient);
-				iUrl = "http://puzzles.telegraph.co.uk/site/print_crossword?id=" + searchId;
-				iWebView.loadUrl(iUrl);
-				dialog.dismiss();
-			}
-		});
-		builder.setNegativeButton(R.string.text_cancel, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				dialog.dismiss();
-			}
-		});
-		AlertDialog alert = builder.create();
-		alert.show();				
+		WebViewFragment.this.iCrosswordId = Integer.toString(aWebInfo.crosswordId());
+		String searchId = Integer.toString(aWebInfo.searchId());
+		String message = getActivity().getString(R.string.text_importing);
+		Toast.makeText(getActivity(), String.format(message, iCrosswordId), Toast.LENGTH_LONG).show();
+		iState = STATE_IMPORT;
+		iWebView.setWebViewClient(iWebViewClient);
+		iUrl = "http://puzzles.telegraph.co.uk/site/print_crossword?id=" + searchId;
+		iWebView.loadUrl(iUrl);
 	}
 		
 }

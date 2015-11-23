@@ -7,8 +7,6 @@ import java.io.File;
 import java.io.IOException;
 
 import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
-import uk.org.downiesoft.crossword.BrowserDialog.BrowserDialogListener;
-import uk.org.downiesoft.crossword.WebViewFragment.WebViewFragmentListener;
 import uk.org.downiesoft.spell.SpellActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -34,12 +32,18 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import android.widget.ListView;
 
-public class MainActivity extends FragmentActivity implements BrowserDialogListener, WebViewFragmentListener,
-		BluetoothListener, ClueListFragment.ClueListListener
+public class MainActivity extends FragmentActivity implements BluetoothListener, ClueListFragment.ClueListListener
 {
 
-	public static final String TAG = "uk.org.downiesoft.crossword.MainActivity";
-	private static final String CROSSWORD_DIR = "Crossword";
+	public static final String TAG = MainActivity.class.getName();
+	public static final String CROSSWORD_DIR = "Crossword";
+
+	public static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+	public static final int REQUEST_ENABLE_BT = 2;
+	public static final int REQUEST_BROWSER = 4098;
+	public static final int REQUEST_CLUE=4096;	
+	public static final int REQUEST_WEB = 4097;
+	
 	private static final int sDebug = 1;
 	
 	private CrosswordModel iCrossword;
@@ -112,14 +116,6 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			iGridFragment.setCrossword(iCrossword);
 			iGridFragment.resetClue();
 			iTitleHandler.post(new TitleSetter());
-			FragmentManager fm = getSupportFragmentManager();
-			fm.popBackStack("main_activity", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-			Fragment frag = fm.findFragmentByTag("web_info_list");
-			if (frag != null)
-				fm.beginTransaction().remove(frag).commit();
-			frag = fm.findFragmentByTag("web_view");
-			if (frag != null)
-				fm.beginTransaction().remove(frag).commit();
 		}
 	}
 
@@ -166,14 +162,6 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			{
 				Toast.makeText(MainActivity.this, R.string.text_invalid_solution, Toast.LENGTH_SHORT).show();
 			}
-			FragmentManager fm = getSupportFragmentManager();
-			fm.popBackStack("main_activity", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-			Fragment frag = fm.findFragmentByTag("web_info_list");
-			if (frag != null)
-				fm.beginTransaction().remove(frag).commit();
-			frag = fm.findFragmentByTag("web_view");
-			if (frag != null)
-				fm.beginTransaction().remove(frag).commit();
 		}
 	}
 
@@ -192,6 +180,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 		if (iCluesFragment == null) {
 			iCluesFragment = new CluesFragment();
 		}
+		restore();
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(R.id.fragmentContainer, iGridFragment, GridFragment.TAG).commit();
 		fm.beginTransaction().replace(R.id.cluesContainer, iCluesFragment, CluesFragment.TAG).commit();
@@ -212,7 +201,6 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	{
 		MainActivity.debug(1, TAG,String.format("onResume(%s)",iCrossword));
 		super.onResume();
-		restore();
 		if (iCrossword.isValid())
 			setCrosswordTitle();
 		// if (iBluetoothManager!=null && iBluetoothManager.isActive())
@@ -224,6 +212,9 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	{
 		MainActivity.debug(1, TAG,String.format("onPause(%s)",iCrossword));
 		super.onPause();
+		if (iCrossword.isValid()) {
+			iCrossword.saveCrossword(this);
+		}
 		store();
 	}
 
@@ -281,43 +272,23 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		BrowserDialog browserDialog;
 		switch (item.getItemId())
 		{
 			case R.id.action_open:
 			{
-				String path = Environment.getExternalStorageDirectory().toString() + File.separatorChar + CROSSWORD_DIR;
-				File currentFile = new File(path);
-				if (!currentFile.exists())
-					currentFile.mkdir();
-				browserDialog = BrowserDialog.getInstance(path, "*.*");
-				FragmentManager fm = getSupportFragmentManager();
-				FragmentTransaction ft = fm.beginTransaction();
-				ft.replace(R.id.fragmentContainer, browserDialog, "browser_dialog");
-				ft.addToBackStack("browser_dialog");
-				ft.commit();
-				return true;
-			}
-			case R.id.action_save:
-			{
-				if (iCrossword.isValid() && iCrossword.saveCrossword(this))
-				{
-					String format = this.getString(R.string.save_successful);
-					Toast.makeText(this, String.format(format, iCrossword.crosswordId()), Toast.LENGTH_SHORT).show();
-				}
+				Intent intent = new Intent(this, BrowserActivity.class);
+				startActivityForResult(intent, REQUEST_BROWSER);
 				return true;
 			}
 			case R.id.action_web:
 			{
-				FragmentManager fm = getSupportFragmentManager();
-				FragmentTransaction ft = fm.beginTransaction();
-				ft.replace(R.id.fragmentContainer, new WebViewFragment(), "web_view");
-				ft.addToBackStack("main_activity");
-				ft.commit();
+				Intent intent = new Intent(this, WebActivity.class);
+				startActivityForResult(intent, MainActivity.REQUEST_WEB);
 				return true;
 			}
 			case R.id.action_clear:
 			{
+				
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setCancelable(true);
 				builder.setTitle(R.string.action_clear);
@@ -381,61 +352,27 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 			}
 		}
 		getActionBar().setTitle(title);
-		if (subtitle!=null) {
-			getActionBar().setSubtitle(subtitle);
-		}
+		getActionBar().setSubtitle(subtitle);
 	}
 
 	@Override
 	public void onFileSelected(final File aFile)
 	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setCancelable(true);
-		builder.setTitle(R.string.action_open);
-		builder.setMessage(R.string.text_query_continue);
-		// builder.setInverseBackgroundForced(true);
-		builder.setPositiveButton(R.string.text_ok, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				FragmentManager fm = getSupportFragmentManager();
-				fm.popBackStack("browser_dialog", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-				Fragment frag = fm.findFragmentByTag("browser_dialog");
-				if (frag != null)
-					fm.beginTransaction().remove(frag).commit();
-				String currentFile = aFile.toString();
-				CrosswordModel newCrossword = CrosswordModel.openCrossword(aFile);
-				if (newCrossword == null)
-				{
-					Toast.makeText(MainActivity.this, R.string.open_failed, Toast.LENGTH_LONG).show();
-				}
-				else
-				{
-					CrosswordModel.setInstance(newCrossword);
-					iCrossword = newCrossword;
-					currentFile = aFile.toString();
-					iGridFragment.setCrossword(iCrossword);
-					iGridFragment.resetClue();
-					setCrosswordTitle();
-					Editor editor = iSettings.edit();
-					editor.putString("current_file", currentFile);
-					editor.commit();
-				}
-				dialog.dismiss();
-			}
-		});
-		builder.setNegativeButton(R.string.text_cancel, new DialogInterface.OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				dialog.dismiss();
-			}
-		});
-		AlertDialog alert = builder.create();
-		alert.show();
-
+		CrosswordModel newCrossword = CrosswordModel.openCrossword(aFile);
+		MainActivity.debug(1,TAG, String.format("onFileSelected(%s):%s",aFile,newCrossword));
+		if (newCrossword == null) {
+			Toast.makeText(MainActivity.this, R.string.open_failed, Toast.LENGTH_LONG).show();
+		} else {
+			CrosswordModel.setInstance(newCrossword);
+			iCrossword = newCrossword;
+			iCluesFragment.setCrossword(iCrossword);
+			iGridFragment.setCrossword(iCrossword);
+			iGridFragment.resetClue();
+			setCrosswordTitle();
+			Editor editor = iSettings.edit();
+			editor.putString("current_file", aFile.toString());
+			editor.commit();
+		}
 	}
 
 	public void store()
@@ -476,13 +413,11 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 		}
 	}
 
-	@Override
 	public void importPuzzle(String html)
 	{
 		new ImportPuzzleTask().execute(html);
 	}
 
-	@Override
 	public void importSolution(String html)
 	{
 		new ImportSolutionTask().execute(html);
@@ -508,13 +443,13 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 				{
 					iBTEnabled = false;
 					Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-					startActivityForResult(enableIntent, BluetoothManager.REQUEST_ENABLE_BT);
+					startActivityForResult(enableIntent, MainActivity.REQUEST_ENABLE_BT);
 				}
 				else
 				{
 					iBTEnabled = true;
 					iServerIntent = new Intent(MainActivity.this, DeviceListActivity.class);
-					startActivityForResult(iServerIntent, BluetoothManager.REQUEST_CONNECT_DEVICE_SECURE);
+					startActivityForResult(iServerIntent, MainActivity.REQUEST_CONNECT_DEVICE_SECURE);
 
 				}
 				dialog.dismiss();
@@ -532,7 +467,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 				if (!iBluetoothManager.bluetoothEnabled())
 				{
 					Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-					startActivityForResult(enableIntent, BluetoothManager.REQUEST_ENABLE_BT);
+					startActivityForResult(enableIntent, MainActivity.REQUEST_ENABLE_BT);
 				}
 				else
 				{
@@ -652,14 +587,14 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 	{
 		switch (requestCode)
 		{
-			case BluetoothManager.REQUEST_CONNECT_DEVICE_SECURE:
+			case MainActivity.REQUEST_CONNECT_DEVICE_SECURE:
 				// When DeviceListActivity returns with a device to connect
 				if (resultCode == Activity.RESULT_OK)
 				{
 					iBluetoothManager.connectDevice(data);
 				}
 				break;
-			case BluetoothManager.REQUEST_ENABLE_BT:
+			case MainActivity.REQUEST_ENABLE_BT:
 				// When the request to enable Bluetooth returns
 				if (resultCode == Activity.RESULT_OK)
 				{
@@ -667,7 +602,7 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 					if (!iBTServer)
 					{
 						iServerIntent = new Intent(this, DeviceListActivity.class);
-						startActivityForResult(iServerIntent, BluetoothManager.REQUEST_CONNECT_DEVICE_SECURE);
+						startActivityForResult(iServerIntent, MainActivity.REQUEST_CONNECT_DEVICE_SECURE);
 					}
 					else
 					{
@@ -693,6 +628,26 @@ public class MainActivity extends FragmentActivity implements BrowserDialogListe
 					}
 				}
 				break;
+			case MainActivity.REQUEST_WEB:
+				if (resultCode == Activity.RESULT_OK) {
+					int mode = data.getExtras().getInt("import",0);
+					String html = data.getExtras().getString("html", "");
+					switch (mode) {
+						case WebViewFragment.IMPORT_PUZZLE:
+							importPuzzle(html);
+							break;
+						case WebViewFragment.IMPORT_SOLUTION:
+							importSolution(html);
+							break;
+					}
+				}
+				break;
+			case MainActivity.REQUEST_BROWSER:
+				if (resultCode == Activity.RESULT_OK) {
+					File file = new File(data.getExtras().getString("file", ""));
+					onFileSelected(file);
+				}
+				break;				
 			default:
 				super.onActivityResult(requestCode,resultCode,data);
 		}

@@ -208,7 +208,7 @@ class CrosswordModel
 		for (int row = 0; row < GRID_SIZE; row++)
 		{
 			line = is.readLine();
-			MainActivity.debug(1, TAG,"OpenCrossword: row="+line);
+			MainActivity.debug(2, TAG,"OpenCrossword: row="+line);
 			for (int col = 0; col < GRID_SIZE && col < line.length(); col++)
 			{
 				char ch = line.charAt(col);
@@ -243,7 +243,7 @@ class CrosswordModel
 		line = is.readLine();
 		while (line != null)
 		{
-			MainActivity.debug(1, TAG,"OpenCrossword: clue="+line);
+			MainActivity.debug(2, TAG,"OpenCrossword: clue="+line);
 			if (line.equalsIgnoreCase("Down"))
 			{
 				direction = CLUE_DOWN;

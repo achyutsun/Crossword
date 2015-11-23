@@ -64,11 +64,21 @@ public class CluesFragment extends Fragment
 	public void setClue(Clue clue, int index, int direction) {
 		mTabHost.setCurrentTab(direction);
 		ClueListFragment clueList = iClueLists[direction];
-		MainActivity.debug(1,TAG, String.format("setClue(%s,%s): %s",index,direction,clueList));
+		MainActivity.debug(1,TAG, String.format("setClue(%s,%s): %s",index,direction,clue));
 		if (clueList != null) {
 			clueList.setItemChecked(index,true);
 		}
 		iCrossword.getClueLists().setSelectedClue(direction, index);
 	}
 
+	public void setCrossword(CrosswordModel aCrossword) {
+		iCrossword = aCrossword;
+		MainActivity.debug(1, TAG, String.format("setCrossword(%s)", aCrossword));
+		if (iClueLists[CrosswordModel.CLUE_ACROSS] != null) {
+			iClueLists[CrosswordModel.CLUE_ACROSS].setCrossword(iCrossword);		
+		}
+		if (iClueLists[CrosswordModel.CLUE_DOWN] != null) {
+			iClueLists[CrosswordModel.CLUE_DOWN].setCrossword(iCrossword);
+		}
+	}
 }

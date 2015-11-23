@@ -39,10 +39,6 @@ public class BluetoothManager
 	public static final String DEVICE_NAME = "device_name";
 	public static final String TOAST = "toast";
 
-	// Intent request codes
-	public static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-	public static final int REQUEST_ENABLE_BT = 2;
-
 	private static BluetoothManager sManagerInstance;
 	
 	// Layout Views
@@ -257,14 +253,14 @@ public class BluetoothManager
 			MainActivity.debug(1, TAG, "onActivityResult " + resultCode);
 		switch (requestCode)
 		{
-			case REQUEST_CONNECT_DEVICE_SECURE:
+			case MainActivity.REQUEST_CONNECT_DEVICE_SECURE:
 				// When DeviceListActivity returns with a device to connect
 				if (resultCode == Activity.RESULT_OK)
 				{
 					connectDevice(data);
 				}
 				break;
-			case REQUEST_ENABLE_BT:
+			case MainActivity.REQUEST_ENABLE_BT:
 				// When the request to enable Bluetooth returns
 				if (resultCode == Activity.RESULT_OK)
 				{

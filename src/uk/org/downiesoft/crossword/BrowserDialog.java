@@ -16,15 +16,11 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.content.Intent;
 
 public class BrowserDialog extends DialogFragment
 {
-	public static final String FRAGMENT_TAG = "BROWSER_FRAGMENT";
-
-	public interface BrowserDialogListener
-	{
-		public void onFileSelected(File aFile);
-	}
+	public static final String TAG = BrowserDialog.class.getName();
 
 	public static BrowserDialog getInstance(String aFolder, String aName)
 	{
@@ -41,22 +37,8 @@ public class BrowserDialog extends DialogFragment
 	private ArrayList<File> iFileList;
 	private File iRootDir;
 	private BrowserAdapter iBrowserAdapter;
-	private BrowserDialogListener iListener;
 	
 	
-    @Override
-    public void onAttach(Activity activity)
-    {
-            super.onAttach(activity);
-            try
-            {
-                    iListener = (BrowserDialogListener) activity;
-            } catch (ClassCastException e)
-            {
-                    throw new ClassCastException(activity.toString() + " must implement BrowserDialogListener");
-            }
-    }
-    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,13 +57,12 @@ public class BrowserDialog extends DialogFragment
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 			{
 				File item=iBrowserAdapter.getItem(position);
-				iListener.onFileSelected(item);
-				if (getDialog()!=null)
-					getDialog().dismiss();
+				Intent result = new Intent();
+				result.putExtra("file",item.toString());
+				getActivity().setResult(Activity.RESULT_OK, result);
+				getActivity().finish();
 			}
 		});
-		//if (getDialog()!=null)
-		//	getDialog().setTitle(R.string.text_openfile);
 		Bundle args=getArguments();
 		setRootDir(new File(args.getString("folder")),args.getString("name"));
 		return iView;

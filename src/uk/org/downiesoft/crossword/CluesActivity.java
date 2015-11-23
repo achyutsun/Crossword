@@ -15,7 +15,6 @@ public class CluesActivity extends FragmentActivity implements ClueListFragment.
 
 
 	public static final String TAG=CluesActivity.class.getName();
-	public static final int REQUEST_CLUE=4096;	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -39,7 +38,7 @@ public class CluesActivity extends FragmentActivity implements ClueListFragment.
 		extras.putInt("number",aNum);
 		extras.putInt("position",aPosition);
 		intent.putExtras(extras);
-		setResult(REQUEST_CLUE,intent);
+		setResult(MainActivity.REQUEST_CLUE,intent);
 		finish();
 	}
 

@@ -28,8 +28,6 @@ import android.graphics.PorterDuff;
 public class GridView extends View {
 
 	private static final String TAG="uk.org.downiesoft.crossword.GridView";
-	private static final int HIGHLIGHT = 0xffffa060;
-	private static final int HIGHLIGHT_ALT = 0xffa0c8ff;
 
 	public interface GridViewListener {
 		public void onClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
@@ -62,7 +60,9 @@ public class GridView extends View {
 	private Bitmap mBackBmp;
 	private Canvas mBackCanvas;
 	private Matrix mMatrix;
-
+	private int mHighlight;
+	private int mHighlightAlt;
+	
 	public GridView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		iContext = context;
@@ -71,6 +71,8 @@ public class GridView extends View {
 		mNumberPaint = new Paint();
 		iCursor = new Point();
 		iExtent = new Rect();
+		mHighlight = context.getResources().getColor(R.color.grid_highlight);
+		mHighlightAlt = context.getResources().getColor(R.color.grid_highlight_alt);
 	}
 
 	@Override
@@ -472,7 +474,7 @@ public class GridView extends View {
 			wordlen = len;
 		Point sq = new Point(iExtent.left, iExtent.top);
 		for (int i = 0; i < len; i++) {
-			drawSquare(sq.x, sq.y, aOn ? (colour != 0 ? HIGHLIGHT_ALT : HIGHLIGHT) : Color.WHITE, aCanvas);
+			drawSquare(sq.x, sq.y, aOn ? (colour != 0 ? mHighlightAlt : mHighlight) : Color.WHITE, aCanvas);
 			drawLetter(sq.x, sq.y, aCanvas);
 			drawNumber(sq.x, sq.y, aCanvas);
 			sq.x += delta.x;

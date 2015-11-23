@@ -138,7 +138,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 //			iGridView.setCursor(iCursorX, iCursorY, iCursorDirection, iTextView!=null);
 //		}
 	}
-
+	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -401,7 +401,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	{
 		switch (requestCode)
 		{
-			case CluesActivity.REQUEST_CLUE:
+			case MainActivity.REQUEST_CLUE:
 				if (data!=null && data.getExtras()!=null) {
 					int direction = data.getExtras().getInt("direction");
 					int number = data.getExtras().getInt("number");

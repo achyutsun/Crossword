@@ -72,6 +72,7 @@ public class ClueListFragment extends Fragment
 				Clue clue=iAdapter.getItem(position);
 				MainActivity.debug(1, TAG, String.format("onItemClick(%d): %s", position, iListView.isItemChecked(position)));
 				iListener.onClueClicked(iDirection, clue.iNumber, position);
+				view.invalidate();
 			}});
 		iListView.setOnItemLongClickListener(new OnItemLongClickListener() {
 				@Override
@@ -91,15 +92,16 @@ public class ClueListFragment extends Fragment
 			iListView.setItemChecked(selected,true);
 			iListView.setSelection(selected);
 		}
-		MainActivity.debug(1, TAG, String.format("onCreateView: %s %s", iListView, iListView.getChoiceMode()));
+		MainActivity.debug(1, TAG, String.format("onCreateView: %s %s %s", iDirection, iCrossword.iCrosswordId, this.getId()));
 		return view;
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		iCrossword = CrosswordModel.getInstance();
 		int selected = iCrossword.getClueLists().getSelectedClueIndex(iDirection);
-		MainActivity.debug(1, TAG, String.format("onResume: %s %s", iDirection, selected));
+		MainActivity.debug(1, TAG, String.format("onResume: %s %s %s %s", iDirection, selected, iCrossword.iCrosswordId, this.getId()));
 		if (selected >= 0) {
 			iListView.setItemChecked(selected, true);
 			iListView.setSelection(selected);
@@ -111,6 +113,16 @@ public class ClueListFragment extends Fragment
 	public void setItemChecked(int position, boolean checked) {
 		iListView.setItemChecked(position, checked);
 		iListView.smoothScrollToPosition(position);
+	}
+	
+	public void setCrossword(CrosswordModel aCrossword) {
+		MainActivity.debug(1, TAG, String.format(">setCrossword(%s): %s %s", aCrossword.iCrosswordId, iDirection, this.getId()));
+		iCrossword = aCrossword;
+		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.getClueLists().getClueList(iDirection));
+		iListView.setAdapter(iAdapter);
+		iListView.invalidate();
+		iAdapter.notifyDataSetChanged();
+		MainActivity.debug(1, TAG, String.format("<setCrossword(%s): %s %s", iCrossword.iCrosswordId, iDirection, this.getId()));
 	}
 	
 }
