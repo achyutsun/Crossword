@@ -399,8 +399,8 @@ public class GridView extends View {
 		boolean invalidated = false;
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				MainActivity.debug(1, TAG, String.format("onTouchEvent: ACTION_DOWN %s)",pos));
 				iAnchor = new Point(pos);
+				MainActivity.debug(1, TAG, String.format(">onTouchEvent: ACTION_DOWN %s %s %s)",pos, iCrossword.withinGrid(iAnchor), !iCrossword.isBlank(pos)));
 				iTouchAnchor = new PointF(event.getX(), event.getY());
 				mLongPressTriggered = false;
 				if (iCrossword.withinGrid(iAnchor) && !iCrossword.isBlank(pos)) {
@@ -431,13 +431,15 @@ public class GridView extends View {
 						highlightCurrentClue(true);
 					}
 				}
+				MainActivity.debug(1, TAG, String.format("<onTouchEvent: ACTION_DOWN %s %s %s)",pos, iCrossword.withinGrid(iAnchor), !iCrossword.isBlank(pos)));
 				return true;
 			case MotionEvent.ACTION_MOVE:
 				return false;
 			case MotionEvent.ACTION_UP:
-				MainActivity.debug(2, TAG, String.format("onTouchEvent: ACTION_UP %s)",pos));
+				MainActivity.debug(1, TAG, String.format("onTouchEvent: ACTION_UP %s)",pos));
 				if (iPressedClue != null) {
-					highlightClue(iAnchor, iPressedDirection, iPressedExtent, iPressedClue, false, true, mBackCanvas);					
+					highlightClue(iAnchor, iPressedDirection, iPressedExtent, iPressedClue, false, true, mBackCanvas);
+					iPressedClue = null;
 				}
 				extent = iCrossword.getClueExtent(pos, direction);
 				if (!mLongPressTriggered && iCrossword.withinGrid(pos) && !iCrossword.isBlank(pos)) {
@@ -456,7 +458,7 @@ public class GridView extends View {
 							direction = CrosswordModel.CLUE_ACROSS;
 						else if (5 * Math.abs(pos.x - iAnchor.x) < Math.abs(pos.y - iAnchor.y))
 							direction = CrosswordModel.CLUE_DOWN;
-						MainActivity.debug(2, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
+						MainActivity.debug(1, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
 						switch (direction) {
 							case CrosswordModel.CLUE_ACROSS:
 								if (extent.width() == 0)
@@ -472,7 +474,7 @@ public class GridView extends View {
 								break;
 						}
 						extent = iCrossword.getClueExtent(pos, direction);
-						MainActivity.debug(2, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
+						MainActivity.debug(1, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
 						iDirection = direction;
 					}
 					iCursor = pos;
@@ -561,7 +563,6 @@ public class GridView extends View {
 		@Override
 		public void onLongPress(MotionEvent e) {
 			Point pos = getEventCoords(e);
-			Rect extent = null;
 			if (iCrossword.withinGrid(pos) && !iCrossword.isBlank(pos)) {
 				iCursor.set(iAnchor.x, iAnchor.y);
 				iExtent.set(iPressedExtent);
