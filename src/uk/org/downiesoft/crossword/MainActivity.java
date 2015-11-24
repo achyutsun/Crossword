@@ -565,7 +565,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		mClueDirection = aDirection;
 		mCluePosition = aPosition;
 		if (iGridFragment != null) {
-			iGridFragment.clueDoubleClicked(aDirection, aNum, aPosition);
+			iGridFragment.clueLongClicked(aDirection, aNum, aPosition);
 		}
 	}
 

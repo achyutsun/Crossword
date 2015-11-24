@@ -23,6 +23,8 @@ import android.util.Log;
 import android.util.DisplayMetrics;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.PorterDuff;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 //import android.util.Log;
 
 public class GridView extends View {
@@ -30,8 +32,8 @@ public class GridView extends View {
 	private static final String TAG="uk.org.downiesoft.crossword.GridView";
 
 	public interface GridViewListener {
-		public void onClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
-		public void onSelectedClueTapped(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
+		public void onGridClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
+		public void onGridClueLongPress(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection);
 	}
 
 	private Context iContext;
@@ -50,6 +52,9 @@ public class GridView extends View {
 	private PointF iTouchAnchor;
 	private Rect iExtent;
 	private Clue iClue;
+	private int iPressedDirection;
+	private Rect iPressedExtent;
+	private Clue iPressedClue;
 	private CrosswordModel iCrossword;
 	private GridViewListener iObserver;
 	private Rect r = new Rect();
@@ -62,6 +67,10 @@ public class GridView extends View {
 	private Matrix mMatrix;
 	private int mHighlight;
 	private int mHighlightAlt;
+	private int mPressed;
+	private int mPressedAlt;
+	private GestureDetector mGestureDetector;
+	private boolean mLongPressTriggered;
 	
 	public GridView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -73,6 +82,9 @@ public class GridView extends View {
 		iExtent = new Rect();
 		mHighlight = context.getResources().getColor(R.color.grid_highlight);
 		mHighlightAlt = context.getResources().getColor(R.color.grid_highlight_alt);
+		mPressed = context.getResources().getColor(R.color.grid_pressed);
+		mPressedAlt = context.getResources().getColor(R.color.grid_pressed_alt);
+		mGestureDetector = new GestureDetector(context, new GridViewOnGestureListener());
 	}
 
 	@Override
@@ -130,7 +142,6 @@ public class GridView extends View {
 			mNumberPaint.setSubpixelText(true);
 		}
 		MainActivity.debug(1, TAG,String.format("onSizeChanged(%s,%s) = (%s,%s) (%s,%s) (%s,%s) %s %s", w, h, iWidth, iHeight, iHSize, iVSize, iHMargin, iVMargin, mTextSize, mNumberSize));
-
 		redraw();
 		invalidate();
 	}
@@ -279,16 +290,6 @@ public class GridView extends View {
 		//MainActivity.debug(1, TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
 	}
 
-//	public void redraw(Rect aRect) {
-//		if (mBackCanvas != null) {
-//			for (int x=aRect.left; x < aRect.right; x++) {
-//				for (int y=aRect.top; y < aRect.bottom; y++) {
-//					drawSquare(x, y, mBackCanvas);
-//				}
-//			} 
-//		}
-//	}
-
 	public void redraw() {
 		MainActivity.debug(1, TAG,String.format("redraw start %s",iCrossword));
 		if (mBackCanvas != null) {
@@ -307,7 +308,7 @@ public class GridView extends View {
 				drawNumbers(mBackCanvas);
 				drawLetters(mBackCanvas);
 			}
-			highlightCurrentClue(true, mBackCanvas);		
+			highlightCurrentClue(true, false, mBackCanvas);		
 		}
 	}
 
@@ -340,9 +341,10 @@ public class GridView extends View {
 
 	public void setCursor(int aX, int aY, int aDirection, boolean aNotifyListener) {
 		if (iCursor.x == aX && iCursor.y == aY && iDirection == aDirection && iClue != null) {
-			highlightCurrentClue(true, mBackCanvas);
+			iExtent = iCrossword.getClueExtent(iCursor, iDirection);
+			highlightCurrentClue(true, false, mBackCanvas);
 		} else {
-			highlightCurrentClue(false, mBackCanvas);
+			highlightCurrentClue(false, false, mBackCanvas);
 			iCursor.set(aX, aY);
 			iDirection = aDirection;
 			Point delta = new Point(1 - aDirection, aDirection);
@@ -364,9 +366,9 @@ public class GridView extends View {
 				iExtent = iCrossword.getClueExtent(iCursor, iDirection);
 			}
 			if (iClue != null && iObserver != null && aNotifyListener) {
-				iObserver.onClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+				iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
 			}
-			highlightCurrentClue(true, mBackCanvas);
+			highlightCurrentClue(true, false, mBackCanvas);
 		}
 		redraw();
 		MainActivity.debug(1, TAG, String.format("<setCursor(%s,%s,%s) %s", iCursor.x, iCursor.y, iDirection, iClue));
@@ -374,48 +376,87 @@ public class GridView extends View {
 		invalidate();
 	}
 
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
+	private Point getEventCoords(MotionEvent event) {
 		float x = event.getX();
 		float y = event.getY();
 		float[] points={ x, y };
 		Matrix inverse=new Matrix();
 		mMatrix.invert(inverse);
 		inverse.mapPoints(points);
-		int col = (int) (points[0] / (float) iHSize);
-		int row = (int) (points[1] / (float) iVSize);
-		MainActivity.debug(2, TAG, String.format("onTouchEvent: (%3.1f,%3.1f),(%3.1f,%3.1f),(%d,%d)", x, y, points[0], points[1], col, row));
-		Point pos = new Point(col, row);
+		Point pos = new Point((int) (points[0] / (float) iHSize), (int) (points[1] / (float) iVSize));
+		MainActivity.debug(2, TAG, String.format("getEventCoords: (%3.1f,%3.1f),(%3.1f,%3.1f),%s,%s", x, y, points[0], points[1], pos, mLongPressTriggered));
+		return pos;
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (mGestureDetector.onTouchEvent(event)) {
+			return true;
+		}
+		Point pos = getEventCoords(event);
 		Rect extent;
+		int direction = iDirection;
 		boolean invalidated = false;
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				iAnchor = new Point(col, row);
-				iTouchAnchor = new PointF(x, y);
+				MainActivity.debug(1, TAG, String.format("onTouchEvent: ACTION_DOWN %s)",pos));
+				iAnchor = new Point(pos);
+				iTouchAnchor = new PointF(event.getX(), event.getY());
+				mLongPressTriggered = false;
+				if (iCrossword.withinGrid(iAnchor) && !iCrossword.isBlank(pos)) {
+					highlightCurrentClue(false, false, mBackCanvas);
+					extent = iCrossword.getClueExtent(pos, direction);
+					switch (direction) {
+						case CrosswordModel.CLUE_ACROSS:
+							if (extent.width() == 0)
+								direction = CrosswordModel.CLUE_DOWN;
+							break;
+						case CrosswordModel.CLUE_DOWN:
+							if (extent.height() == 0)
+								direction = CrosswordModel.CLUE_ACROSS;
+							break;
+						default:
+							break;
+					}
+					extent = iCrossword.getClueExtent(pos, direction);
+					if (extent.width() > 0 || extent.height() > 0) {
+						iPressedDirection = direction;
+						iPressedExtent = new Rect(extent);
+						iPressedClue = iCrossword.clueAt(pos, direction);
+						highlightClue(iAnchor, direction, iPressedExtent, iPressedClue, true, true, mBackCanvas);
+						invalidate();					
+					} else {
+						iPressedClue = null;
+						iPressedExtent = null;
+						highlightCurrentClue(true);
+					}
+				}
 				return true;
 			case MotionEvent.ACTION_MOVE:
 				return false;
 			case MotionEvent.ACTION_UP:
-				if (iCrossword.withinGrid(pos) && !iCrossword.isBlank(pos)) {
-					if (iCursor.equals(col, row) && iAnchor.equals(iCursor)) {
+				MainActivity.debug(2, TAG, String.format("onTouchEvent: ACTION_UP %s)",pos));
+				if (iPressedClue != null) {
+					highlightClue(iAnchor, iPressedDirection, iPressedExtent, iPressedClue, false, true, mBackCanvas);					
+				}
+				extent = iCrossword.getClueExtent(pos, direction);
+				if (!mLongPressTriggered && iCrossword.withinGrid(pos) && !iCrossword.isBlank(pos)) {
+					if (iCursor.equals(pos) && iAnchor.equals(iCursor)) {
 						extent = iCrossword.getClueExtent(pos, 1 - iDirection);
 						if (extent.width() > 0 || extent.height() > 0) {
-							highlightCurrentClue(false, mBackCanvas);
+							highlightCurrentClue(false, false, mBackCanvas);
 							iDirection = 1 - iDirection;
 							invalidated = true;
 						} else {
-							iObserver.onSelectedClueTapped(iClue, iCursor.x, iCursor.y, iDirection);
-							highlightCurrentClue(true, mBackCanvas);
-							return true;
+							extent = iCrossword.getClueExtent(pos, iDirection);							
 						}
 					} else {
-						int direction=iDirection;
-						highlightCurrentClue(false, mBackCanvas);
-						if (Math.abs(col - iAnchor.x) > 5 * Math.abs(row - iAnchor.y))
+						highlightCurrentClue(false, false, mBackCanvas);
+						if (Math.abs(pos.x - iAnchor.x) > 5 * Math.abs(pos.y - iAnchor.y))
 							direction = CrosswordModel.CLUE_ACROSS;
-						else if (5 * Math.abs(col - iAnchor.x) < Math.abs(row - iAnchor.y))
+						else if (5 * Math.abs(pos.x - iAnchor.x) < Math.abs(pos.y - iAnchor.y))
 							direction = CrosswordModel.CLUE_DOWN;
-						extent = iCrossword.getClueExtent(pos, direction);
+						MainActivity.debug(2, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
 						switch (direction) {
 							case CrosswordModel.CLUE_ACROSS:
 								if (extent.width() == 0)
@@ -431,17 +472,33 @@ public class GridView extends View {
 								break;
 						}
 						extent = iCrossword.getClueExtent(pos, direction);
+						MainActivity.debug(2, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
 						iDirection = direction;
 					}
 					iCursor = pos;
 					iExtent.set(extent);
 					iClue = iCrossword.clueAt(pos, iDirection);
-					highlightCurrentClue(true, mBackCanvas);
+					highlightCurrentClue(true, false, mBackCanvas);
 					if (iObserver != null) {
-						iObserver.onClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+						iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
 					}
 					if (invalidated)
 						invalidate();
+				} else if (mLongPressTriggered) {
+					iCursor.set(iAnchor.x, iAnchor.y);
+					iExtent.set(iPressedExtent);
+					iDirection = iPressedDirection;
+					if (!iClue.equals(iPressedClue)) {
+						iClue = iPressedClue;
+						if (iObserver != null) {
+							iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+						}
+					}
+					highlightCurrentClue(true);
+					invalidate();
+				} else {
+					highlightCurrentClue(true);
+					invalidate();
 				}
 				return true;
 		}
@@ -449,39 +506,46 @@ public class GridView extends View {
 	}
 
 	public void highlightCurrentClue(boolean aOn) {
-		highlightCurrentClue(aOn,mBackCanvas);
+		highlightCurrentClue(aOn, false, mBackCanvas);
 		invalidate();
 	}
 
-	private void highlightCurrentClue(boolean aOn, Canvas aCanvas) {
-		if (iClue == null || aCanvas == null)
+	private void highlightCurrentClue(boolean aOn, boolean aPressed, Canvas aCanvas) {
+		highlightClue(iCursor, iDirection, iExtent, iClue, aOn, aPressed, aCanvas);
+	}
+	
+	private void highlightClue(Point aCursor, int aDirection, Rect aExtent, Clue aClue, boolean aOn, boolean aPressed, Canvas aCanvas) {
+		MainActivity.debug(1,TAG, String.format("highlightClue(%s, %s, %s, %s, %s, %s)", aCursor, aDirection, aExtent, aOn, aPressed, aClue));
+		if (aClue == null || aCanvas == null)
 			return;
-		Point delta = new Point(1 - iDirection, iDirection);
-		int pos = iCursor.x - iExtent.left + iCursor.y - iExtent.top;
-		int len = iExtent.right - iExtent.left + iExtent.bottom - iExtent.top + 1;
+		Point delta = new Point(1 - aDirection, aDirection);
+		int pos = aCursor.x - aExtent.left + aCursor.y - aExtent.top;
+		int len = aExtent.right - aExtent.left + aExtent.bottom - aExtent.top + 1;
 		int word = 0;
-		int wordlen = iClue.wordLength(word);
+		int wordlen = aClue.wordLength(word);
 		if (wordlen == -1)
 			wordlen = len;
 		while (pos >= wordlen) {
 			word++;
-			wordlen += iClue.wordLength(word);
+			wordlen += aClue.wordLength(word);
 		}
 		int colour = 0;
 		word = 0;
-		wordlen = iClue.wordLength(word);
+		wordlen = aClue.wordLength(word);
 		if (wordlen == -1)
 			wordlen = len;
-		Point sq = new Point(iExtent.left, iExtent.top);
+		Point sq = new Point(aExtent.left, aExtent.top);
+		int hi = aPressed?mPressed:mHighlight;
+		int alt = aPressed?mPressedAlt:mHighlightAlt;
 		for (int i = 0; i < len; i++) {
-			drawSquare(sq.x, sq.y, aOn ? (colour != 0 ? mHighlightAlt : mHighlight) : Color.WHITE, aCanvas);
+			drawSquare(sq.x, sq.y, aOn ? (colour != 0 ? alt : hi) : Color.WHITE, aCanvas);
 			drawLetter(sq.x, sq.y, aCanvas);
 			drawNumber(sq.x, sq.y, aCanvas);
 			sq.x += delta.x;
 			sq.y += delta.y;
 			if (--wordlen == 0) {
 				word++;
-				wordlen = iClue.wordLength(word);
+				wordlen = aClue.wordLength(word);
 				colour ^= 1;
 			}
 		}
@@ -492,4 +556,28 @@ public class GridView extends View {
 		iCrossword.dumpGrid(TAG);
 	}
 
+	private class GridViewOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+		@Override
+		public void onLongPress(MotionEvent e) {
+			Point pos = getEventCoords(e);
+			Rect extent = null;
+			if (iCrossword.withinGrid(pos) && !iCrossword.isBlank(pos)) {
+				iCursor.set(iAnchor.x, iAnchor.y);
+				iExtent.set(iPressedExtent);
+				iDirection = iPressedDirection;
+				if (!iClue.equals(iPressedClue)) {
+					iClue = iPressedClue;
+					if (iObserver != null) {
+						iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+					}
+				}
+				highlightCurrentClue(true);
+				invalidate();
+				iObserver.onGridClueLongPress(iPressedClue, iAnchor.x, iAnchor.y, iPressedDirection);
+				mLongPressTriggered = true;
+			}
+
+		}
+	}
 }

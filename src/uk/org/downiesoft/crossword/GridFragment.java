@@ -57,8 +57,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	private boolean iGuardBackKey=false;
 	private long iBackTimestampMillis=0;
 	private final int iBackTimeoutMillis=3000;
-	private Clue mClickedClue;
-	private Handler mHandler = new Handler();
 	private CluesFragment mCluesFragment;
 	
 	
@@ -246,7 +244,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	}
 
 	@Override
-	public void onClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
+	public void onGridClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
 		MainActivity.debug(1,TAG,String.format("onClueSelected(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
 		if (aClue != null && iTextView!=null) {
 			iTextView.setText(aClue.toString());
@@ -256,27 +254,24 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		iCursorDirection = aCursorDirection;
 		saveState();
 		if (aClue!=null && mCluesFragment != null) {
-			mClickedClue = aClue;
 			int index = iCrossword.getClueLists().getClueIndex(aCursorDirection, aClue);
 			mCluesFragment.setClue(aClue, index, aCursorDirection);
 		}
 	}
 
 	@Override
-	public void onSelectedClueTapped(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
-		MainActivity.debug(1,TAG,String.format("onSelectedClueTapped(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
+	public void onGridClueLongPress(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
+		MainActivity.debug(1,TAG,String.format("onClueLongPress(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
 		iCursorX = aCursorX;
 		iCursorY = aCursorY;
 		iCursorDirection = aCursorDirection;
 		saveState();
-		if (aClue!=null) {
+		if (aClue != null) {
 			String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
 			wordEntryDialog(aClue, "", hint);
 		}
 	}
 
-
-	
 	public void clueClicked(int aDirection, int aNum, int aPosition) {
 		if (aPosition >= 0) {
 			Point pos=iCrossword.locateClue(aDirection, aNum);
@@ -287,12 +282,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			if (mCluesFragment != null) {
 				int index = iCrossword.getClueLists().getClueIndex(iCursorDirection, clue);
 				mCluesFragment.setClue(clue, index, iCursorDirection);
-				if (mClickedClue != null && clue.equals(mClickedClue)) {
-					String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
-					wordEntryDialog(iGridView.getCurrentClue(), "", hint);
-				} else {
-					mClickedClue = clue;
-				}
 			}
 			iGridView.setCursor(pos.x, pos.y, aDirection,false);
 			if (iTextView != null) {
@@ -302,7 +291,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		}
 	}
 
-	public void clueDoubleClicked(int aDirection, int aNum, int aPosition) {
+	public void clueLongClicked(int aDirection, int aNum, int aPosition) {
 		if (aPosition >= 0) {
 			Point pos=iCrossword.locateClue(aDirection, aNum);
 			iCursorX = pos.x;

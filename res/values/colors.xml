@@ -7,6 +7,8 @@
     <color name="grey_background">#80303030</color>
 	<color name="grid_highlight">#ffffa060</color>
 	<color name="grid_highlight_alt">#ffa0c0ff</color>
+	<color name="grid_pressed">#ffb07030</color>
+	<color name="grid_pressed_alt">#ff70a0c0</color>
 	<color name="clue_selected">#00004060</color>
 	<color name="clue_activated">#80a0c0ff</color>
 	<color name="clue_pressed">#a0a0c0ff</color>

@@ -84,6 +84,7 @@ public class ClueListFragment extends Fragment
 						iListener.onClueLongClicked(iDirection, clue.iNumber, position);
 					} else {
 						iListener.onClueClicked(iDirection, clue.iNumber, position);
+						iListener.onClueLongClicked(iDirection, clue.iNumber, position);
 					}
 					return true;
 				}});
