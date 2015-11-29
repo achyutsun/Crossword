@@ -62,7 +62,7 @@ public class ClueListFragment extends Fragment
 		{
 			iDirection=args.getInt("direction",0);
 		}
-		ArrayList<Clue> clueList=iCrossword.iClues.getClueList(iDirection);
+		ArrayList<Clue> clueList=iCrossword.iClues.getClueListArray(iDirection);
 		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,clueList);
 		iListView.setAdapter(iAdapter);
 		iListView.setOnItemClickListener(new OnItemClickListener() {
@@ -119,7 +119,7 @@ public class ClueListFragment extends Fragment
 	public void setCrossword(CrosswordModel aCrossword) {
 		MainActivity.debug(1, TAG, String.format(">setCrossword(%s): %s %s", aCrossword.iCrosswordId, iDirection, this.getId()));
 		iCrossword = aCrossword;
-		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.getClueLists().getClueList(iDirection));
+		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.getClueLists().getClueListArray(iDirection));
 		iListView.setAdapter(iAdapter);
 		iListView.invalidate();
 		iAdapter.notifyDataSetChanged();

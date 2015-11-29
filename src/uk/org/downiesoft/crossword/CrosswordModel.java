@@ -466,7 +466,7 @@ class CrosswordModel
 	
 	public Clue getClue(int aDirection, int aNum)
 	{
-		return iClues.getClue(aDirection, aNum);
+		return iClues.getClueByNumber(aDirection, aNum);
 	}
 
 	public Rect getClueExtent(Point aPos, int aDirection)

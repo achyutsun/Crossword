@@ -4,95 +4,72 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import android.util.SparseArray;
 
 public class ClueLists
 {
 
-	private ArrayList<ArrayList<Clue>> iClues;
+	private ClueList[] iClues;
 	private int mSelectedDirection;
 	private int mSelectedIndex;
 	
 	public ClueLists()
 	{
-		iClues = new ArrayList<ArrayList<Clue>>(2);
+		iClues = new ClueList[2];
 		for (int i = 0; i < 2; i++)
 		{
-			iClues.add(new ArrayList<Clue>(15));
+			iClues[i] = new ClueList();
 		}
 	}
 
 	public void reset()
 	{
-		for (int i = 0; i < iClues.size(); i++)
-		{
-			iClues.get(i).clear();
+		for (ClueList l: iClues) {
+			l.reset();
 		}
 	}
 
-	public Clue getClue(int aDirection, int aNum)
+	public Clue getClueByNumber(int aDirection, int aNum)
 	{
-		int i = 0;
-		while (i < iClues.get(aDirection).size())
-		{
-			if (iClues.get(aDirection).get(i).number() == aNum)
-			{
-				return (iClues.get(aDirection).get(i));
-			}
-			i++;
-		}
-		return null;
+		return iClues[aDirection].getClueByNumber(aNum);
 	}
 
 	public void addClue(Clue aClue, int aDirection)
 	{
-		if (aDirection < iClues.size())
-			iClues.get(aDirection).add(aClue);
+		iClues[aDirection].addClue(aClue);
 	}
 
 	public void externalize(DataOutputStream aStream) throws IOException
 	{
-		for (int i = 0; i < 2; i++)
-		{
-			aStream.writeInt(iClues.get(i).size());
-			for (int j = 0; j < iClues.get(i).size(); j++)
-			{
-				iClues.get(i).get(j).externalize(aStream);
-			}
+		for (ClueList l: iClues) {
+			l.externalize(aStream);
 		}
 	}
 
 	public void internalize(DataInputStream aStream) throws IOException
 	{
-		reset();
-		for (int i = 0; i < 2; i++)
-		{
-			int count = aStream.readInt();
-			for (int j = 0; j < count; j++)
-			{
-				Clue clue = new Clue();
-				clue.internalize(aStream);
-				iClues.get(i).add(clue);
-			}
+		for (ClueList l: iClues) {
+			l.internalize(aStream);
 		}
 	}
 
 	public int count(int aDirection)
 	{
-		return iClues.get(aDirection).size();
+		return iClues[aDirection].count();
 	}
 
 	public Clue getClueByIndex(int aDirection, int aIndex)
 	{
-		return iClues.get(aDirection).get(aIndex);
+		return iClues[aDirection].getClueByIndex(aIndex);
 	}
 	
 	public int getClueIndex(int aDirection, Clue aClue) {
-		return iClues.get(aDirection).indexOf(aClue);
+		return iClues[aDirection].getClueIndex(aClue);
 	}
 	
-	public ArrayList<Clue> getClueList(int aDirection)
+	public ArrayList<Clue> getClueListArray(int aDirection)
 	{
-		return iClues.get(aDirection%2);
+		return iClues[aDirection].getClueListArray();
 	}
 	
 	public void setSelectedClue(int aDirection, int aIndex) {

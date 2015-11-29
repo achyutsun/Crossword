@@ -126,7 +126,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		iGuardBackKey = true;
 		iGridView.setObserver(this);
 		Clue clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
-		int position = iCrossword.getClueLists().getClueList(iCursorDirection).indexOf(clue);
+		int position = iCrossword.getClueLists().getClueIndex(iCursorDirection,clue);
 		mCluesFragment = (CluesFragment)getActivity().getSupportFragmentManager().findFragmentByTag(CluesFragment.TAG);
 		if (mCluesFragment != null) {
 			mCluesFragment.setClue(clue, position, iCursorDirection);
