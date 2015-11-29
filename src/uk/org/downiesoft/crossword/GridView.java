@@ -477,12 +477,16 @@ public class GridView extends View {
 						MainActivity.debug(1, TAG, String.format("onTouchEvent: %s %s)",extent, direction));
 						iDirection = direction;
 					}
-					iCursor = pos;
-					iExtent.set(extent);
-					iClue = iCrossword.clueAt(pos, iDirection);
-					highlightCurrentClue(true, false, mBackCanvas);
-					if (iObserver != null) {
-						iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+					if (extent.width()+extent.height() != 0) {
+						iCursor = pos;
+						iExtent.set(extent);
+						iClue = iCrossword.clueAt(pos, iDirection);
+						highlightCurrentClue(true, false, mBackCanvas);
+						if (iObserver != null) {
+							iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
+						}
+					} else {
+						highlightCurrentClue(true, false, mBackCanvas);
 					}
 					if (invalidated)
 						invalidate();
@@ -490,7 +494,7 @@ public class GridView extends View {
 					iCursor.set(iAnchor.x, iAnchor.y);
 					iExtent.set(iPressedExtent);
 					iDirection = iPressedDirection;
-					if (!iClue.equals(iPressedClue)) {
+					if (iClue != null && iPressedClue != null && !iClue.equals(iPressedClue)) {
 						iClue = iPressedClue;
 						if (iObserver != null) {
 							iObserver.onGridClueSelected(iClue, iCursor.x, iCursor.y, iDirection);
