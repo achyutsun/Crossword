@@ -5,15 +5,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import android.util.SparseIntArray;
 
 public class ClueList {
 
 	private ArrayList<Clue> iClues;
-	private SparseArray<Integer> iIndex;
+	private SparseIntArray iIndex;
 
 	public ClueList() {
 		iClues = new ArrayList<Clue>(15);
-		iIndex = new SparseArray<Integer>(15);
+		iIndex = new SparseIntArray(15);
 	}
 
 	public void reset() {
@@ -48,7 +49,7 @@ public class ClueList {
 			Clue clue = new Clue();
 			clue.internalize(aStream);
 			iClues.add(clue);
-			iIndex.put(clue.iNumber, iClues.size()-1);
+			iIndex.append(clue.iNumber, iClues.size()-1);
 		}
 	}
 
