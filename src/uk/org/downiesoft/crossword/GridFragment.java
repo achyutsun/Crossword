@@ -113,7 +113,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			resetClue();
 			clue=iCrossword.clueAt(new Point(iCursorX,iCursorY), iCursorDirection);
 		}
-		if (iGridView != null) {
+		if (iCrossword.isValid() && iGridView != null) {
 			iGridView.setCursor(iCursorX,iCursorY,iCursorDirection,true);
 			iGridView.redraw();
 		}
