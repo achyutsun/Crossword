@@ -192,8 +192,7 @@ public class BluetoothManager
 		DataOutputStream os=new DataOutputStream(baos);
 		try
 		{
-			aCrossword.saveCrosswordId(os);
-			aCrossword.saveGrid(os);
+			aCrossword.saveCrossword(os);
 			os.close();
 			byte[] send=baos.toByteArray();
 			// Check that there's actually something to send
@@ -214,8 +213,7 @@ public class BluetoothManager
 		try
 		{
 			CrosswordModel crossword=new CrosswordModel();
-			crossword.readCrosswordId(is);
-			crossword.readGrid(is,crossword);
+			crossword.openCrossword(is);
 			is.close();
 			return crossword;
 		}
