@@ -434,8 +434,11 @@ public class BluetoothService {
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-
+					int count=0;
+					while ((bytes = mmInStream.read(buffer, count, buffer.length)) >= 0) {
+						count += bytes;
+					}
+					Log.i(TAG, String.format("mConnectedThread read %s",buffer.toString()));
                     // Send the obtained bytes to the UI Activity
                     mHandler.obtainMessage(BluetoothManager.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
@@ -456,7 +459,8 @@ public class BluetoothService {
         public void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
-
+				Log.i(TAG, String.format("mConnectedThread write %s",buffer.toString()));
+				
                 // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(BluetoothManager.MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();
