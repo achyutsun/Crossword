@@ -449,7 +449,7 @@ public class BluetoothService {
 					}
 					Log.i(TAG, String.format("mConnectedThread read %s bytes total",count));
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(BluetoothManager.MESSAGE_READ, bytes, -1, buffer)
+                    mHandler.obtainMessage(BluetoothManager.MESSAGE_READ, count, -1, Arrays.copyOf(buffer,count))
                             .sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);

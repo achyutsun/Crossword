@@ -214,7 +214,7 @@ public class BluetoothManager
 
 	private CrosswordModel receiveCrossword(byte[] receive)
 	{
-		Log.i(TAG, String.format("receiveCrossword: %s",new String(receive)));
+		Log.i(TAG, String.format("receiveCrossword: %s bytes",receive.length));
 		ByteArrayInputStream bais=new ByteArrayInputStream(receive);
 		try
 		{
