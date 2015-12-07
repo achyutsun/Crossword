@@ -86,9 +86,13 @@ public class BluetoothManager
 					}
 					break;
 				case MESSAGE_WRITE:
+					if (D)
+						Log.i(TAG, String.format("MESSAGE_WRITE: %s bytes",((byte[])msg.obj).length));
 					break;
 				case MESSAGE_READ:
 					byte[] readBuf = (byte[]) msg.obj;
+					if (D)
+						Log.i(TAG, String.format("MESSAGE_READ: %s bytes",(readBuf.length)));
 					crossword=receiveCrossword(readBuf);
 					if (mListener != null && crossword!=null)
 						mListener.onCrosswordReceived(crossword);
@@ -203,6 +207,7 @@ public class BluetoothManager
 		}
 		catch (IOException e)
 		{
+			e.printStackTrace();
 		}
 	}
 
@@ -219,6 +224,7 @@ public class BluetoothManager
 		}
 		catch (IOException e)
 		{
+			e.printStackTrace();
 			return null;
 		}
 	}
