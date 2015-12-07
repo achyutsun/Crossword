@@ -198,6 +198,7 @@ public class BluetoothManager
 		{
 			aCrossword.saveCrossword(baos);
 			byte[] send=baos.toByteArray();
+			Log.i(TAG,String.format("sendCrossword: [%s]",new String(send)));
 			baos.close();
 			// Check that there's actually something to send
 			if (send.length>0)

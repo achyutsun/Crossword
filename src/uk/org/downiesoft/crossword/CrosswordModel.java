@@ -189,6 +189,7 @@ class CrosswordModel
 		saveGrid(writer);
 		saveClues(writer);
 		writer.newLine();
+		writer.close();
 	}
 	
 	public boolean saveCrossword(Context aContext)
@@ -252,26 +253,27 @@ class CrosswordModel
 			return null;
 		int direction = CLUE_ACROSS;
 		line = reader.readLine();
-		while (line != null && line.length()>0)
-		{
-			MainActivity.debug(2, TAG,"OpenCrossword: clue="+line);
-			if (line.equalsIgnoreCase("Down"))
-			{
-				direction = CLUE_DOWN;
-				line = reader.readLine();
-				if (line == null)
-				{
-					return null;
+		try {
+			while (line != null && line.length() > 0) {
+				MainActivity.debug(1, TAG, String.format("OpenCrossword: clue=[%s]", line));
+				if (line.equalsIgnoreCase("Down")) {
+					direction = CLUE_DOWN;
+					line = reader.readLine();
+					if (line == null) {
+						return null;
+					}
 				}
+				Clue clue = new Clue();
+				clue.setType(direction);
+				String[] words = line.split("\t");
+				words[0] = words[0].replaceFirst("[AD]:", "");
+				clue.setNumber(Integer.parseInt(words[0]));
+				clue.setText(words[1]);
+				crossword.iClues.addClue(clue, direction);
+				line = reader.readLine();
 			}
-			Clue clue = new Clue();
-			clue.setType(direction);
-			String[] words = line.split("\t");
-			words[0] = words[0].replaceFirst("[AD]:", "");
-			clue.setNumber(Integer.parseInt(words[0]));
-			clue.setText(words[1]);
-			crossword.iClues.addClue(clue, direction);
-			line = reader.readLine();
+		} catch (NumberFormatException e) {
+			// end of input
 		}
 		reader.close();
 		return crossword;
