@@ -479,6 +479,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		}
 		store();
 		MainActivity.debug(1,TAG, String.format("<onCrosswordReceived(%s)", iCrossword.crosswordId()));
+		iCrossword.dumpGrid("debug");
 	}
 
 	@Override
