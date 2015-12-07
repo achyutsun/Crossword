@@ -208,6 +208,7 @@ public class BluetoothManager
 
 	private CrosswordModel receiveCrossword(byte[] receive)
 	{
+		Log.i(TAG, String.format("receiveCrossword: %s",new String(receive)));
 		ByteArrayInputStream bais=new ByteArrayInputStream(receive);
 		DataInputStream is=new DataInputStream(bais);
 		try
