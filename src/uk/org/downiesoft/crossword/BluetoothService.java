@@ -407,19 +407,19 @@ public class BluetoothService {
      */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
-        private final DataInputStream mmInStream;
-        private final DataOutputStream mmOutStream;
+        private final InputStream mmInStream;
+        private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
             MainActivity.debug(1, TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
-            DataInputStream tmpIn = null;
-            DataOutputStream tmpOut = null;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
 
             // Get the BluetoothSocket input and output streams
             try {
-                tmpIn = new DataInputStream(socket.getInputStream());
-                tmpOut = new DataOutputStream(socket.getOutputStream());
+                tmpIn = socket.getInputStream();
+                tmpOut = socket.getOutputStream();
             } catch (IOException e) {
                 Log.e(TAG, "temp sockets not created", e);
             }
@@ -438,10 +438,13 @@ public class BluetoothService {
                 try {
                     // Read from the InputStream
 					int count=0;
-					int length = mmInStream.readInt();
+					int length = mmInStream.read();
+					if (length >=0) {
+						length += mmInStream.read()*256;
+					}
 					while (count < length) {
 						bytes = mmInStream.read(buffer, count, length-count);
-						Log.i(TAG, String.format("mConnectedThread read %s bytes = [%s]",bytes,new String(Arrays.copyOfRange(buffer,count,bytes))));
+						Log.i(TAG, String.format("mConnectedThread read %s bytes = [%s]",bytes,new String(Arrays.copyOfRange(buffer,count,count+bytes))));
 						count += bytes;
 					}
                     // Send the obtained bytes to the UI Activity
@@ -463,7 +466,8 @@ public class BluetoothService {
          */
         public void write(byte[] buffer) {
             try {
-				mmOutStream.writeInt(buffer.length);
+				mmOutStream.write(buffer.length % 256);
+				mmOutStream.write(buffer.length / 256);
                 mmOutStream.write(buffer);
 				Log.i(TAG, String.format("mConnectedThread write %s",Arrays.toString(buffer)));
 				
