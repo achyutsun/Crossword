@@ -218,7 +218,7 @@ class CrosswordModel
 		for (int row = 0; row < GRID_SIZE; row++)
 		{
 			line = aReader.readLine();
-			MainActivity.debug(1, TAG, String.format("OpenCrossword: row=[%s]", line));
+			MainActivity.debug(2, TAG, String.format("OpenCrossword: row=[%s]", line));
 			for (int col = 0; col < GRID_SIZE && col < line.length(); col++)
 			{
 				char ch = line.charAt(col);
@@ -253,7 +253,7 @@ class CrosswordModel
 		line = reader.readLine();
 		try {
 			while (line != null && line.length() > 0) {
-				MainActivity.debug(1, TAG, String.format("OpenCrossword: clue=[%s]", line));
+				MainActivity.debug(2, TAG, String.format("OpenCrossword: clue=[%s]", line));
 				if (line.equalsIgnoreCase("Down")) {
 					direction = CLUE_DOWN;
 					line = reader.readLine();
