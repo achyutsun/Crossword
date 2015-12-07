@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import java.util.Arrays;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -435,10 +436,10 @@ public class BluetoothService {
                 try {
                     // Read from the InputStream
 					int count=0;
-					while ((bytes = mmInStream.read(buffer, count, buffer.length)) >= 0) {
+					while ((bytes = mmInStream.read(buffer, count, buffer.length-count)) > 0) {
+						Log.i(TAG, String.format("mConnectedThread read %s bytes = [%s]",bytes,new String(Arrays.copyOfRange(buffer,count,bytes))));
 						count += bytes;
 					}
-					Log.i(TAG, String.format("mConnectedThread read %s",buffer.toString()));
                     // Send the obtained bytes to the UI Activity
                     mHandler.obtainMessage(BluetoothManager.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
@@ -459,7 +460,7 @@ public class BluetoothService {
         public void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
-				Log.i(TAG, String.format("mConnectedThread write %s",buffer.toString()));
+				Log.i(TAG, String.format("mConnectedThread write %s",Arrays.toString(buffer)));
 				
                 // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(BluetoothManager.MESSAGE_WRITE, -1, -1, buffer)
