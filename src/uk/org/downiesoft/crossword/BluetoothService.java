@@ -31,6 +31,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import java.util.Arrays;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -405,19 +407,19 @@ public class BluetoothService {
      */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
+        private final DataInputStream mmInStream;
+        private final DataOutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
             MainActivity.debug(1, TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
+            DataInputStream tmpIn = null;
+            DataOutputStream tmpOut = null;
 
             // Get the BluetoothSocket input and output streams
             try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
+                tmpIn = new DataInputStream(socket.getInputStream());
+                tmpOut = new DataOutputStream(socket.getOutputStream());
             } catch (IOException e) {
                 Log.e(TAG, "temp sockets not created", e);
             }
@@ -429,14 +431,16 @@ public class BluetoothService {
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[4096];
-            int bytes;
+            int bytes = 0;
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     // Read from the InputStream
 					int count=0;
-					while ((bytes = mmInStream.read(buffer, count, buffer.length-count)) > 0) {
+					int length = mmInStream.readInt();
+					while (count < length) {
+						bytes = mmInStream.read(buffer, count, length-count);
 						Log.i(TAG, String.format("mConnectedThread read %s bytes = [%s]",bytes,new String(Arrays.copyOfRange(buffer,count,bytes))));
 						count += bytes;
 					}
@@ -459,6 +463,7 @@ public class BluetoothService {
          */
         public void write(byte[] buffer) {
             try {
+				mmOutStream.writeInt(buffer.length);
                 mmOutStream.write(buffer);
 				Log.i(TAG, String.format("mConnectedThread write %s",Arrays.toString(buffer)));
 				
