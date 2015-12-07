@@ -55,6 +55,7 @@ public class BluetoothManager
 //	private CrosswordModel mCrossword;
 	// The Handler that gets information back from the BluetoothService
 	private final MessageHandler mHandler = new MessageHandler();
+	private boolean mIsServer;
 
 	private class MessageHandler extends Handler 
 	{
@@ -75,9 +76,11 @@ public class BluetoothManager
 							setStatus(mActivity.getString(R.string.title_connected_to, mConnectedDeviceName));
 							break;
 						case BluetoothService.STATE_CONNECTING:
+							mIsServer = false;
 							setStatus(R.string.title_connecting);
 							break;
 						case BluetoothService.STATE_LISTEN:
+							mIsServer = true;
 							setStatus(R.string.title_not_connected);
 							break;
 						case BluetoothService.STATE_NONE:
@@ -103,10 +106,9 @@ public class BluetoothManager
 					Toast.makeText(mActivity.getApplicationContext(), "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT)
 							.show();
 					crossword=CrosswordModel.getInstance();
-					if (D)
-						MainActivity.debug(1, TAG, "crossword valid: " + crossword.isValid());
-					if (crossword.isValid())
+					if (mIsServer && crossword.isValid()) {
 						sendCrossword(crossword);
+					}
 					break;
 				case MESSAGE_TOAST:
 					Toast.makeText(mActivity.getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
