@@ -202,8 +202,6 @@ class CrosswordModel
 		{
 			DataOutputStream is = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(path))));
 			saveCrossword(is);
-			is.flush();
-			is.close();		
 		}
 		catch (IOException e)
 		{
