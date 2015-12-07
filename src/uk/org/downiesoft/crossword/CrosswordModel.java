@@ -207,20 +207,20 @@ class CrosswordModel
 		}
 		catch (IOException e)
 		{
+			e.printStackTrace();
 			Toast.makeText(aContext, R.string.save_failed, Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void readGrid(BufferedReader aReader, CrosswordModel aCrossword) throws IOException
 	{
 		String line;
 		for (int row = 0; row < GRID_SIZE; row++)
 		{
 			line = aReader.readLine();
-			MainActivity.debug(2, TAG,"OpenCrossword: row="+line);
+			MainActivity.debug(1, TAG, String.format("OpenCrossword: row=[%s]", line));
 			for (int col = 0; col < GRID_SIZE && col < line.length(); col++)
 			{
 				char ch = line.charAt(col);
@@ -232,10 +232,10 @@ class CrosswordModel
 		}		
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void readCrosswordId(BufferedReader aReader) throws IOException
 	{
 		String line = aReader.readLine();
+		MainActivity.debug(1, TAG, String.format("OpenCrossword: id=[%s]", line));
 		if (line == null || !line.regionMatches(0, CROSSWORD_HEADER, 0, CROSSWORD_HEADER.length()))
 			iCrosswordId=-1;
 		String[] id = line.split("\t");

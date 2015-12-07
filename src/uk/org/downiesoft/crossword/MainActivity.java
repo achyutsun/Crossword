@@ -326,8 +326,9 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	}
 
 	public void setCrossword(CrosswordModel aCrossword) {
-		CrosswordModel.setInstance(aCrossword);
 		iCrossword = aCrossword;
+		MainActivity.debug(1,TAG,String.format("setCrossword(%s)",iCrossword.crosswordId()));
+		CrosswordModel.setInstance(iCrossword);
 		iCluesFragment.setCrossword(iCrossword);
 		iGridFragment.setCrossword(iCrossword);
 		iGridFragment.resetClue();
@@ -451,10 +452,12 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 
 	@Override
 	public void onCrosswordReceived(final CrosswordModel aCrossword) {
+		MainActivity.debug(1,TAG, String.format(">onCrosswordReceived(%s)", iCrossword.crosswordId()));
 		if (iCrossword.isValid()) {
 			iCrossword.saveCrossword(this);
 		}
 		if (iCrossword.crosswordId() != aCrossword.crosswordId()) {
+			iCrossword = aCrossword;
 			setCrossword(aCrossword);
 		} else {
 			for (int col = 0; col < CrosswordModel.GRID_SIZE; col++) {
@@ -474,6 +477,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		if (iGridFragment != null) {
 			iGridFragment.update();
 		}
+		MainActivity.debug(1,TAG, String.format("<onCrosswordReceived(%s)", iCrossword.crosswordId()));
 	}
 
 	@Override
