@@ -214,13 +214,13 @@ public class BluetoothManager
 
 	private CrosswordModel receiveCrossword(byte[] receive)
 	{
-		Log.i(TAG, String.format("receiveCrossword: %s bytes",receive.length));
+		MainActivity.debug(1,TAG, String.format(">receiveCrossword: %s bytes",receive.length));
 		ByteArrayInputStream bais=new ByteArrayInputStream(receive);
 		try
 		{
-			CrosswordModel crossword=new CrosswordModel();
-			crossword.openCrossword(bais);
+			CrosswordModel crossword = CrosswordModel.openCrossword(bais);
 			bais.close();
+			MainActivity.debug(1,TAG, String.format("<receiveCrossword: %s",crossword.crosswordId()));
 			return crossword;
 		}
 		catch (IOException e)

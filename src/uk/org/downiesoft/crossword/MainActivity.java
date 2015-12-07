@@ -452,7 +452,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 
 	@Override
 	public void onCrosswordReceived(final CrosswordModel aCrossword) {
-		MainActivity.debug(1,TAG, String.format(">onCrosswordReceived(%s)", iCrossword.crosswordId()));
+		MainActivity.debug(1,TAG, String.format(">onCrosswordReceived(%s)->%s", iCrossword.crosswordId(), aCrossword.crosswordId()));
 		if (iCrossword.isValid()) {
 			iCrossword.saveCrossword(this);
 		}
