@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
+import java.io.InputStream;
 
 public class BluetoothManager
 {
@@ -188,13 +189,12 @@ public class BluetoothManager
 			return;
 		}
 
-		ByteArrayOutputStream baos=new ByteArrayOutputStream(4096);
-		DataOutputStream os=new DataOutputStream(baos);
+		ByteArrayOutputStream baos=new ByteArrayOutputStream();
 		try
 		{
-			aCrossword.saveCrossword(os);
-			os.close();
+			aCrossword.saveCrossword(baos);
 			byte[] send=baos.toByteArray();
+			baos.close();
 			// Check that there's actually something to send
 			if (send.length>0)
 			{
@@ -210,12 +210,11 @@ public class BluetoothManager
 	{
 		Log.i(TAG, String.format("receiveCrossword: %s",new String(receive)));
 		ByteArrayInputStream bais=new ByteArrayInputStream(receive);
-		DataInputStream is=new DataInputStream(bais);
 		try
 		{
 			CrosswordModel crossword=new CrosswordModel();
-			crossword.openCrossword(is);
-			is.close();
+			crossword.openCrossword(bais);
+			bais.close();
 			return crossword;
 		}
 		catch (IOException e)

@@ -1,20 +1,23 @@
 package uk.org.downiesoft.crossword;
 
-import java.io.BufferedInputStream;
+import android.content.Context;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.os.Environment;
+import android.widget.Toast;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import android.content.Context;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.os.Environment;
-import android.util.Log;
-import android.widget.Toast;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 class CrosswordModel
 {
@@ -139,45 +142,53 @@ class CrosswordModel
 		iCrosswordValid = false;
 	}
 
-	public void saveCrosswordId(DataOutputStream aStream) throws IOException
+	public void saveCrosswordId(BufferedWriter aWriter) throws IOException
 	{
-		aStream.writeBytes(CROSSWORD_HEADER + "\t" + Integer.toString(iCrosswordId) + "\n");
+		aWriter.write(CROSSWORD_HEADER + "\t" + Integer.toString(iCrosswordId));
+		aWriter.newLine();
 	}
 
-	public void saveGrid(DataOutputStream aStream) throws IOException
+	public void saveGrid(BufferedWriter aWriter) throws IOException
 	{
 		for (int row = 0; row < GRID_SIZE; row++)
 		{
 			for (int col = 0; col < GRID_SIZE; col++)
 			{
 				int val = value(col, row);
-				aStream.writeByte(val == SQUARE_BLANK ? '*' : (val == SQUARE_NONBLANK ? ' ' : val));
+				aWriter.write(val == SQUARE_BLANK ? '*' : (val == SQUARE_NONBLANK ? ' ' : val));
 			}
-			aStream.writeByte(10);
+			aWriter.newLine();
 		}		
 	}
 	
-	public void saveClues(DataOutputStream aStream) throws IOException
+	public void saveClues(BufferedWriter aWriter) throws IOException
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			if (i == 0)
-				aStream.writeBytes("Across\n");
-			if (i == 1)
-				aStream.writeBytes("Down\n");
+			if (i == 0) {
+				aWriter.write("Across");
+				aWriter.newLine();
+			}
+			if (i == 1) {
+				aWriter.write("Down");
+				aWriter.newLine();
+			}
 			for (int j = 0; j < iClues.count(i); j++)
 			{
-				aStream.writeBytes(iClues.getClueByIndex(i, j).toString() + "\n");
+				aWriter.write(iClues.getClueByIndex(i, j).toString());
+				aWriter.newLine();
 			}
 		}
 		
 	}
 	
-	public void saveCrossword(DataOutputStream aStream) throws IOException
+	public void saveCrossword(OutputStream aStream) throws IOException
 	{
-		saveCrosswordId(aStream);
-		saveGrid(aStream);
-		saveClues(aStream);
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(aStream));
+		saveCrosswordId(writer);
+		saveGrid(writer);
+		saveClues(writer);
+		writer.newLine();
 	}
 	
 	public boolean saveCrossword(Context aContext)
@@ -202,12 +213,12 @@ class CrosswordModel
 	}
 
 	@SuppressWarnings("deprecation")
-	public void readGrid(DataInputStream is, CrosswordModel aCrossword) throws IOException
+	public void readGrid(BufferedReader aReader, CrosswordModel aCrossword) throws IOException
 	{
 		String line;
 		for (int row = 0; row < GRID_SIZE; row++)
 		{
-			line = is.readLine();
+			line = aReader.readLine();
 			MainActivity.debug(2, TAG,"OpenCrossword: row="+line);
 			for (int col = 0; col < GRID_SIZE && col < line.length(); col++)
 			{
@@ -221,33 +232,33 @@ class CrosswordModel
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void readCrosswordId(DataInputStream aStream) throws IOException
+	public void readCrosswordId(BufferedReader aReader) throws IOException
 	{
-		String line = aStream.readLine();
+		String line = aReader.readLine();
 		if (line == null || !line.regionMatches(0, CROSSWORD_HEADER, 0, CROSSWORD_HEADER.length()))
 			iCrosswordId=-1;
 		String[] id = line.split("\t");
 		iCrosswordId=Integer.parseInt(id[1]);
 	}
 	
-	@SuppressWarnings("deprecation")
-	public static CrosswordModel openCrossword(DataInputStream is) throws IOException
+	public static CrosswordModel openCrossword(InputStream is) throws IOException
 	{
 		CrosswordModel crossword=new CrosswordModel();
-		crossword.readCrosswordId(is);
-		crossword.readGrid(is,crossword);
-		String line = is.readLine();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		crossword.readCrosswordId(reader);
+		crossword.readGrid(reader,crossword);
+		String line = reader.readLine();
 		if (!line.equalsIgnoreCase("Across"))
 			return null;
 		int direction = CLUE_ACROSS;
-		line = is.readLine();
-		while (line != null)
+		line = reader.readLine();
+		while (line != null && line.length()>0)
 		{
 			MainActivity.debug(2, TAG,"OpenCrossword: clue="+line);
 			if (line.equalsIgnoreCase("Down"))
 			{
 				direction = CLUE_DOWN;
-				line = is.readLine();
+				line = reader.readLine();
 				if (line == null)
 				{
 					return null;
@@ -260,8 +271,9 @@ class CrosswordModel
 			clue.setNumber(Integer.parseInt(words[0]));
 			clue.setText(words[1]);
 			crossword.iClues.addClue(clue, direction);
-			line = is.readLine();
+			line = reader.readLine();
 		}
+		reader.close();
 		return crossword;
 	}
 	
@@ -270,14 +282,15 @@ class CrosswordModel
 		CrosswordModel crossword=null;
 		try
 		{
-			DataInputStream is = new DataInputStream(new BufferedInputStream(new FileInputStream(aFile)));
+			InputStream is = new FileInputStream(aFile);
 			crossword=CrosswordModel.openCrossword(is);
 			is.close();
+			crossword.iCrosswordValid = true;
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 		}
-		crossword.iCrosswordValid = true;
 		return crossword;
 	}
 

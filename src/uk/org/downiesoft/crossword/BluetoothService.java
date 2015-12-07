@@ -464,15 +464,15 @@ public class BluetoothService {
          * Write to the connected OutStream.
          * @param buffer  The bytes to write
          */
-        public void write(byte[] buffer) {
+        public void write(byte[] aBuffer) {
             try {
-				mmOutStream.write(buffer.length % 256);
-				mmOutStream.write(buffer.length / 256);
-                mmOutStream.write(buffer);
-				Log.i(TAG, String.format("mConnectedThread write %s",Arrays.toString(buffer)));
+				mmOutStream.write(aBuffer.length % 256);
+				mmOutStream.write(aBuffer.length / 256);
+                mmOutStream.write(aBuffer);
+				Log.i(TAG, String.format("mConnectedThread write %s",Arrays.toString(aBuffer)));
 				
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(BluetoothManager.MESSAGE_WRITE, -1, -1, buffer)
+                mHandler.obtainMessage(BluetoothManager.MESSAGE_WRITE, -1, -1, aBuffer)
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
