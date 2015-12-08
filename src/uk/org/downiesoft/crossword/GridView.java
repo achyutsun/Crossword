@@ -285,6 +285,7 @@ public class GridView extends View {
 
 	@Override
 	public void onDraw(Canvas canvas) {
+		iPaint.reset();
 		canvas.drawColor(Color.TRANSPARENT,PorterDuff.Mode.CLEAR);
 		canvas.drawBitmap(mBackBmp, mMatrix, iPaint);
 		//MainActivity.debug(1, TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));

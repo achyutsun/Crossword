@@ -204,7 +204,7 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	}
 
 	public void setCrossword(CrosswordModel aCrossword) {
-		MainActivity.debug(1, TAG,String.format("setCrossword(%s): %s",aCrossword, this));
+		MainActivity.debug(1, TAG,String.format("setCrossword(%s): %s",aCrossword, iCrossword.isValid()));
 		iCrossword = aCrossword;
 		if (iGridView != null) {
 			iGridView.setCrossword(iCrossword);
