@@ -270,11 +270,13 @@ class CrosswordModel
 				crossword.iClues.addClue(clue, direction);
 				line = reader.readLine();
 			}
+			crossword.iCrosswordValid = true;
+			reader.close();
+			return crossword;
 		} catch (NumberFormatException e) {
-			// end of input
+			crossword.iCrosswordValid = false;
+			return null;
 		}
-		reader.close();
-		return crossword;
 	}
 	
 	public static CrosswordModel openCrossword(File aFile)
