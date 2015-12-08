@@ -769,7 +769,7 @@ class CrosswordModel
 
 	@Override
 	public String toString() {
-		return String.format("%s(%s)",TAG,this.iCrosswordId);
+		return String.format("CrosswordModel{%s}",this.iCrosswordId);
 	}
 
 }

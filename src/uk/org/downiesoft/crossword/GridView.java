@@ -309,6 +309,8 @@ public class GridView extends View {
 				drawLetters(mBackCanvas);
 			}
 			highlightCurrentClue(true, false, mBackCanvas);		
+		} else {
+			MainActivity.debug(1, TAG,String.format("redraw - no back canvas"));			
 		}
 	}
 
@@ -323,6 +325,7 @@ public class GridView extends View {
 	public void setCrossword(CrosswordModel aCrossword) {
 		MainActivity.debug(1, TAG,String.format("setCrossword(%s): %s",aCrossword, this));
 		iCrossword = aCrossword;
+		iCrossword.dumpGrid(TAG);
 		redraw();
 		invalidate();
 	}
