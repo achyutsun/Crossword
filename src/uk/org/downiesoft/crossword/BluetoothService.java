@@ -42,7 +42,7 @@ import java.io.DataOutputStream;
  */
 public class BluetoothService {
     // Debugging
-    private static final String TAG = "BluetoothManagerService";
+    private static final String TAG = BluetoothService.class.getName();
     private static final boolean D = true;
 
     // Name for the SDP record when creating server socket
@@ -310,7 +310,7 @@ public class BluetoothService {
                     }
                 }
             }
-            if (D) Log.i(TAG, "END mAcceptThread, socket Type: " + mSocketType);
+            if (D) MainActivity.debug(1,TAG, "END mAcceptThread, socket Type: " + mSocketType);
 
         }
 
@@ -353,7 +353,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
+            MainActivity.debug(1,TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
             setName("ConnectThread" + mSocketType);
 
             // Always cancel discovery because it will slow down a connection
@@ -429,7 +429,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            Log.i(TAG, "BEGIN mConnectedThread");
+            MainActivity.debug(1,TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[4096];
             int bytes = 0;
 
@@ -444,10 +444,10 @@ public class BluetoothService {
 					}
 					while (count < length) {
 						bytes = mmInStream.read(buffer, count, length-count);
-						Log.i(TAG, String.format("mConnectedThread read %s bytes",bytes));
+						MainActivity.debug(1,TAG, String.format("mConnectedThread read %s bytes",bytes));
 						count += bytes;
 					}
-					Log.i(TAG, String.format("mConnectedThread read %s bytes total",count));
+					MainActivity.debug(1,TAG, String.format("mConnectedThread read %s bytes total",count));
                     // Send the obtained bytes to the UI Activity
                     mHandler.obtainMessage(BluetoothManager.MESSAGE_READ, count, -1, Arrays.copyOf(buffer,count))
                             .sendToTarget();
@@ -455,7 +455,7 @@ public class BluetoothService {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
                     // Start the service over to restart listening mode
-                    //BluetoothService.this.start();
+                    BluetoothService.this.start();
                     break;
                 }
             }
@@ -470,7 +470,7 @@ public class BluetoothService {
 				mmOutStream.write(aBuffer.length % 256);
 				mmOutStream.write(aBuffer.length / 256);
                 mmOutStream.write(aBuffer);
-				Log.i(TAG, String.format("mConnectedThread write %s bytes",aBuffer.length));				
+				MainActivity.debug(1,TAG, String.format("mConnectedThread write %s bytes",aBuffer.length));				
                 // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(BluetoothManager.MESSAGE_WRITE, -1, -1, aBuffer)
                         .sendToTarget();

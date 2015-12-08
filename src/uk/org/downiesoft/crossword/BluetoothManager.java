@@ -25,7 +25,7 @@ public class BluetoothManager
 		public void onCrosswordReceived(CrosswordModel aCrossword);
 	}
 
-	private static final String TAG = "BluetoothManager";
+	private static final String TAG = BluetoothManager.class.getName();
 	private static final boolean D = true;
 
 	// Message types sent from the BluetoothService Handler
@@ -52,7 +52,6 @@ public class BluetoothManager
 	// Member object for the chat services
 	private BluetoothService mBTService = null;
 	private BluetoothListener mListener;
-//	private CrosswordModel mCrossword;
 	// The Handler that gets information back from the BluetoothService
 	private final MessageHandler mHandler = new MessageHandler();
 	private boolean mIsServer;
@@ -69,7 +68,7 @@ public class BluetoothManager
 			{
 				case MESSAGE_STATE_CHANGE:
 					if (D)
-						Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+						MainActivity.debug(1,TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
 					switch (msg.arg1)
 					{
 						case BluetoothService.STATE_CONNECTED:
@@ -90,12 +89,12 @@ public class BluetoothManager
 					break;
 				case MESSAGE_WRITE:
 					if (D)
-						Log.i(TAG, String.format("MESSAGE_WRITE: %s bytes",((byte[])msg.obj).length));
+						MainActivity.debug(1,TAG, String.format("MESSAGE_WRITE: %s bytes",((byte[])msg.obj).length));
 					break;
 				case MESSAGE_READ:
 					byte[] readBuf = (byte[]) msg.obj;
 					if (D)
-						Log.i(TAG, String.format("MESSAGE_READ: %s bytes",(readBuf.length)));
+						MainActivity.debug(1,TAG, String.format("MESSAGE_READ: %s bytes",(readBuf.length)));
 					crossword=receiveCrossword(readBuf);
 					if (mListener != null && crossword!=null)
 						mListener.onCrosswordReceived(crossword);

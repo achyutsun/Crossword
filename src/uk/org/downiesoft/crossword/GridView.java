@@ -288,7 +288,6 @@ public class GridView extends View {
 		iPaint.reset();
 		canvas.drawColor(Color.TRANSPARENT,PorterDuff.Mode.CLEAR);
 		canvas.drawBitmap(mBackBmp, mMatrix, iPaint);
-		//MainActivity.debug(1, TAG,String.format("onDraw finish %d millisecs",System.currentTimeMillis()-start));
 	}
 
 	public void redraw() {
@@ -326,7 +325,6 @@ public class GridView extends View {
 	public void setCrossword(CrosswordModel aCrossword) {
 		MainActivity.debug(1, TAG,String.format("setCrossword(%s): %s",aCrossword, this));
 		iCrossword = aCrossword;
-		iCrossword.dumpGrid(TAG);
 		redraw();
 		invalidate();
 	}
