@@ -23,6 +23,7 @@ public class BluetoothManager
 	public interface BluetoothListener
 	{
 		public void onCrosswordReceived(CrosswordModel aCrossword);
+		public void setBTStatus(String aSubtitle);
 	}
 
 	private static final String TAG = BluetoothManager.class.getName();
@@ -154,7 +155,7 @@ public class BluetoothManager
 	{
 		if (mBTService!=null)
 		{
-			mBTService.start();
+			mBTService.listen();
 		}
 	}
 	
@@ -238,19 +239,18 @@ public class BluetoothManager
 			actionBar.setSubtitle(resId);
 	}
 
-	private final void setStatus(CharSequence subTitle)
+	private final void setStatus(String subTitle)
 	{
-		final ActionBar actionBar = mActivity.getActionBar();
-		if (actionBar != null)
-			actionBar.setSubtitle(subTitle);
+		if (mListener != null) {
+			mListener.setBTStatus(subTitle);
+		}
 	}
-
 
 	private final void clearStatus()
 	{
-		final ActionBar actionBar = mActivity.getActionBar();
-		if (actionBar != null)
-			actionBar.setSubtitle(null);		
+		if (mListener != null) {
+			mListener.setBTStatus(null);
+		}
 	}
 	
 	public void onActivityResult(int requestCode, int resultCode, Intent data)

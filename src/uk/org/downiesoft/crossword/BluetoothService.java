@@ -98,7 +98,7 @@ public class BluetoothService {
     /**
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume() */
-    public synchronized void start() {
+    public synchronized void listen() {
         if (D) MainActivity.debug(1, TAG, "start");
 
         // Cancel any thread attempting to make a connection
@@ -225,9 +225,7 @@ public class BluetoothService {
         bundle.putString(BluetoothManager.TOAST, "Unable to connect device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
-
-        // Start the service over to restart listening mode
-        BluetoothService.this.start();
+		stop(false);
     }
 
     /**
@@ -240,9 +238,7 @@ public class BluetoothService {
         bundle.putString(BluetoothManager.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
-
-        // Start the service over to restart listening mode
-        //BluetoothService.this.start();
+		stop(false);
     }
 
     /**
@@ -454,8 +450,6 @@ public class BluetoothService {
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
-                    // Start the service over to restart listening mode
-                    BluetoothService.this.start();
                     break;
                 }
             }

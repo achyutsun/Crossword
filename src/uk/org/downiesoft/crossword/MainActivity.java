@@ -312,6 +312,16 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	}
 
 	@Override
+	public void setBTStatus(String aSubtitle) {
+		if (aSubtitle != null) {
+			getActionBar().setSubtitle(aSubtitle);			
+		} else {
+			setCrosswordTitle();
+		}
+	}
+
+
+	@Override
 	public void onFileSelected(final File aFile) {
 		CrosswordModel newCrossword = CrosswordModel.openCrossword(aFile);
 		MainActivity.debug(1, TAG, String.format("onFileSelected(%s):%s", aFile, newCrossword));
