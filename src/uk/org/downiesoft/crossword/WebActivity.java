@@ -1,14 +1,8 @@
 package uk.org.downiesoft.crossword;
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.FragmentManager;
-import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.widget.ListView;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 
 public class WebActivity extends FragmentActivity
 {

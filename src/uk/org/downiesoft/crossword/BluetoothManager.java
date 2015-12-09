@@ -1,11 +1,5 @@
 package uk.org.downiesoft.crossword;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -15,7 +9,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class BluetoothManager
 {
@@ -200,7 +196,7 @@ public class BluetoothManager
 		{
 			aCrossword.saveCrossword(baos);
 			byte[] send=baos.toByteArray();
-			Log.i(TAG,String.format("sendCrossword(#%s): %s bytes",aCrossword.crosswordId(),send.length));
+			Log.i(TAG,String.format("sendCrossword(#%s): %s bytes",aCrossword.getCrosswordId(),send.length));
 			baos.close();
 			// Check that there's actually something to send
 			if (send.length>0)
@@ -222,7 +218,7 @@ public class BluetoothManager
 		{
 			CrosswordModel crossword = CrosswordModel.openCrossword(bais);
 			bais.close();
-			MainActivity.debug(1,TAG, String.format("<receiveCrossword: %s",crossword.crosswordId()));
+			MainActivity.debug(1,TAG, String.format("<receiveCrossword: %s",crossword.getCrosswordId()));
 			return crossword;
 		}
 		catch (IOException e)

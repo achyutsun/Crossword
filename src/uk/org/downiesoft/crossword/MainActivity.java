@@ -7,8 +7,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,17 +38,16 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 
 	private static final int sDebug = 1;
 
-	private CrosswordModel iCrossword;
-	private GridFragment iGridFragment;
-	private CluesFragment iCluesFragment;
-	private SharedPreferences iSettings;
-	private WebManager iWebManager;
-	private Handler iTitleHandler;
-	private Intent iServerIntent;
-	private BluetoothManager iBluetoothManager;
-	private boolean iCrosswordReceived = false;
-	private boolean iBTServer = false;
-	private boolean iBTEnabled = false;
+	private CrosswordModel mCrossword;
+	private GridFragment mGridFragment;
+	private CluesFragment mCluesFragment;
+	private WebManager mWebManager;
+	private Handler mTitleHandler;
+	private Intent mServerIntent;
+	private BluetoothManager mBluetoothManager;
+	private boolean mCrosswordReceived = false;
+	private boolean mBTServer = false;
+	private boolean mBTEnabled = false;
 	private int mClueDirection = -1;
 	private int mCluePosition = -1;
 
@@ -60,17 +57,10 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 			Log.d(aTag, aText);
 		}
 	}
-	private class TitleSetter implements Runnable {
 
-		@Override
-		public void run() {
-			iTitleHandler.removeCallbacks(this);
-			setCrosswordTitle();
-		}
-	};
-
-	private class ImportPuzzleTask extends AsyncTask<String, Void, Void> {
+	private class ImportPuzzleTask extends AsyncTask<String, Void, CrosswordModel> {
 		ProgressDialog mDialog;
+		CrosswordModel mCrossword;
 
 		@Override
 		protected void onPreExecute() {
@@ -82,12 +72,13 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		}
 
 		@Override
-		protected Void doInBackground(String... html) {
+		protected CrosswordModel doInBackground(String... html) {
 
 			try {
 				DataInputStream is = new DataInputStream(new ByteArrayInputStream(html[0].getBytes()));
-				MainActivity.this.iCrossword.importCrossword(is);
+				CrosswordModel crossword = CrosswordModel.importCrossword(is);
 				is.close();
+				return crossword;
 			} catch (Exception e) {
 				MainActivity.debug(1, TAG, e.toString() + ":" + e.getMessage());
 				e.printStackTrace();
@@ -96,15 +87,15 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(CrosswordModel aCrossword) {
 			mDialog.dismiss();
-			iGridFragment.setCrossword(iCrossword);
-			iGridFragment.resetClue();
-			iTitleHandler.post(new TitleSetter());
+			if (aCrossword != null) {
+				setCrossword(aCrossword);
+			}
 		}
 	}
 
-	private class ImportSolutionTask extends AsyncTask<String, Void, Boolean> {
+	private class ImportSolutionTask extends AsyncTask<String, Void, CrosswordModel> {
 		ProgressDialog mDialog;
 
 		@Override
@@ -117,26 +108,26 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		}
 
 		@Override
-		protected Boolean doInBackground(String... html) {
+		protected CrosswordModel doInBackground(String... html) {
 			MainActivity.debug(1, TAG, String.format("ImportSolutionTask: %s", html[0]));
-			boolean retval = false;
+			CrosswordModel solution = null;
 			try {
 				DataInputStream is = new DataInputStream(new ByteArrayInputStream(html[0].getBytes()));
-				CrosswordModel solution = new CrosswordModel();
-				retval = solution.importCrossword(is);
-				retval = retval && iCrossword.mapSolution(solution);
+				solution = CrosswordModel.importCrossword(is);
 				is.close();
 			} catch (Exception e) {
 				MainActivity.debug(1, TAG, e.toString() + ":" + e.getMessage());
 				e.printStackTrace();
 			}
-			return Boolean.valueOf(retval);
+			return solution;
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result) {
+		protected void onPostExecute(CrosswordModel solution) {
 			mDialog.dismiss();
-			if (!result) {
+			if (solution != null) {
+				mCrossword.mapSolution(solution);
+			} else {
 				Toast.makeText(MainActivity.this, R.string.text_invalid_solution, Toast.LENGTH_SHORT).show();
 			}
 		}
@@ -144,49 +135,43 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		MainActivity.debug(1, TAG, String.format("onCreate(%s)", iCrossword));
+		MainActivity.debug(1, TAG, String.format("onCreate(%s)", mCrossword));
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_crossword);
-		iCrossword = CrosswordModel.getInstance();
-		iSettings = getSharedPreferences("CROSSWORD_SETTINGS", Context.MODE_PRIVATE);
-		iTitleHandler = new Handler();
+		mCrossword = CrosswordModel.getInstance();
+		mTitleHandler = new Handler();
 		restore();
-		if (iGridFragment == null)
-			iGridFragment = new GridFragment();
-		if (iCluesFragment == null) {
-			iCluesFragment = new CluesFragment();
+		if (mGridFragment == null)
+			mGridFragment = new GridFragment();
+		if (mCluesFragment == null) {
+			mCluesFragment = new CluesFragment();
 		}
 		restore();
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(R.id.fragmentContainer, iGridFragment, GridFragment.TAG).commit();
-		fm.beginTransaction().replace(R.id.cluesContainer, iCluesFragment, CluesFragment.TAG).commit();
+		fm.beginTransaction().replace(R.id.fragmentContainer, mGridFragment, GridFragment.TAG).commit();
+		fm.beginTransaction().replace(R.id.cluesContainer, mCluesFragment, CluesFragment.TAG).commit();
 	}
 
 	@Override
 	public void onStart() {
-		MainActivity.debug(1, TAG, String.format("onStart(%s)", iCrossword));
+		MainActivity.debug(1, TAG, String.format("onStart(%s)", mCrossword));
 		super.onStart();
-		// if (iBluetoothManager!=null && iBluetoothManager.isActive())
-		// iBluetoothManager.setup();
-
 	}
 
 	@Override
 	public void onResume() {
-		MainActivity.debug(1, TAG, String.format("onResume(%s)", iCrossword));
+		MainActivity.debug(1, TAG, String.format("onResume(%s)", mCrossword));
 		super.onResume();
-		if (iCrossword.isValid())
+		if (mCrossword.isValid())
 			setCrosswordTitle();
-		// if (iBluetoothManager!=null && iBluetoothManager.isActive())
-		// iBluetoothManager.listen();
 	}
 
 	@Override
 	public void onPause() {
-		MainActivity.debug(1, TAG, String.format("onPause(%s)", iCrossword));
+		MainActivity.debug(1, TAG, String.format("onPause(%s)", mCrossword));
 		super.onPause();
-		if (iCrossword.isValid()) {
-			iCrossword.saveCrossword(this);
+		if (mCrossword.isValid() && mCrossword.isModified()) {
+			mCrossword.saveCrossword(this);
 		}
 		store();
 	}
@@ -194,15 +179,15 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	@Override
 	public void onDestroy() {
 		super.onStop();
-		if (iBluetoothManager != null)
-			iBluetoothManager.stop(false);
+		if (mBluetoothManager != null)
+			mBluetoothManager.stop(false);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.crossword, menu);
-		if (iBluetoothManager != null && iBluetoothManager.isActive()) {
+		if (mBluetoothManager != null && mBluetoothManager.isActive()) {
 			menu.removeItem(R.id.action_bluetooth_on);
 		} else {
 			menu.removeItem(R.id.action_bluetooth_off);
@@ -218,7 +203,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 			off = off || menu.getItem(i).getItemId() == R.id.action_bluetooth_off;
 			on = on || menu.getItem(i).getItemId() == R.id.action_bluetooth_on;
 		}
-		if (iBluetoothManager != null && iBluetoothManager.isActive()) {
+		if (mBluetoothManager != null && mBluetoothManager.isActive()) {
 			if (!off)
 				menu.add(Menu.NONE, R.id.action_bluetooth_off, 100, R.string.action_bluetooth_off);
 			if (on)
@@ -259,8 +244,8 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 						{
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
-								iCrossword.clearAnswers();
-								iGridFragment.setCrossword(iCrossword);
+								mCrossword.clearAnswers();
+								mGridFragment.setCrossword(mCrossword);
 								dialog.dismiss();
 							}
 						});
@@ -287,10 +272,10 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 				}
 			case R.id.action_spell:
 				{
-					iServerIntent = new Intent(MainActivity.this, SpellActivity.class);
-					iServerIntent.putExtra("uk.org.downiesoft.crossword.wordPattern", iGridFragment.getCluePattern());
-					iServerIntent.putExtra("uk.org.downiesoft.crossword.clueText", iGridFragment.getClueText());
-					startActivityForResult(iServerIntent, SpellActivity.REQUEST_CROSSWORD);
+					mServerIntent = new Intent(MainActivity.this, SpellActivity.class);
+					mServerIntent.putExtra("uk.org.downiesoft.crossword.wordPattern", mGridFragment.getCluePattern());
+					mServerIntent.putExtra("uk.org.downiesoft.crossword.clueText", mGridFragment.getClueText());
+					startActivityForResult(mServerIntent, SpellActivity.REQUEST_CROSSWORD);
 					return true;
 				}
 		}
@@ -300,9 +285,9 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	void setCrosswordTitle() {
 		String title = getString(R.string.crossword_app_name);
 		String subtitle = null;
-		if (iCrossword.isValid() && iWebManager != null) {
-			title = Integer.toString(iCrossword.crosswordId());
-			WebInfo info = iWebManager.getCrossword(iCrossword.crosswordId());
+		if (mCrossword.isValid() && mWebManager != null) {
+			title = Integer.toString(mCrossword.getCrosswordId());
+			WebInfo info = mWebManager.getCrossword(mCrossword.getCrosswordId());
 			if (info != null) {
 				subtitle = info.dateString();
 			}
@@ -328,46 +313,44 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		if (newCrossword == null) {
 			Toast.makeText(MainActivity.this, R.string.open_failed, Toast.LENGTH_LONG).show();
 		} else {
+			newCrossword.setModified(false);
 			setCrossword(newCrossword);
-			Editor editor = iSettings.edit();
-			editor.putString("current_file", aFile.toString());
-			editor.commit();
 		}
 	}
 
 	public void setCrossword(CrosswordModel aCrossword) {
-		iCrossword = aCrossword;
-		MainActivity.debug(1,TAG,String.format("setCrossword(%s)",iCrossword.crosswordId()));
-		CrosswordModel.setInstance(iCrossword);
-		iCluesFragment.setCrossword(iCrossword);
-		iGridFragment.setCrossword(iCrossword);
-		iGridFragment.resetClue();
+		mCrossword = aCrossword;
+		MainActivity.debug(1,TAG,String.format("setCrossword(%s)",mCrossword.getCrosswordId()));
+		CrosswordModel.setInstance(mCrossword);
+		mCluesFragment.setCrossword(mCrossword);
+		mGridFragment.setCrossword(mCrossword);
+		mGridFragment.resetClue();
 		setCrosswordTitle();
 	}
 
 	public void store() {
-		if (iCrossword.isValid()) {
+		if (mCrossword.isValid()) {
 			try {
 				DataOutputStream os = new DataOutputStream(openFileOutput("current.xwd", Context.MODE_PRIVATE));
-				iCrossword.externalize(os);
+				mCrossword.externalize(os);
 				os.flush();
 				os.close();
-				iGridFragment.setCrossword(iCrossword);
+				mGridFragment.setCrossword(mCrossword);
 			} catch (IOException e) {
 
 			}
 		}
-		if (iWebManager != null)
-			iWebManager.store(this);
+		if (mWebManager != null)
+			mWebManager.store(this);
 	}
 
 	public void restore() {
-		iWebManager = WebManager.getInstance();
-		iWebManager.restore(this);
+		mWebManager = WebManager.getInstance();
+		mWebManager.restore(this);
 
 		try {
 			DataInputStream is = new DataInputStream(openFileInput("current.xwd"));
-			iCrossword.internalize(is);
+			mCrossword.internalize(is);
 			is.close();
 			setCrosswordTitle();
 		} catch (IOException e) {
@@ -392,18 +375,18 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					iCrosswordReceived = false;
-					iBTServer = false;
-					iBluetoothManager = BluetoothManager.getInstance(MainActivity.this, MainActivity.this);
-					iBluetoothManager.setup();
-					if (!iBluetoothManager.bluetoothEnabled()) {
-						iBTEnabled = false;
+					mCrosswordReceived = false;
+					mBTServer = false;
+					mBluetoothManager = BluetoothManager.getInstance(MainActivity.this, MainActivity.this);
+					mBluetoothManager.setup();
+					if (!mBluetoothManager.bluetoothEnabled()) {
+						mBTEnabled = false;
 						Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 						startActivityForResult(enableIntent, MainActivity.REQUEST_ENABLE_BT);
 					} else {
-						iBTEnabled = true;
-						iServerIntent = new Intent(MainActivity.this, DeviceListActivity.class);
-						startActivityForResult(iServerIntent, MainActivity.REQUEST_CONNECT_DEVICE_SECURE);
+						mBTEnabled = true;
+						mServerIntent = new Intent(MainActivity.this, DeviceListActivity.class);
+						startActivityForResult(mServerIntent, MainActivity.REQUEST_CONNECT_DEVICE_SECURE);
 
 					}
 					dialog.dismiss();
@@ -413,15 +396,15 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					iCrosswordReceived = false;
-					iBTServer = true;
-					iBluetoothManager = BluetoothManager.getInstance(MainActivity.this, MainActivity.this);
-					iBluetoothManager.setup();
-					if (!iBluetoothManager.bluetoothEnabled()) {
+					mCrosswordReceived = false;
+					mBTServer = true;
+					mBluetoothManager = BluetoothManager.getInstance(MainActivity.this, MainActivity.this);
+					mBluetoothManager.setup();
+					if (!mBluetoothManager.bluetoothEnabled()) {
 						Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 						startActivityForResult(enableIntent, MainActivity.REQUEST_ENABLE_BT);
 					} else {
-						iBluetoothManager.listen();
+						mBluetoothManager.listen();
 					}
 					dialog.dismiss();
 				}
@@ -431,8 +414,8 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	}
 
 	private void stopBluetooth() {
-		if (iBluetoothManager != null && iBluetoothManager.isActive())
-			if (!iBTEnabled) {
+		if (mBluetoothManager != null && mBluetoothManager.isActive())
+			if (!mBTEnabled) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setCancelable(true);
 				builder.setTitle(R.string.action_bluetooth_off);
@@ -442,7 +425,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 					{
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							iBluetoothManager.stop(true);
+							mBluetoothManager.stop(true);
 							dialog.dismiss();
 						}
 					});
@@ -450,53 +433,53 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 					{
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							iBluetoothManager.stop(false);
+							mBluetoothManager.stop(false);
 							dialog.dismiss();
 						}
 					});
 				AlertDialog alert = builder.create();
 				alert.show();
 			} else
-				iBluetoothManager.stop(false);
+				mBluetoothManager.stop(false);
 	}
 
 	@Override
 	public void onCrosswordReceived(final CrosswordModel aCrossword) {
-		MainActivity.debug(1,TAG, String.format(">onCrosswordReceived(%s)->%s", iCrossword.crosswordId(), aCrossword.crosswordId()));
-		if (iCrossword.isValid()) {
-			iCrossword.saveCrossword(this);
+		MainActivity.debug(1,TAG, String.format(">onCrosswordReceived(%s)->%s", mCrossword.getCrosswordId(), aCrossword.getCrosswordId()));
+		if (mCrossword.isValid()) {
+			mCrossword.saveCrossword(this);
 		}
-		if (iCrossword.crosswordId() != aCrossword.crosswordId()) {
-			iCrossword = aCrossword;
+		if (mCrossword.getCrosswordId() != aCrossword.getCrosswordId()) {
+			mCrossword = aCrossword;
 			setCrossword(aCrossword);
 		} else {
 			for (int col = 0; col < CrosswordModel.GRID_SIZE; col++) {
 				for (int row = 0; row < CrosswordModel.GRID_SIZE; row++) {
-					if (!iCrossword.isBlank(col, row)) {
-						if (iCrossword.value(col, row) == CrosswordModel.SQUARE_NONBLANK) {
-							iCrossword.setValue(col, row, aCrossword.value(col, row));
+					if (!mCrossword.isBlank(col, row)) {
+						if (mCrossword.value(col, row) == CrosswordModel.SQUARE_NONBLANK) {
+							mCrossword.setValue(col, row, aCrossword.value(col, row));
 						}
 					}
 				}
 			}
 		}
-		if (!iCrosswordReceived) {
-			iBluetoothManager.sendCrossword(iCrossword);
+		if (!mCrosswordReceived) {
+			mBluetoothManager.sendCrossword(mCrossword);
 		}
-		iCrosswordReceived = true;
-		if (iGridFragment != null) {
-			iGridFragment.update();
+		mCrosswordReceived = true;
+		if (mGridFragment != null) {
+			mGridFragment.update();
 		}
 		store();
-		MainActivity.debug(1,TAG, String.format("<onCrosswordReceived(%s)", iCrossword.crosswordId()));
+		MainActivity.debug(1,TAG, String.format("<onCrosswordReceived(%s)", mCrossword.getCrosswordId()));
 	}
 
 	@Override
 	public void onClueClicked(int aDirection, int aNum, int aPosition) {
 		mClueDirection = aDirection;
 		mCluePosition = aPosition;
-		if (iGridFragment != null) {
-			iGridFragment.clueClicked(aDirection, aNum, aPosition);
+		if (mGridFragment != null) {
+			mGridFragment.clueClicked(aDirection, aNum, aPosition);
 		}
 	}
 
@@ -504,16 +487,16 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	public void onClueLongClicked(int aDirection, int aNum, int aPosition) {
 		mClueDirection = aDirection;
 		mCluePosition = aPosition;
-		if (iGridFragment != null) {
-			iGridFragment.clueLongClicked(aDirection, aNum, aPosition);
+		if (mGridFragment != null) {
+			mGridFragment.clueLongClicked(aDirection, aNum, aPosition);
 		}
 	}
 
 
 	@Override
 	public int onClueListCreated(ClueListFragment aClueList, int aDirection) {
-		if (iCluesFragment != null) {
-			iCluesFragment.setClueList(aDirection, aClueList);
+		if (mCluesFragment != null) {
+			mCluesFragment.setClueList(aDirection, aClueList);
 			if (aDirection == mClueDirection) {
 				return mCluePosition;
 			}
@@ -528,18 +511,18 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 			case MainActivity.REQUEST_CONNECT_DEVICE_SECURE:
 				// When DeviceListActivity returns with a device to connect
 				if (resultCode == Activity.RESULT_OK) {
-					iBluetoothManager.connectDevice(data);
+					mBluetoothManager.connectDevice(data);
 				}
 				break;
 			case MainActivity.REQUEST_ENABLE_BT:
 				// When the request to enable Bluetooth returns
 				if (resultCode == Activity.RESULT_OK) {
 					// Bluetooth is now enabled, so set up a chat session
-					if (!iBTServer) {
-						iServerIntent = new Intent(this, DeviceListActivity.class);
-						startActivityForResult(iServerIntent, MainActivity.REQUEST_CONNECT_DEVICE_SECURE);
+					if (!mBTServer) {
+						mServerIntent = new Intent(this, DeviceListActivity.class);
+						startActivityForResult(mServerIntent, MainActivity.REQUEST_CONNECT_DEVICE_SECURE);
 					} else {
-						iBluetoothManager.listen();
+						mBluetoothManager.listen();
 					}
 				} else {
 					// User did not enable Bluetooth or an error occurred
@@ -550,10 +533,10 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 			case SpellActivity.REQUEST_CROSSWORD:
 				if (resultCode == Activity.RESULT_OK) {
 					String word = data.getExtras().getString("uk.org.downiesoft.spell.wordResult", "");
-					if (word.length() > 0 && iGridFragment != null) {
-						iGridFragment.enterWord(word.toUpperCase());
+					if (word.length() > 0 && mGridFragment != null) {
+						mGridFragment.enterWord(word.toUpperCase());
 						store();
-						BluetoothManager.synch(iCrossword);
+						BluetoothManager.synch(mCrossword);
 					}
 				}
 				break;
@@ -585,8 +568,8 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			if (iGridFragment != null) {
-				if (iGridFragment.offerBackKeyEvent())
+			if (mGridFragment != null) {
+				if (mGridFragment.offerBackKeyEvent())
 					return true;
 			}
 		}

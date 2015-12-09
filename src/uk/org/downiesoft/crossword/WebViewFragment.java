@@ -1,28 +1,24 @@
 package uk.org.downiesoft.crossword;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-
-import uk.org.downiesoft.crossword.WebInfoList.WebInfoListListener;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.Toast;
-import android.webkit.JavascriptInterface;
-import android.content.Intent;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import uk.org.downiesoft.crossword.WebInfoList.WebInfoListListener;
 
 public class WebViewFragment extends Fragment implements WebInfoListListener
 {
@@ -148,7 +144,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 			@Override
 			public void onClick(View arg0)
 			{
-				int id = CrosswordModel.getInstance().crosswordId();
+				int id = CrosswordModel.getInstance().getCrosswordId();
 				int searchId = iWebManager.getCrossword(id).searchId();
 				iWebView.setWebViewClient(iWebViewClient);
 				iState = STATE_SOLUTION;

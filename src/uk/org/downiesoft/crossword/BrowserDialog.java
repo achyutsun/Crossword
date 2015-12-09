@@ -1,11 +1,7 @@
 package uk.org.downiesoft.crossword;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.util.ArrayList;
-import java.util.Locale;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.DialogFragment;
@@ -16,7 +12,11 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.content.Intent;
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
 
 public class BrowserDialog extends DialogFragment
 {
@@ -85,6 +85,7 @@ public class BrowserDialog extends DialogFragment
 			{
 				return (file.isDirectory() || file.getName().toLowerCase(Locale.ENGLISH).endsWith(".xwd"));
 			}});
+		Arrays.sort(files);
 		iFileList=new ArrayList<File>();
 		int selected=0;
 		for (int i=0; i<files.length; i++)

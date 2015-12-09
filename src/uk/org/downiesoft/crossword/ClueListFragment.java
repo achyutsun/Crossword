@@ -1,7 +1,5 @@
 package uk.org.downiesoft.crossword;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,9 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
-import android.util.Log;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
+import java.util.ArrayList;
 
 public class ClueListFragment extends Fragment
 {
@@ -62,7 +60,7 @@ public class ClueListFragment extends Fragment
 		{
 			iDirection=args.getInt("direction",0);
 		}
-		ArrayList<Clue> clueList=iCrossword.iClues.getClueListArray(iDirection);
+		ArrayList<Clue> clueList=iCrossword.getClueLists().getClueListArray(iDirection);
 		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,clueList);
 		iListView.setAdapter(iAdapter);
 		iListView.setOnItemClickListener(new OnItemClickListener() {
@@ -93,7 +91,7 @@ public class ClueListFragment extends Fragment
 			iListView.setItemChecked(selected,true);
 			iListView.setSelection(selected);
 		}
-		MainActivity.debug(1, TAG, String.format("onCreateView: %s %s %s", iDirection, iCrossword.iCrosswordId, this.getId()));
+		MainActivity.debug(1, TAG, String.format("onCreateView: %s %s %s", iDirection, iCrossword.getCrosswordId(), this.getId()));
 		return view;
 	}
 
@@ -102,7 +100,7 @@ public class ClueListFragment extends Fragment
 		super.onResume();
 		iCrossword = CrosswordModel.getInstance();
 		int selected = iCrossword.getClueLists().getSelectedClueIndex(iDirection);
-		MainActivity.debug(1, TAG, String.format("onResume: %s %s %s %s", iDirection, selected, iCrossword.iCrosswordId, this.getId()));
+		MainActivity.debug(1, TAG, String.format("onResume: %s %s %s %s", iDirection, selected, iCrossword.getCrosswordId(), this.getId()));
 		if (selected >= 0) {
 			iListView.setItemChecked(selected, true);
 			iListView.setSelection(selected);
@@ -117,13 +115,13 @@ public class ClueListFragment extends Fragment
 	}
 	
 	public void setCrossword(CrosswordModel aCrossword) {
-		MainActivity.debug(1, TAG, String.format(">setCrossword(%s): %s %s", aCrossword.iCrosswordId, iDirection, this.getId()));
+		MainActivity.debug(1, TAG, String.format(">setCrossword(%s): %s %s", aCrossword.getCrosswordId(), iDirection, this.getId()));
 		iCrossword = aCrossword;
 		iAdapter = new ClueListAdapter(getActivity(),R.layout.clue_list_item,iCrossword.getClueLists().getClueListArray(iDirection));
 		iListView.setAdapter(iAdapter);
 		iListView.invalidate();
 		iAdapter.notifyDataSetChanged();
-		MainActivity.debug(1, TAG, String.format("<setCrossword(%s): %s %s", iCrossword.iCrosswordId, iDirection, this.getId()));
+		MainActivity.debug(1, TAG, String.format("<setCrossword(%s): %s %s", iCrossword.getCrosswordId(), iDirection, this.getId()));
 	}
 	
 }
