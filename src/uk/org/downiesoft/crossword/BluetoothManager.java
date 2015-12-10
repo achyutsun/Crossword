@@ -52,6 +52,7 @@ public class BluetoothManager
 	// The Handler that gets information back from the BluetoothService
 	private final MessageHandler mHandler = new MessageHandler();
 	private boolean mIsServer;
+	private String mBTStatus;
 
 	private class MessageHandler extends Handler 
 	{
@@ -230,6 +231,8 @@ public class BluetoothManager
 	
 	private final void setStatus(int resId)
 	{
+		mBTStatus = mActivity.getResources().getString(resId);
+		setStatus(mBTStatus);
 		final ActionBar actionBar = mActivity.getActionBar();
 		if (actionBar != null)
 			actionBar.setSubtitle(resId);
@@ -237,15 +240,21 @@ public class BluetoothManager
 
 	private final void setStatus(String subTitle)
 	{
+		mBTStatus = subTitle;
 		if (mListener != null) {
-			mListener.setBTStatus(subTitle);
+			mListener.setBTStatus(mBTStatus);
 		}
+	}
+	
+	public String getStatus() {
+		return mBTStatus;
 	}
 
 	private final void clearStatus()
 	{
 		if (mListener != null) {
 			mListener.setBTStatus(null);
+			mBTStatus = null;
 		}
 	}
 	

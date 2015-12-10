@@ -42,7 +42,6 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	private GridFragment mGridFragment;
 	private CluesFragment mCluesFragment;
 	private WebManager mWebManager;
-	private Handler mTitleHandler;
 	private Intent mServerIntent;
 	private BluetoothManager mBluetoothManager;
 	private boolean mCrosswordReceived = false;
@@ -139,7 +138,6 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_crossword);
 		mCrossword = CrosswordModel.getInstance();
-		mTitleHandler = new Handler();
 		restore();
 		if (mGridFragment == null)
 			mGridFragment = new GridFragment();
@@ -285,7 +283,9 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	void setCrosswordTitle() {
 		String title = getString(R.string.crossword_app_name);
 		String subtitle = null;
-		if (mCrossword.isValid() && mWebManager != null) {
+		if (mBluetoothManager != null && mBluetoothManager.isActive() && mBluetoothManager.getStatus() != null) {
+			subtitle = mBluetoothManager.getStatus();			
+		} else if (mCrossword.isValid() && mWebManager != null) {
 			title = Integer.toString(mCrossword.getCrosswordId());
 			WebInfo info = mWebManager.getCrossword(mCrossword.getCrosswordId());
 			if (info != null) {
