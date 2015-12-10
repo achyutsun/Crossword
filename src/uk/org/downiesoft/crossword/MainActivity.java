@@ -36,7 +36,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	public static final int REQUEST_CLUE=4096;	
 	public static final int REQUEST_WEB = 4097;
 
-	private static final int sDebug = 1;
+	private static final int sDebug = 0;
 
 	private CrosswordModel mCrossword;
 	private GridFragment mGridFragment;

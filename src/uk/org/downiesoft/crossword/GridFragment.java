@@ -169,8 +169,6 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		return super.onOptionsItemSelected(item);
 		
 	}
-
-
 	
 	public void getSavedState() {
 		SharedPreferences settings=getActivity().getSharedPreferences("CROSSWORD_SETTING", Context.MODE_PRIVATE);
@@ -229,31 +227,31 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	}
 
 	@Override
-	public void onGridClueSelected(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
-		MainActivity.debug(1,TAG,String.format("onClueSelected(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
-		if (aClue != null && iTextView!=null) {
-			iTextView.setText(aClue.toString());
+	public void onGridClueSelected(GridClueContext aClueContext) {
+		MainActivity.debug(1,TAG,String.format("onClueSelected(%s): %s",aClueContext,mCluesFragment));
+		if (aClueContext.getClue() != null && iTextView!=null) {
+			iTextView.setText(aClueContext.getClue().toString());
 		}
-		iCursorX = aCursorX;
-		iCursorY = aCursorY;
-		iCursorDirection = aCursorDirection;
+		iCursorX = aClueContext.getPosition().x;
+		iCursorY = aClueContext.getPosition().y;
+		iCursorDirection = aClueContext.getDirection();
 		saveState();
-		if (aClue!=null && mCluesFragment != null) {
-			int index = iCrossword.getClueLists().getClueIndex(aCursorDirection, aClue);
-			mCluesFragment.setClue(aClue, index, aCursorDirection);
+		if (aClueContext.getClue() != null && mCluesFragment != null) {
+			int index = iCrossword.getClueLists().getClueIndex(aClueContext.getDirection(), aClueContext.getClue());
+			mCluesFragment.setClue(aClueContext.getClue(), index, aClueContext.getDirection());
 		}
 	}
 
 	@Override
-	public void onGridClueLongPress(Clue aClue, int aCursorX, int aCursorY, int aCursorDirection) {
-		MainActivity.debug(1,TAG,String.format("onClueLongPress(%s,%s,%s,%s): %s",aCursorX,aCursorY,aCursorDirection,aClue,mCluesFragment));
-		iCursorX = aCursorX;
-		iCursorY = aCursorY;
-		iCursorDirection = aCursorDirection;
+	public void onGridClueLongPress(GridClueContext aClueContext) {
+		MainActivity.debug(1,TAG,String.format("onClueLongPress(%s): %s",aClueContext,mCluesFragment));
+		iCursorX = aClueContext.getPosition().x;
+		iCursorY = aClueContext.getPosition().y;
+		iCursorDirection = aClueContext.getDirection();
 		saveState();
-		if (aClue != null) {
+		if (aClueContext.getClue() != null) {
 			String hint = iCrossword.getCluePattern(new Point(iCursorX, iCursorY), iCursorDirection);
-			wordEntryDialog(aClue, "", hint);
+			wordEntryDialog(aClueContext.getClue(), "", hint);
 		}
 	}
 
