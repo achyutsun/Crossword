@@ -19,6 +19,11 @@ import android.widget.Toast;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import uk.org.downiesoft.crossword.WebInfoList.WebInfoListListener;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class WebViewFragment extends Fragment implements WebInfoListListener
 {
@@ -36,8 +41,6 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	private String iCrosswordId;
 	private WebView iWebView;
 	private WebManager iWebManager;
-	private Button iImportButton;
-	private Button iSolutionButton;
 	private String iUrl;
 	private int iState = STATE_NULL;
 	private Handler iWebViewClientHandler = new Handler();
@@ -115,43 +118,14 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View v = inflater.inflate(R.layout.web_view, container, false);
+		setHasOptionsMenu(true);
 		iWebView = (WebView) v.findViewById(R.id.webView);
-		iImportButton = (Button) v.findViewById(R.id.webImportButton);
-		iSolutionButton = (Button) v.findViewById(R.id.webSolutionButton);
 		iWebManager = WebManager.getInstance();
 		iWebView.getSettings().setJavaScriptEnabled(true);
 		iWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
 		iWebView.setWebViewClient(iWebViewClient);
 		iState = STATE_INDEX;
 		iWebView.loadUrl(iUrl);
-		iImportButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View arg0)
-			{
-				FragmentManager fm = getActivity().getSupportFragmentManager();
-				FragmentTransaction ft = fm.beginTransaction();
-				WebInfoList infoList = new WebInfoList();
-				infoList.setListener(WebViewFragment.this);
-				ft.replace(R.id.webContainer, infoList, "web_info_list");
-				ft.addToBackStack("web_view_fragment");
-				ft.commit();
-
-			}
-		});
-		iSolutionButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View arg0)
-			{
-				int id = CrosswordModel.getInstance().getCrosswordId();
-				int searchId = iWebManager.getCrossword(id).searchId();
-				iWebView.setWebViewClient(iWebViewClient);
-				iState = STATE_SOLUTION;
-				iUrl = "http://puzzles.telegraph.co.uk/site/print_crossword?id=" + Integer.toString(searchId) + "&action=solution";
-				iWebView.loadUrl(iUrl);
-			}
-		});
 		return v;
 	}
 
@@ -167,7 +141,35 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		super.onPause();
 	}
 
-	@SuppressWarnings("deprecation")
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.web_menu,menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.action_import:
+				FragmentManager fm = getActivity().getSupportFragmentManager();
+				FragmentTransaction ft = fm.beginTransaction();
+				WebInfoList infoList = new WebInfoList();
+				infoList.setListener(WebViewFragment.this);
+				ft.replace(R.id.webContainer, infoList, "web_info_list");
+				ft.addToBackStack("web_view_fragment");
+				ft.commit();
+				return true;
+			case R.id.action_solution:
+				int id = CrosswordModel.getInstance().getCrosswordId();
+				int searchId = iWebManager.getCrossword(id).searchId();
+				iWebView.setWebViewClient(iWebViewClient);
+				iState = STATE_SOLUTION;
+				iUrl = "http://puzzles.telegraph.co.uk/site/print_crossword?id=" + Integer.toString(searchId) + "&action=solution";
+				iWebView.loadUrl(iUrl);
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
 	private void getCrosswordInfo(String html)
 	{
 		final String SEARCH_ID = "search_puzzle_number?id=";
@@ -177,8 +179,8 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		String date;
 		try
 		{
-			DataInputStream is = new DataInputStream(new ByteArrayInputStream(html.getBytes()));
-			String line = is.readLine();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(html.getBytes())));			
+			String line = reader.readLine();
 			while (line != null)
 			{
 				if (line.contains("CRYPTIC"))
@@ -189,14 +191,14 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 					line = line.substring(0, line.indexOf('<'));
 					MainActivity.debug(1, TAG,String.format("line='%s'",line));
 					crosswordId = Integer.parseInt(line.replace(",", ""));
-					line = is.readLine();
+					line = reader.readLine();
 					line = line.substring(line.indexOf(SEARCH_ID) + SEARCH_ID.length());
 					line = line.substring(line.indexOf('>') + 1);
 					date = line.substring(0, line.indexOf('<'));
 					if (iWebManager != null)
 						iWebManager.insert(new WebInfo(crosswordId, searchId, date));
 				}
-				line = is.readLine();
+				line = reader.readLine();
 			}
 		}
 		catch (Exception e)

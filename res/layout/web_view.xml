@@ -9,30 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_above="@+id/webButtons"
-         >
-    </WebView>
-
-    <LinearLayout
-        android:id="@+id/webButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
-
-        <Button
-            android:id="@+id/webImportButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/action_import"
-            android:textSize="18sp" />
-        <Button
-            android:id="@+id/webSolutionButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/text_solution"
-            android:textSize="18sp" />
-    </LinearLayout>
+        android:layout_above="@+id/webButtons" />
 
 </RelativeLayout>

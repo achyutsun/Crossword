@@ -8,6 +8,7 @@
     <string name="action_save">Save</string>
     <string name="action_import">Import</string>
     <string name="action_export">Export</string>
+    <string name="action_solution">Solution</string>
     <string name="action_settings">Settings</string>
     <string name="action_spell">Spell check</string>
     <string name="action_clear">Clear</string>

@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<item
+        android:id="@+id/action_import"
+        android:orderInCategory="70"
+		android:showAsAction="ifRoom|withText"
+		android:icon="@drawable/ic_action_download"
+		android:title="@string/action_import"/>
+
+	<item
+        android:id="@+id/action_solution"
+        android:orderInCategory="75"
+		android:showAsAction="ifRoom|withText"
+		android:icon="@drawable/ic_action_help"
+		android:title="@string/action_solution"/>
+
+</menu>
