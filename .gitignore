@@ -29,6 +29,6 @@ proguard/
 .idea/
 
 RCS/*
-libs/*
+libs/
 project.properties
 proguard-project.txt
