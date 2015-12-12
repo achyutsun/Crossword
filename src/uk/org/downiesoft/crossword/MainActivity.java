@@ -32,10 +32,12 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 
 	public static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
 	public static final int REQUEST_ENABLE_BT = 2;
-	public static final int REQUEST_BROWSER = 4098;
-	public static final int REQUEST_CLUE=4096;	
-	public static final int REQUEST_WEB = 4097;
-
+	
+	public static final int REQUEST_CLUE     = 4096;	
+	public static final int REQUEST_BROWSER  = 4097;
+	public static final int REQUEST_PUZZLE   = 4098;
+	public static final int REQUEST_SOLUTION = 4099;
+	
 	private static final int sDebug = 0;
 
 	private CrosswordModel mCrossword;
@@ -125,7 +127,9 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		protected void onPostExecute(CrosswordModel solution) {
 			mDialog.dismiss();
 			if (solution != null) {
-				mCrossword.mapSolution(solution);
+				if (mCrossword.mapSolution(solution)) {
+					mGridFragment.update();
+				}
 			} else {
 				Toast.makeText(MainActivity.this, R.string.text_invalid_solution, Toast.LENGTH_SHORT).show();
 			}
@@ -224,10 +228,18 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 					startActivityForResult(intent, REQUEST_BROWSER);
 					return true;
 				}
-			case R.id.action_web:
+			case R.id.action_import:
 				{
 					Intent intent = new Intent(this, WebActivity.class);
-					startActivityForResult(intent, MainActivity.REQUEST_WEB);
+					intent.putExtra(WebViewFragment.ARG_MODE,WebViewFragment.MODE_PUZZLE);
+					startActivityForResult(intent, MainActivity.REQUEST_PUZZLE);
+					return true;
+				}
+			case R.id.action_solution:
+				{
+					Intent intent = new Intent(this, WebActivity.class);
+					intent.putExtra(WebViewFragment.ARG_MODE,WebViewFragment.MODE_SOLUTION);
+					startActivityForResult(intent, MainActivity.REQUEST_SOLUTION);
 					return true;
 				}
 			case R.id.action_clear:
@@ -540,18 +552,16 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 					}
 				}
 				break;
-			case MainActivity.REQUEST_WEB:
+			case MainActivity.REQUEST_PUZZLE:
 				if (resultCode == Activity.RESULT_OK) {
-					int mode = data.getExtras().getInt("import", 0);
 					String html = data.getExtras().getString("html", "");
-					switch (mode) {
-						case WebViewFragment.IMPORT_PUZZLE:
-							importPuzzle(html);
-							break;
-						case WebViewFragment.IMPORT_SOLUTION:
-							importSolution(html);
-							break;
-					}
+					importPuzzle(html);
+				}
+				break;
+			case MainActivity.REQUEST_SOLUTION:
+				if (resultCode == Activity.RESULT_OK) {
+					String html = data.getExtras().getString("html", "");
+					importSolution(html);
 				}
 				break;
 			case MainActivity.REQUEST_BROWSER:

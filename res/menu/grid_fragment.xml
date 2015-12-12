@@ -14,4 +14,16 @@
 		android:icon="@drawable/ic_action_discard"
 		android:title="@string/action_erase"/>
 
+	<item
+        android:id="@+id/action_spell"
+        android:orderInCategory="80"
+		android:showAsAction="ifRoom|withText"
+		android:icon="@drawable/ic_action_search"
+		android:title="@string/action_spell"/>
+    <item
+        android:id="@+id/action_clear"
+        android:orderInCategory="85"
+        android:showAsAction="never"
+        android:title="@string/action_clear"/>
+
 </menu>

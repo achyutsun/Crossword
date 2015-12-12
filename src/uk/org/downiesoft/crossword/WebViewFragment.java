@@ -24,32 +24,70 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import android.support.v4.content.IntentCompat;
 
 public class WebViewFragment extends Fragment implements WebInfoListListener
 {
 	
 	public static final String TAG = WebViewFragment.class.getName();
+
+	public interface WebViewListener {
+		void onLogin(int aLoginStatus, int aMode);
+		void onRetryLogin();
+	}	
 	
-	public static final int IMPORT_PUZZLE = 1;
-	public static final int IMPORT_SOLUTION = 2;
+	public static final String ARG_MODE = "arg_mode";
+	public static final int MODE_NULL = 0;
+	public static final int MODE_PUZZLE = 1;
+	public static final int MODE_SOLUTION = 2;
 
-	private final int STATE_NULL = 0;
-	private final int STATE_INDEX = 1;
-	private final int STATE_IMPORT = 2;
-	private final int STATE_SOLUTION = 3;
+	public static final int LOGIN_FAILED = -1;
+	public static final int LOGIN_UNDEFINED = 0;
+	public static final int LOGIN_SUCCESSFUL = 1;
 
-	private String iCrosswordId;
-	private WebView iWebView;
-	private WebManager iWebManager;
-	private String iUrl;
-	private int iState = STATE_NULL;
-	private Handler iWebViewClientHandler = new Handler();
-	private Runnable iWebViewClientSetter = new Runnable()
+	private static final int STATE_NULL = 0;
+	private static final int STATE_INDEX = 1;
+	private static final int STATE_IMPORT = 2;
+	private static final int STATE_SOLUTION = 3;
+
+	private static final String URL_CRYPTIC = "http://puzzles.telegraph.co.uk/site/crossword_puzzles_cryptic";
+	private static final String URL_SOLUTION = "http://puzzles.telegraph.co.uk/site/print_crossword?id=%s&action=solution";
+	private static final String URL_PUZZLE = "http://puzzles.telegraph.co.uk/site/print_crossword?id=%s";
+		
+	private String mCrosswordId;
+	private WebView mWebView;
+	private WebManager mWebManager;
+	private String mUrl;
+	private int mState = STATE_NULL;
+	private int mMode = MODE_PUZZLE;
+	private int mLoggedIn = LOGIN_UNDEFINED;
+	private WebViewListener mListener;
+	private Handler mWebViewClientHandler = new Handler();
+	private Runnable mWebViewClientSetter = new Runnable()
 	{
 		@Override
 		public void run()
 		{
-			iWebView.setWebViewClient(iDefaultWebViewClient);
+			mWebView.setWebViewClient(iDefaultWebViewClient);
+		}
+	};
+
+	private Runnable mWebViewLogin = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			mListener.onLogin(mLoggedIn, mMode);
+			if (mLoggedIn==LOGIN_SUCCESSFUL && mMode == MODE_SOLUTION) {
+				int id = CrosswordModel.getInstance().getCrosswordId();
+				int searchId = mWebManager.getCrossword(id).searchId();
+				mWebView.setWebViewClient(iWebViewClient);
+				mState = STATE_SOLUTION;
+				mUrl = String.format(URL_SOLUTION,searchId);
+				mWebView.loadUrl(mUrl);
+			} else {
+				mState = STATE_NULL;
+			}
 		}
 	};
 
@@ -57,39 +95,38 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	{
 
 		@JavascriptInterface
-		public void saveHTML(String html)
-		{
-			iWebViewClientHandler.post(iWebViewClientSetter);
-			switch (iState)
-			{
+		public void saveHTML(String html) {
+			MainActivity.debug(1, TAG, String.format("saveHTML: mState=%s", mState));
+			mWebViewClientHandler.post(mWebViewClientSetter);
+			switch (mState) {
 				case STATE_IMPORT:
-				{
-					Intent result = new Intent();
-					result.putExtra("import",IMPORT_PUZZLE);
-					result.putExtra("html",html);
-					getActivity().setResult(Activity.RESULT_OK,result);
-					getActivity().finish();
-				}
-				break;
+					{
+						Intent result = new Intent();
+						result.putExtra("html", html);
+						getActivity().setResult(Activity.RESULT_OK, result);
+						getActivity().finish();
+						mState = STATE_NULL;
+						break;
+					}
 				case STATE_INDEX:
-				{
-					getCrosswordInfo(html);
-					break;
-				}
+					{
+						getCrosswordInfo(html);
+						mWebViewClientHandler.post(mWebViewLogin);
+						break;
+					}
 				case STATE_SOLUTION:
-				{
-					Intent result = new Intent();
-					result.putExtra("import",IMPORT_SOLUTION);
-					result.putExtra("html",html);
-					getActivity().setResult(Activity.RESULT_OK,result);
-					getActivity().finish();
-					break;
-				}
+					{
+						Intent result = new Intent();
+						result.putExtra("html", html);
+						getActivity().setResult(Activity.RESULT_OK, result);
+						getActivity().finish();
+						mState = STATE_NULL;
+						break;
+					}
 			}
-			iState = STATE_NULL;
 		}
 	}
-
+	
 	private WebViewClient iDefaultWebViewClient = new WebViewClient();
 
 	private WebViewClient iWebViewClient = new WebViewClient()
@@ -97,21 +134,33 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		@Override
 		public void onPageFinished(WebView view, String url)
 		{
+			MainActivity.debug(1, TAG, String.format("onPageFinished: URL=%s", url));
 			view.loadUrl("javascript:window.HTMLOUT.saveHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
 		}
 
 		@Override
 		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
 		{
-			MainActivity.debug(1, "uk.org.downiesoft.crossword.WebViewClient", String.format("Description: %s, URL %s", description, failingUrl));
+			MainActivity.debug(1, TAG, String.format("onReceivedError: %s, URL %s", description, failingUrl));
 		}
 	};
 
 	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			mListener = (WebViewListener)activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(String.format("Activity %s must implement %s",activity.getClass().getName(),WebViewListener.class.getName()));
+		}
+	}
+
+	
+	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		iUrl = "http://puzzles.telegraph.co.uk/site/crossword_puzzles_cryptic";
+		mUrl = URL_CRYPTIC;
 	}
 
 	@Override
@@ -119,13 +168,18 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	{
 		View v = inflater.inflate(R.layout.web_view, container, false);
 		setHasOptionsMenu(true);
-		iWebView = (WebView) v.findViewById(R.id.webView);
-		iWebManager = WebManager.getInstance();
-		iWebView.getSettings().setJavaScriptEnabled(true);
-		iWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
-		iWebView.setWebViewClient(iWebViewClient);
-		iState = STATE_INDEX;
-		iWebView.loadUrl(iUrl);
+		mWebView = (WebView) v.findViewById(R.id.webView);
+		mWebManager = WebManager.getInstance();
+		Bundle args =  getArguments();
+		if (args != null) {
+			mMode = args.getInt(ARG_MODE,MODE_PUZZLE);
+			MainActivity.debug(1, TAG, String.format("onCreateView: mMode=%s", mMode));
+		}
+		mWebView.getSettings().setJavaScriptEnabled(true);
+		mWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
+		mWebView.setWebViewClient(iWebViewClient);
+		mState = STATE_INDEX;
+		mWebView.loadUrl(mUrl);
 		return v;
 	}
 
@@ -143,31 +197,35 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.web_menu,menu);
+		inflater.inflate(R.menu.web_view_fragment,menu);
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		MainActivity.debug(1, TAG, String.format("onPrepareOptionsMenu mState=%s, mLoggedIn=%s", mState, mLoggedIn));
+		if (mState != STATE_NULL || mLoggedIn != LOGIN_FAILED) {
+			menu.removeItem(R.id.action_refresh);
+		}
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.action_import:
-				FragmentManager fm = getActivity().getSupportFragmentManager();
-				FragmentTransaction ft = fm.beginTransaction();
-				WebInfoList infoList = new WebInfoList();
-				infoList.setListener(WebViewFragment.this);
-				ft.replace(R.id.webContainer, infoList, "web_info_list");
-				ft.addToBackStack("web_view_fragment");
-				ft.commit();
+			case R.id.action_refresh:
+				mWebView.setWebViewClient(iWebViewClient);
+				mUrl = URL_CRYPTIC;
+				mState = STATE_INDEX;
+				mWebView.loadUrl(mUrl);
+				mListener.onRetryLogin();
 				return true;
-			case R.id.action_solution:
-				int id = CrosswordModel.getInstance().getCrosswordId();
-				int searchId = iWebManager.getCrossword(id).searchId();
-				iWebView.setWebViewClient(iWebViewClient);
-				iState = STATE_SOLUTION;
-				iUrl = "http://puzzles.telegraph.co.uk/site/print_crossword?id=" + Integer.toString(searchId) + "&action=solution";
-				iWebView.loadUrl(iUrl);
-				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
+	}
+
+	public int getLoginStatus() {
+		return mLoggedIn;
 	}
 	
 	private void getCrosswordInfo(String html)
@@ -176,6 +234,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		final String CROSSWORD_ID = "</span> - No. ";
 		int crosswordId;
 		int searchId;
+		
 		String date;
 		try
 		{
@@ -183,20 +242,21 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 			String line = reader.readLine();
 			while (line != null)
 			{
-				if (line.contains("CRYPTIC"))
-				{
+				if (line.contains("welcome_message")) {
+					mLoggedIn = (line.contains("Welcome back"))? LOGIN_SUCCESSFUL: LOGIN_FAILED;
+				} else if (line.contains("CRYPTIC")) {
 					line = line.substring(line.indexOf(SEARCH_ID) + SEARCH_ID.length());
 					searchId = Integer.parseInt(line.substring(0, line.indexOf('"')));
 					line = line.substring(line.indexOf(CROSSWORD_ID) + CROSSWORD_ID.length());
 					line = line.substring(0, line.indexOf('<'));
-					MainActivity.debug(1, TAG,String.format("line='%s'",line));
+					MainActivity.debug(2, TAG,String.format("line='%s'",line));
 					crosswordId = Integer.parseInt(line.replace(",", ""));
 					line = reader.readLine();
 					line = line.substring(line.indexOf(SEARCH_ID) + SEARCH_ID.length());
 					line = line.substring(line.indexOf('>') + 1);
 					date = line.substring(0, line.indexOf('<'));
-					if (iWebManager != null)
-						iWebManager.insert(new WebInfo(crosswordId, searchId, date));
+					if (mWebManager != null)
+						mWebManager.insert(new WebInfo(crosswordId, searchId, date));
 				}
 				line = reader.readLine();
 			}
@@ -211,14 +271,14 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	@Override
 	public void onWebInfoListItemSelected(final WebInfo aWebInfo)
 	{
-		WebViewFragment.this.iCrosswordId = Integer.toString(aWebInfo.crosswordId());
+		WebViewFragment.this.mCrosswordId = Integer.toString(aWebInfo.crosswordId());
 		String searchId = Integer.toString(aWebInfo.searchId());
 		String message = getActivity().getString(R.string.text_importing);
-		Toast.makeText(getActivity(), String.format(message, iCrosswordId), Toast.LENGTH_LONG).show();
-		iState = STATE_IMPORT;
-		iWebView.setWebViewClient(iWebViewClient);
-		iUrl = "http://puzzles.telegraph.co.uk/site/print_crossword?id=" + searchId;
-		iWebView.loadUrl(iUrl);
+		Toast.makeText(getActivity(), String.format(message, mCrosswordId), Toast.LENGTH_LONG).show();
+		mState = STATE_IMPORT;
+		mWebView.setWebViewClient(iWebViewClient);
+		mUrl = String.format(URL_PUZZLE,searchId);
+		mWebView.loadUrl(mUrl);
 	}
 		
 }

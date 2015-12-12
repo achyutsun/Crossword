@@ -13,6 +13,9 @@ import android.widget.ListView;
 
 public class WebInfoList extends Fragment
 {
+
+	public static final String TAG = WebInfoList.class.getName();
+	
 	public interface WebInfoListListener
 	{
 		void onWebInfoListItemSelected(WebInfo aWebInfo);
@@ -46,5 +49,8 @@ public class WebInfoList extends Fragment
     public void setListener(WebInfoListListener aListener)
     {
     	iListener = aListener;
+		if (iAdapter != null) {
+			iAdapter.notifyDataSetChanged();
+		}
     }
 }

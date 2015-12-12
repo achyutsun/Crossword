@@ -297,8 +297,10 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 	}
 
 	public void update() {
-		if (iGridView != null)
+		if (iGridView != null) {
 			iGridView.redraw();
+			iGridView.invalidate();
+		}
 	}
 
 	public String getClueText() {

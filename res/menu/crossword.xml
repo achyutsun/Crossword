@@ -1,27 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-	<item
-        android:id="@+id/action_spell"
-        android:orderInCategory="80"
-		 android:showAsAction="ifRoom|withText"
-		 android:icon="@drawable/ic_action_search"
-		 android:title="@string/action_spell"/>
-    <item
-        android:id="@+id/action_clear"
-        android:orderInCategory="85"
-        android:showAsAction="never"
-        android:title="@string/action_clear"/>
     <item
         android:id="@+id/action_open"
         android:orderInCategory="87"
         android:showAsAction="never"
         android:title="@string/action_open"/>
     <item
-        android:id="@+id/action_web"
+        android:id="@+id/action_import"
         android:orderInCategory="95"
 		android:icon="@drawable/ic_action_web_site"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/action_web"/>
+        android:showAsAction="never"
+        android:title="@string/action_import"/>
+    <item
+        android:id="@+id/action_solution"
+        android:orderInCategory="96"
+		android:icon="@drawable/ic_action_help"
+        android:showAsAction="never"
+        android:title="@string/action_solution"/>
     <item
         android:id="@+id/action_bluetooth_on"
         android:orderInCategory="100"
