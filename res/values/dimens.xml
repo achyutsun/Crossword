@@ -8,5 +8,9 @@
     <dimen name="clue_list_padding">1dp</dimen>
     <dimen name="button_size">40dp</dimen>
     <dimen name="button_text_size">18dp</dimen>
-    
+
+	<integer name="web_list_weight_1">10</integer>    
+	<integer name="web_list_weight_2">20</integer>
+	<integer name="web_list_weight_3">30</integer>
+	
 </resources>

@@ -16,15 +16,11 @@ public class WebInfoAdapter extends ArrayAdapter<WebInfo>
 	public static final String TAG = WebInfoAdapter.class.getName();
 	
 	private int mResource;
-	private int mColourAvailable;
-	private int mColourOnDevice;
 
 	public WebInfoAdapter(Context context, int resource, ArrayList<WebInfo> items)
 	{
 		super(context, resource, items);
 		this.mResource = resource;
-		mColourAvailable = context.getResources().getColor(android.R.color.primary_text_dark);
-		mColourOnDevice = context.getResources().getColor(android.R.color.tertiary_text_dark);
 	}
 	
 	@Override
@@ -54,12 +50,8 @@ public class WebInfoAdapter extends ArrayAdapter<WebInfo>
 		dateView.setText(item.dateString());
 		if (item.isOnDevice()) {
 			imageView.setImageResource(R.drawable.ic_launcher);
-			idView.setTextColor(mColourOnDevice);
-			dateView.setTextColor(mColourOnDevice);
 		} else {
 			imageView.setImageDrawable(null);
-			idView.setTextColor(mColourAvailable);
-			dateView.setTextColor(mColourAvailable);
 		}
 		
 		return infoItemView;

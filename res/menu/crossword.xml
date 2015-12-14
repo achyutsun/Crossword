@@ -1,30 +1,36 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item
-        android:id="@+id/action_open"
-        android:orderInCategory="87"
-        android:showAsAction="never"
-        android:title="@string/action_open"/>
-    <item
-        android:id="@+id/action_import"
-        android:orderInCategory="95"
-		android:icon="@drawable/ic_action_web_site"
-        android:showAsAction="never"
-        android:title="@string/action_import"/>
+	<item
+		android:id="@+id/action_open_menu"
+		android:showAsAction="never"
+		android:title="@string/action_open" >
+
+		<menu>
+
+			<item
+				android:id="@+id/action_open"
+				android:icon="@drawable/ic_action_storage"
+				android:showAsAction="never"
+				android:title="@string/action_open_file"/>
+
+			<item
+				android:id="@+id/action_import"
+				android:icon="@drawable/ic_action_web_site"
+				android:showAsAction="never"
+				android:title="@string/action_import"/>
+		</menu>
+	</item>
     <item
         android:id="@+id/action_solution"
-        android:orderInCategory="96"
 		android:icon="@drawable/ic_action_help"
         android:showAsAction="never"
         android:title="@string/action_solution"/>
     <item
         android:id="@+id/action_bluetooth_on"
-        android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_bluetooth_on"/>
     <item
         android:id="@+id/action_bluetooth_off"
-        android:orderInCategory="101"
         android:showAsAction="never"
         android:title="@string/action_bluetooth_off"/>
     

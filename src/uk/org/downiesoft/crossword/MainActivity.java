@@ -9,7 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
 import uk.org.downiesoft.spell.SpellActivity;
-import android.os.Environment;
 
 public class MainActivity extends FragmentActivity implements BluetoothListener, ClueListFragment.ClueListListener {
 
@@ -256,12 +255,10 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 				}
 			case R.id.action_clear:
 				{
-
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setCancelable(true);
 					builder.setTitle(R.string.action_clear);
 					builder.setMessage(R.string.text_query_continue);
-					// builder.setInverseBackgroundForced(true);
 					builder.setPositiveButton(R.string.text_ok, new DialogInterface.OnClickListener()
 						{
 							@Override
@@ -580,7 +577,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 				break;
 			case MainActivity.REQUEST_BROWSER:
 				if (resultCode == Activity.RESULT_OK) {
-					File file = new File(data.getExtras().getString("file", ""));
+					File file = new File(sCrosswordRoot,String.format("%s.xwd",data.getExtras().getInt("file")));
 					onFileSelected(file);
 				}
 				break;				

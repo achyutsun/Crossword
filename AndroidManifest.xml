@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.org.downiesoft.crossword"
-    android:versionCode="16"
-    android:versionName="2.2" >
+    android:versionCode="17"
+    android:versionName="2.3" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -25,19 +25,15 @@
             android:windowSoftInputMode="stateHidden|adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".WebActivity"
-            android:label="@string/action_web" />
+            android:label="@string/title_open_web" />
         <activity
             android:name=".BrowserActivity"
-            android:label="@string/action_open" />
-        <activity
-            android:name=".CluesActivity"
-            android:label="@string/text_clues" />
+            android:label="@string/title_open_file" />
         <activity
             android:name=".DeviceListActivity"
             android:configChanges="orientation|keyboardHidden"

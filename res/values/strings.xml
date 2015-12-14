@@ -4,14 +4,17 @@
     <string name="crossword_app_name">Crossword</string>
     <string name="action_enter">Enter</string>
     <string name="action_erase">Erase</string>
-    <string name="action_open">Open </string>
+    <string name="action_open">Open crossword&#8230;</string>
     <string name="action_save">Save</string>
-    <string name="action_import">Import puzzle</string>
+    <string name="action_open_file">Open saved file</string>
+    <string name="action_import">Import from web</string>
     <string name="action_export">Export</string>
     <string name="action_solution">Get solution</string>
     <string name="action_settings">Settings</string>
     <string name="action_spell">Spell check</string>
-    <string name="action_clear">Clear</string>
+    <string name="action_clear">Erase all</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_select_all">Select all</string>
     <string name="action_web">Web</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_bluetooth_off">Bluetooth off</string>
@@ -20,6 +23,9 @@
     <string name="save_failed">Save failed</string>
     <string name="save_successful">Crossword %d saved</string>
     
+	<string name="title_open_file">Local Files</string>
+	<string name="title_open_web">Web Files</string>
+	
     <string name="text_across">Across</string>
     <string name="text_down">Down</string>
     <string name="text_enter">Enter</string>
@@ -31,7 +37,6 @@
     <string name="text_cancel">Cancel</string>
     <string name="text_bad_fit">Word does not fit</string>
     <string name="text_enter_word">Enter word</string>
-    <string name="text_threelines">10 The quick brown fox jumps over the lazy dog (5,5,5)</string>
     <string name="text_no_files">No files</string>
     <string name="text_no_crossword">No crossword</string>
     <string name="text_icon">Icon</string>
@@ -46,14 +51,22 @@
     <string name="text_synch_error">Synchronisation error</string>
     <string name="text_mismatch">Different crosswords</string>
     <string name="text_press_back_again">Press back again to exit</string>
-    <string name="text_query_continue">Current crossword will be lost.\nContinue?</string>
+    <string name="text_query_continue">All answers will be lost.\nContinue?</string>
 	<string name="text_logging_in">Logging in&#8230;"</string>
 	<string name="text_getting_solution">Getting solution&#8230;</string>
 	<string name="text_please_wait">Please wait</string>
 	<string name="text_login_failed">Login failed</string>
 	<string name="text_please_login">Please enter your login details and check the \'Remember me\' box, then tap the refresh button.</string>
+	<string name="text_confirm_delete">Confirm delete</string>
+	<string name="text_delete_format_single" formatted="false">%s crossword will be deleted</string>
+	<string name="text_delete_format_plural" formatted="false">%s crosswords will be deleted</string>
+	<string name="text_deleted_format_single" formatted="false">%s of %s crossword deleted</string>
+	<string name="text_deleted_format_plural" formatted="false">%s of %s crosswords deleted</string>
+	<string name="text_crossword_protected">Current crossword cannot be deleted</string>
+	<string name="text_on_device">Saved</string>
+    <string name="text_crossword_id">Crossword No.</string>
+    <string name="text_crossword_date">Crossword Date</string>
 	
-    
     <!--  BluetoothChat -->
     <string name="send">Send</string>
     <string name="not_connected">You are not connected to a device</string>

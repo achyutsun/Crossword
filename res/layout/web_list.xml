@@ -5,6 +5,8 @@
     android:background="#FF000000"
     android:orientation="vertical" >
 
+	<include layout="@layout/web_list_header" />
+		
     <ListView
         android:id="@+id/webInfoList"
         android:layout_width="match_parent"

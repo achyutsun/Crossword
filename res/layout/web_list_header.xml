@@ -1,37 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="@color/grey_background"
+	android:orientation="horizontal" >
 
-	<ImageView
-		android:id="@+id/webImage"
+	<TextView
 		android:layout_width="0dp"
-		android:layout_height="30dp"
+		android:layout_height="wrap_content"
 		android:layout_weight="@integer/web_list_weight_1"
-		android:layout_gravity="center" 
 		android:gravity="center" 
-		android:src="@drawable/ic_launcher"
-		android:contentDescription="@string/text_icon"
+		android:padding="10dp"
+		android:fontFamily="monospace"
+		android:textAppearance="?android:attr/textAppearanceLarge"
+		android:text="@string/text_on_device"
 		android:scaleType="centerInside" />
 
-    <TextView
-		android:id="@+id/webId"
+	<TextView
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_weight="@integer/web_list_weight_2"
 		android:padding="10dp"
 		android:fontFamily="monospace"
 		android:textAppearance="?android:attr/textAppearanceLarge"
+		android:text="@string/text_crossword_id"
 		android:singleLine="true" />
 
 	<TextView 
-		android:id="@+id/webDate"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_weight="@integer/web_list_weight_3"
 		android:padding="10dp"
 		android:fontFamily="monospace"
 		android:textAppearance="?android:attr/textAppearanceLarge"
-		android:singleLine="false" />
+		android:text="@string/text_crossword_date"
+		android:singleLine="true" />
 </LinearLayout>
+
