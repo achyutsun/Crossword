@@ -16,10 +16,9 @@ public class BrowserActivity extends FragmentActivity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.browser_activity);
-		String path = Environment.getExternalStorageDirectory().toString() + File.separatorChar + MainActivity.CROSSWORD_DIR;
-		File currentFile = new File(path);
-		if (!currentFile.exists())
-			currentFile.mkdir();
+		File path = new File(Environment.getExternalStorageDirectory().toString(),MainActivity.CROSSWORD_DIR);
+		if (!path.exists())
+			path.mkdir();
 		Fragment browserFragment=BrowserDialog.getInstance(path, "*.*");
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(R.id.browserContainer, browserFragment, BrowserDialog.TAG).commit();

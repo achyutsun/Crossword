@@ -19,8 +19,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-class CrosswordModel {
-	public static final String TAG="uk.org.downiesoft.crossword.CrosswordModel";
+public class CrosswordModel {
+	
+	public static final String TAG = CrosswordModel.class.getName();
 
 	public static final int GRID_SIZE = 15;
 	public static final int VERSION_ANDROID = 0x00020000;
@@ -204,17 +205,13 @@ class CrosswordModel {
 		writer.close();
 	}
 
-	public boolean saveCrossword(Context aContext) {
-		String path = Environment.getExternalStorageDirectory().toString() + File.separatorChar + "Crossword";
-		File dir = new File(path);
-		dir.mkdir();
-		path += File.separatorChar + Integer.toString(mCrosswordId) + ".xwd";
+	public boolean saveCrossword(File aCrosswordDir) {
+		File path = new File(aCrosswordDir, Integer.toString(mCrosswordId) + ".xwd");
 		try {
-			DataOutputStream is = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(path))));
+			DataOutputStream is = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
 			saveCrossword(is);
 		} catch (IOException e) {
 			e.printStackTrace();
-			Toast.makeText(aContext, R.string.save_failed, Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		return true;

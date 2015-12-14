@@ -37,6 +37,9 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	}	
 	
 	public static final String ARG_MODE = "arg_mode";
+	public static final String ARG_LOGIN = "arg_login";
+	public static final String ARG_STATE = "arg_state";
+	
 	public static final int MODE_NULL = 0;
 	public static final int MODE_PUZZLE = 1;
 	public static final int MODE_SOLUTION = 2;
@@ -60,7 +63,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	private String mUrl;
 	private int mState = STATE_NULL;
 	private int mMode = MODE_PUZZLE;
-	private int mLoggedIn = LOGIN_UNDEFINED;
+	private int mLoginStatus = LOGIN_UNDEFINED;
 	private WebViewListener mListener;
 	private Handler mWebViewClientHandler = new Handler();
 	private Runnable mWebViewClientSetter = new Runnable()
@@ -77,8 +80,8 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		@Override
 		public void run()
 		{
-			mListener.onLogin(mLoggedIn, mMode);
-			if (mLoggedIn==LOGIN_SUCCESSFUL && mMode == MODE_SOLUTION) {
+			mListener.onLogin(mLoginStatus, mMode);
+			if (mLoginStatus==LOGIN_SUCCESSFUL && mMode == MODE_SOLUTION) {
 				int id = CrosswordModel.getInstance().getCrosswordId();
 				int searchId = mWebManager.getCrossword(id).searchId();
 				mWebView.setWebViewClient(iWebViewClient);
@@ -166,6 +169,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
+		MainActivity.debug(1, TAG, String.format("onCreateView: %s", savedInstanceState));
 		View v = inflater.inflate(R.layout.web_view, container, false);
 		setHasOptionsMenu(true);
 		mWebView = (WebView) v.findViewById(R.id.webView);
@@ -174,6 +178,12 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		if (args != null) {
 			mMode = args.getInt(ARG_MODE,MODE_PUZZLE);
 			MainActivity.debug(1, TAG, String.format("onCreateView: mMode=%s", mMode));
+		}
+		if (savedInstanceState != null) {
+			mState = savedInstanceState.getInt(ARG_STATE, STATE_NULL);
+			mMode = savedInstanceState.getInt(ARG_MODE, MODE_PUZZLE);
+			mLoginStatus = savedInstanceState.getInt(ARG_LOGIN, LOGIN_UNDEFINED);
+			MainActivity.debug(1, TAG, String.format("onCreateView: %s", mLoginStatus));
 		}
 		mWebView.getSettings().setJavaScriptEnabled(true);
 		mWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
@@ -196,6 +206,15 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt(ARG_MODE, mMode);
+		outState.putInt(ARG_STATE, mState);
+		outState.putInt(ARG_LOGIN, mLoginStatus);
+		super.onSaveInstanceState(outState);
+	}
+
+	
+	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.web_view_fragment,menu);
 	}
@@ -203,8 +222,8 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
-		MainActivity.debug(1, TAG, String.format("onPrepareOptionsMenu mState=%s, mLoggedIn=%s", mState, mLoggedIn));
-		if (mState != STATE_NULL || mLoggedIn != LOGIN_FAILED) {
+		MainActivity.debug(1, TAG, String.format("onPrepareOptionsMenu mState=%s, mLoggedIn=%s", mState, mLoginStatus));
+		if (mState != STATE_NULL || mLoginStatus != LOGIN_FAILED) {
 			menu.removeItem(R.id.action_refresh);
 		}
 	}
@@ -225,7 +244,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	}
 
 	public int getLoginStatus() {
-		return mLoggedIn;
+		return mLoginStatus;
 	}
 	
 	private void getCrosswordInfo(String html)
@@ -243,7 +262,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 			while (line != null)
 			{
 				if (line.contains("welcome_message")) {
-					mLoggedIn = (line.contains("Welcome back"))? LOGIN_SUCCESSFUL: LOGIN_FAILED;
+					mLoginStatus = (line.contains("Welcome back"))? LOGIN_SUCCESSFUL: LOGIN_FAILED;
 				} else if (line.contains("CRYPTIC")) {
 					line = line.substring(line.indexOf(SEARCH_ID) + SEARCH_ID.length());
 					searchId = Integer.parseInt(line.substring(0, line.indexOf('"')));

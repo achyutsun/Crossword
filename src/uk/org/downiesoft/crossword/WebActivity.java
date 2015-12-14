@@ -1,4 +1,5 @@
 package uk.org.downiesoft.crossword;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -30,30 +31,21 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
-		startLoginDialog();
-	}
-
-
-	@Override
 	protected void onResume() {
 		super.onResume();
 		int login = mWebFragment.getLoginStatus();
-		if (login != WebViewFragment.LOGIN_UNDEFINED) {
-			doLogin(login, WebViewFragment.MODE_NULL);
-		}
+		MainActivity.debug(1, TAG, String.format("onResume %s", login));
+		doLogin(login, WebViewFragment.MODE_NULL);
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
+	protected void onPause() {
+		super.onPause();
 		if (mProgressDialog != null) {
 			mProgressDialog.dismiss();
 			mProgressDialog = null;
 		}
 	}
-
 	
 	@Override
 	public void onLogin(int aLoginStatus, int aMode) {
@@ -106,6 +98,10 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 						mProgressDialog.show();
 						break;
 				}
+				break;
+			case WebViewFragment.LOGIN_UNDEFINED:
+				startLoginDialog();
+				break;
 		}
 	}
 
@@ -122,4 +118,5 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 		mProgressDialog.setCancelable(false);
 		mProgressDialog.show();
 	}
+
 }

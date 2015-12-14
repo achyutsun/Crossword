@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
 import uk.org.downiesoft.spell.SpellActivity;
+import android.os.Environment;
 
 public class MainActivity extends FragmentActivity implements BluetoothListener, ClueListFragment.ClueListListener {
 
@@ -40,6 +41,8 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	
 	private static final int sDebug = 0;
 
+	private static File sCrosswordRoot;
+	
 	private CrosswordModel mCrossword;
 	private GridFragment mGridFragment;
 	private CluesFragment mCluesFragment;
@@ -136,10 +139,18 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		}
 	}
 
+	public static File getCrosswordDirectory() {
+		return sCrosswordRoot;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		MainActivity.debug(1, TAG, String.format("onCreate(%s)", mCrossword));
 		super.onCreate(savedInstanceState);
+		MainActivity.sCrosswordRoot = new File(Environment.getExternalStorageDirectory().toString(),getString(R.string.crossword_app_name));
+		if (!MainActivity.sCrosswordRoot.exists()) {
+			MainActivity.sCrosswordRoot.mkdir();
+		}
 		setContentView(R.layout.activity_crossword);
 		mCrossword = CrosswordModel.getInstance();
 		restore();
@@ -148,7 +159,6 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		if (mCluesFragment == null) {
 			mCluesFragment = new CluesFragment();
 		}
-		restore();
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(R.id.fragmentContainer, mGridFragment, GridFragment.TAG).commit();
 		fm.beginTransaction().replace(R.id.cluesContainer, mCluesFragment, CluesFragment.TAG).commit();
@@ -173,7 +183,9 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		MainActivity.debug(1, TAG, String.format("onPause(%s)", mCrossword));
 		super.onPause();
 		if (mCrossword.isValid() && mCrossword.isModified()) {
-			mCrossword.saveCrossword(this);
+			if (!mCrossword.saveCrossword(sCrosswordRoot)) {
+				Toast.makeText(this, R.string.save_failed, Toast.LENGTH_SHORT).show();
+			}
 		}
 		store();
 	}
@@ -459,7 +471,9 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	public void onCrosswordReceived(final CrosswordModel aCrossword) {
 		MainActivity.debug(1,TAG, String.format(">onCrosswordReceived(%s)->%s", mCrossword.getCrosswordId(), aCrossword.getCrosswordId()));
 		if (mCrossword.isValid()) {
-			mCrossword.saveCrossword(this);
+			if (!mCrossword.saveCrossword(sCrosswordRoot)) {
+				Toast.makeText(this, R.string.save_failed, Toast.LENGTH_SHORT).show();
+			}
 		}
 		if (mCrossword.getCrosswordId() != aCrossword.getCrosswordId()) {
 			mCrossword = aCrossword;

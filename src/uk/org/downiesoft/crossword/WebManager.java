@@ -1,134 +1,161 @@
 package uk.org.downiesoft.crossword;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.SparseBooleanArray;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import android.content.Context;
-import java.io.File;
+import java.util.Locale;
 
-public class WebManager
-{
-	private static WebManager sManagerInstance;
+public class WebManager {
 	
-	private ArrayList<WebInfo> iWebInfo;
-	private WebInfoAdapter iWebInfoAdapter;
+	public static final String TAG = WebManager.class.getName();
+
+	private static WebManager sManagerInstance;
+
+	private ArrayList<WebInfo> mWebInfoList;
+	private WebInfoAdapter mWebInfoAdapter;
+	private boolean mModified = false;
 
 	public static WebManager getInstance() {
-		if (sManagerInstance==null) {
+		if (sManagerInstance == null) {
 			sManagerInstance = new WebManager();
 		}
 		return sManagerInstance;
 	}
-	
-	private WebManager()
-	{
-		iWebInfo=new ArrayList<WebInfo>();
+
+	private WebManager() {
 	}
-	
-	public int insert(WebInfo aInfo)
-	{
-		int i=0;
-		while (i<iWebInfo.size())
-		{
-			WebInfo info=iWebInfo.get(i);
-			if (info.crosswordId()==aInfo.crosswordId())
-			{
-				iWebInfo.remove(i);
-				iWebInfo.add(i,aInfo);
-				return i;
-			}
-			else if (info.date().after(aInfo.date()))
-				i++;
-			else
-				break;
+
+	public int insert(WebInfo aInfo) {
+		int index = insertInSeq(mWebInfoList, aInfo);
+		if (mWebInfoAdapter != null) {
+			mWebInfoAdapter.notifyDataSetChanged();
 		}
-		iWebInfo.add(i,aInfo);
-		if (iWebInfoAdapter != null) {
-			iWebInfoAdapter.notifyDataSetChanged();
-		}
-		return i;
+		return index;
 	}
-	
-	public ArrayList<WebInfo> getWebInfo()
-	{
-		return iWebInfo;
-	}
-	
+
 	public WebInfoAdapter getAdapter(Context aContext) {
-		if (iWebInfoAdapter == null) {
-			iWebInfoAdapter = new WebInfoAdapter(aContext, R.layout.web_info_item, iWebInfo);
+		if (mWebInfoAdapter == null) {
+			mWebInfoAdapter = new WebInfoAdapter(aContext, R.layout.web_info_item, mWebInfoList);
 		}
-		return iWebInfoAdapter;
+		return mWebInfoAdapter;
 	}
-	
-	public WebInfo getCrossword(int aCrosswordId)
-	{
-		for (int i=0; i<iWebInfo.size(); i++)
-			if (iWebInfo.get(i).crosswordId()==aCrosswordId)
-				return iWebInfo.get(i);
-		return null;
-	}
-	
-	public WebInfo getCrossword(Date aDate)
-	{
-		for (int i=0; i<iWebInfo.size(); i++)
-			if (iWebInfo.get(i).date().compareTo(aDate)==0)
-				return iWebInfo.get(i);
+
+	public WebInfo getCrossword(int aCrosswordId) {
+		if (mWebInfoList != null) {
+			for (int i=0; i < mWebInfoList.size(); i++) {
+				if (mWebInfoList.get(i).crosswordId() == aCrosswordId) {
+					return mWebInfoList.get(i);
+				}
+			}
+		}
 		return null;
 	}
 
-	public void externalize(DataOutputStream os) throws IOException	{
-		os.writeInt(iWebInfo.size());
-		for (int i=0; i < iWebInfo.size(); i++)
-			iWebInfo.get(i).externalize(os);
-		os.flush();
-		os.close();
-	}
-	
-	public void internalize(DataInputStream is) throws IOException
-	{
-		int size=is.readInt();
-		iWebInfo = new ArrayList<WebInfo>(size);
-		for (int i=0; i < size; i++) {
-			WebInfo info=new WebInfo();
-			info.internalize(is);
-			iWebInfo.add(info);
+	public WebInfo getCrossword(Date aDate) {
+		if (mWebInfoList != null) {
+			for (int i=0; i < mWebInfoList.size(); i++) {
+				if (mWebInfoList.get(i).date().compareTo(aDate) == 0) {
+					return mWebInfoList.get(i);
+				}
+			}
 		}
+		return null;
 	}
 
-	public void store(Context aContext)
-	{
-		File file = new File(aContext.getFilesDir(),"webinfo");
-		try
-		{
-			DataOutputStream os = new DataOutputStream(aContext.openFileOutput("webinfo", Context.MODE_PRIVATE));
-			externalize(os);
-			os.flush();
-			os.close();
+	public void store(Context aContext) {
+		if (mModified) {
+			try {
+				DataOutputStream os = new DataOutputStream(aContext.openFileOutput("webinfo", Context.MODE_PRIVATE));
+				os.writeInt(mWebInfoList.size());
+				for (WebInfo info: mWebInfoList) {
+					info.externalize(os);
+				}
+				os.flush();
+				os.close();
+			} catch (IOException e) {
+				File file = new File(aContext.getFilesDir(), "webinfo");
+				file.delete();
+			}
 		}
-		catch (IOException e)
-		{
-			file.delete();
+		mModified = false;
+	}
+
+	public void restore(Context aContext) {
+		new WebInfoLoaderTask(aContext, "webinfo").execute();	
+	}
+
+	public int insertInSeq(ArrayList<WebInfo> aWebInfoList, WebInfo aInfo) {
+		int index = Collections.binarySearch(aWebInfoList, aInfo);
+		if (index >= 0) {
+			return index;
+		} else {
+			index = -1 - index;
+			aWebInfoList.add(index, aInfo);
+			mModified = true;
+			return index;			
+		}
+	}
+
+	private class WebInfoLoaderTask extends AsyncTask<Void, Void, ArrayList<WebInfo>> {
+
+		private Context mContext;
+		private String mFileName;
+
+		WebInfoLoaderTask(Context aContext, String aFileName) {
+			mContext = aContext;
+			mFileName = aFileName;
+		}
+
+		@Override
+		protected ArrayList<WebInfo> doInBackground(Void... voids) {
+			ArrayList<WebInfo> webInfoList = null;
+			File[] xwdFiles=MainActivity.getCrosswordDirectory().listFiles(new FileFilter(){
+					@Override
+					public boolean accept(File file) {
+						return (file.isDirectory() || file.getName().toLowerCase(Locale.ENGLISH).endsWith(".xwd"));
+					}});
+			SparseBooleanArray deviceFiles = new SparseBooleanArray(xwdFiles.length);
+			for (File f: xwdFiles) {
+				try {
+					String name = f.getName();
+					int id = Integer.parseInt(name.substring(0, name.lastIndexOf('.')));
+					deviceFiles.put(id, true);
+				} catch (NumberFormatException e) {
+					// ignore non-numeric file names
+				}
+			}
+			try {
+				DataInputStream is = new DataInputStream(mContext.openFileInput(mFileName));
+				int size=is.readInt();
+				webInfoList = new ArrayList<WebInfo>(size);
+				for (int i=0; i < size; i++) {
+					WebInfo info=new WebInfo(is);
+					info.setIsOnDevice(deviceFiles.get(info.crosswordId()));
+					insertInSeq(webInfoList, info);
+				}
+				is.close();
+				return webInfoList;
+			} catch (IOException e) {
+				if (webInfoList != null) {
+					webInfoList.clear();
+				}
+			}
+			return webInfoList;
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<WebInfo> result) {
+			WebManager.this.mWebInfoList = result;
+			mModified = false;
 		}
 
 	}
-
-	public void restore(Context aContext)
-	{
-		try
-		{
-			DataInputStream is = new DataInputStream(aContext.openFileInput("webinfo"));
-			internalize(is);
-			is.close();
-		}
-		catch (IOException e)
-		{
-			iWebInfo.clear();
-		}
-
-	}
-
-	
 }

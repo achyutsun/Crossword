@@ -17,16 +17,18 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import android.view.View.OnLongClickListener;
+import android.view.ActionMode;
 
 public class BrowserDialog extends DialogFragment
 {
 	public static final String TAG = BrowserDialog.class.getName();
 
-	public static BrowserDialog getInstance(String aFolder, String aName)
+	public static BrowserDialog getInstance(File aFolder, String aName)
 	{
 		BrowserDialog self=new BrowserDialog();
 		Bundle args = new Bundle();
-		args.putString("folder", aFolder);
+		args.putString("folder", aFolder.toString());
 		args.putString("name", aName);
 		self.setArguments(args);
 		return self;
@@ -37,7 +39,7 @@ public class BrowserDialog extends DialogFragment
 	private ArrayList<File> iFileList;
 	private File iRootDir;
 	private BrowserAdapter iBrowserAdapter;
-	
+	private ActionMode mActionMode;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,13 @@ public class BrowserDialog extends DialogFragment
 				getActivity().finish();
 			}
 		});
+		iListView.setOnLongClickListener(new OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View p1) {
+					// TODO: Implement this method
+					return false;
+				}
+			});
 		Bundle args=getArguments();
 		setRootDir(new File(args.getString("folder")),args.getString("name"));
 		return iView;
