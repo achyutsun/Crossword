@@ -11,7 +11,7 @@
 		android:gravity="center" 
 		android:padding="10dp"
 		android:fontFamily="monospace"
-		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:text="@string/text_on_device"
 		android:scaleType="centerInside" />
 
@@ -21,7 +21,7 @@
 		android:layout_weight="@integer/web_list_weight_2"
 		android:padding="10dp"
 		android:fontFamily="monospace"
-		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:text="@string/text_crossword_id"
 		android:singleLine="true" />
 
@@ -31,7 +31,7 @@
 		android:layout_weight="@integer/web_list_weight_3"
 		android:padding="10dp"
 		android:fontFamily="monospace"
-		android:textAppearance="?android:attr/textAppearanceMedium"
+		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:text="@string/text_crossword_date"
 		android:singleLine="true" />
 </LinearLayout>

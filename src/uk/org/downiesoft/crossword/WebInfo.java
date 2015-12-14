@@ -46,14 +46,18 @@ public class WebInfo implements Comparable
 	@SuppressLint("SimpleDateFormat")
 	public void setDate(String aDateStr)
 	{
-		final String months="JanFebMarAprMayJunJulAugSepOctNovDec";
-		String[] elem=aDateStr.split(" ");
-		int d=Integer.parseInt(elem[1]);
-		int m=months.indexOf(elem[2])/3;
-		int y=Integer.parseInt(elem[3])+2000;
-		Calendar cal=Calendar.getInstance(Locale.UK);
-		cal.set(y, m, d);
-		mDate = cal.getTime();
+		if (aDateStr != null) {
+			final String months="JanFebMarAprMayJunJulAugSepOctNovDec";
+			String[] elem=aDateStr.split(" ");
+			int d=Integer.parseInt(elem[1]);
+			int m=months.indexOf(elem[2]) / 3;
+			int y=Integer.parseInt(elem[3]) + 2000;
+			Calendar cal=Calendar.getInstance(Locale.UK);
+			cal.set(y, m, d);
+			mDate = cal.getTime();
+		} else {
+			mDate = estimatedDate(mCrosswordId);
+		}
 	}
 
 	public int crosswordId()
@@ -76,16 +80,43 @@ public class WebInfo implements Comparable
 
 	public Date date()
 	{
-		return mDate;
+		if (mDate != null) {
+			return mDate;
+		} else {
+			return estimatedDate(mCrosswordId);
+		}
 	}
 
+	private Date estimatedDate(int aId) {
+		Calendar cal = Calendar.getInstance(Locale.UK);
+		final long oneDayMillis = 24 * 3600 * 1000;
+		if (aId>=10000) {
+			cal.set(2015,Calendar.DECEMBER,14);
+			long time=cal.getTimeInMillis();
+			long weeks = (aId - 27984) / 6;
+			long days = (aId - 27984) % 6;
+			time = time + (7 * weeks + days) * oneDayMillis;
+			return new Date(time);
+		} else {
+			cal.set(2015,Calendar.DECEMBER,13);
+			long time=cal.getTimeInMillis();
+			long weeks = (aId - 2826);
+			time = time + (7 * weeks) * oneDayMillis;
+			return new Date(time);
+		}
+	}
+	
 	public void merge(WebInfo aInfo) {
 		mCrosswordId = aInfo.mCrosswordId;
 		mSearchId = Math.max(mSearchId,aInfo.mSearchId);
 		if (mDate == null) {
 			mDate = aInfo.mDate;
 		}
-		mDate.setTime(aInfo.date().getTime());
+		if (aInfo.mDate != null) {
+			mDate.setTime(aInfo.date().getTime());
+		} else {
+			mDate = estimatedDate(mCrosswordId);
+		}
 		mIsOnDevice |= aInfo.mIsOnDevice;
 	}	
 
@@ -114,8 +145,14 @@ public class WebInfo implements Comparable
 			WebInfo info = (WebInfo)p1;
 			if (info.mCrosswordId == this.mCrosswordId) {
 				return 0;
-			} else {
+			} else if (mDate != null && info.mDate != null) {
 				return -this.mDate.compareTo(info.mDate);
+			} else if (mDate == null) {
+				return -estimatedDate(this.mCrosswordId).compareTo(info.mDate);
+			} else if (info.mDate == null) {
+				return -this.mDate.compareTo(estimatedDate(info.mCrosswordId));
+			} else {
+				return -estimatedDate(this.mCrosswordId).compareTo(estimatedDate(info.mCrosswordId));
 			}
 		} catch (ClassCastException e) {
 			throw new IllegalArgumentException(String.format("Object %s is not of type %s",p1.getClass().getName(),WebInfo.class.getName()));

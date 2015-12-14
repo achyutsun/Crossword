@@ -64,8 +64,8 @@
 	<string name="text_deleted_format_plural" formatted="false">%s of %s crosswords deleted</string>
 	<string name="text_crossword_protected">Current crossword cannot be deleted</string>
 	<string name="text_on_device">Saved</string>
-    <string name="text_crossword_id">Crossword No.</string>
-    <string name="text_crossword_date">Crossword Date</string>
+    <string name="text_crossword_id">Id</string>
+    <string name="text_crossword_date">Date</string>
 	
     <!--  BluetoothChat -->
     <string name="send">Send</string>
