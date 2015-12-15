@@ -12,7 +12,7 @@
     <string name="action_solution">Get solution</string>
     <string name="action_settings">Settings</string>
     <string name="action_spell">Spell check</string>
-    <string name="action_clear">Erase all</string>
+    <string name="action_clear">Erase answers</string>
     <string name="action_delete">Delete</string>
     <string name="action_select_all">Select all</string>
     <string name="action_web">Web</string>

@@ -2,27 +2,27 @@
 
 	<item
         android:id="@+id/action_enter"
-        android:orderInCategory="70"
-		android:showAsAction="ifRoom|withText"
+        android:orderInCategory="10"
+        android:showAsAction="ifRoom|withText"
 		android:icon="@drawable/ic_action_edit"
 		android:title="@string/action_enter"/>
 	
 	<item
         android:id="@+id/action_erase"
-        android:orderInCategory="75"
-		android:showAsAction="ifRoom|withText"
+        android:orderInCategory="20"
+        android:showAsAction="ifRoom|withText"
 		android:icon="@drawable/ic_action_discard"
 		android:title="@string/action_erase"/>
 
 	<item
         android:id="@+id/action_spell"
-        android:orderInCategory="80"
+		android:orderInCategory="30"
 		android:showAsAction="ifRoom|withText"
 		android:icon="@drawable/ic_action_search"
 		android:title="@string/action_spell"/>
     <item
         android:id="@+id/action_clear"
-        android:orderInCategory="85"
+        android:orderInCategory="40"
         android:showAsAction="never"
         android:title="@string/action_clear"/>
 
