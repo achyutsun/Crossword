@@ -124,9 +124,8 @@ public class BrowserDialog extends DialogFragment
 			WebInfo info = webManager.getCrossword(id);
 			if (info == null) {
 				info = new WebInfo(id,0,null);
-			} else {
-				info.setIsOnDevice(true);
 			}
+			info.setIsOnDevice(true);
 			iFileList.add(info);
 			if (id == aCrosswordId) { 
 				selected=i;
