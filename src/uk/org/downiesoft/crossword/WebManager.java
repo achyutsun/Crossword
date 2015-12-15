@@ -24,7 +24,7 @@ public class WebManager extends Fragment {
 	public static final String TAG = WebManager.class.getName();
 
 	public interface WebManagerListener {
-		public void onWebManagerReady(WebManager aWebManager)
+		public void onWebManagerReady(WebManager aWebManager);
 	}
 	
 	private static WebManager sManagerInstance;
@@ -114,8 +114,9 @@ public class WebManager extends Fragment {
 		mModified = false;
 	}
 
+	
 	public int insertInSeq(ArrayList<WebInfo> aWebInfoList, WebInfo aInfo) {
-		int index = Collections.binarySearch(aWebInfoList, aInfo);
+		int index = Collections.binarySearch(aWebInfoList, aInfo, new WebInfo.WebInfoComparator());
 		if (index >= 0) {
 			return index;
 		} else {
@@ -172,6 +173,8 @@ public class WebManager extends Fragment {
 				e.printStackTrace();
 				if (webInfoList != null) {
 					webInfoList.clear();
+				} else {
+					webInfoList = new ArrayList<WebInfo>();
 				}
 			}
 			return webInfoList;
