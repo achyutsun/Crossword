@@ -9,8 +9,9 @@
     <dimen name="button_size">40dp</dimen>
     <dimen name="button_text_size">18dp</dimen>
 
-	<integer name="web_list_weight_1">20</integer>    
-	<integer name="web_list_weight_2">20</integer>
-	<integer name="web_list_weight_3">40</integer>
+	<integer name="web_list_weight_1">15</integer>    
+	<integer name="web_list_weight_2">15</integer>
+	<integer name="web_list_weight_3">12</integer>
+	<integer name="web_list_weight_4">30</integer>
 	
 </resources>

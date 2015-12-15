@@ -21,17 +21,26 @@
 		android:layout_height="wrap_content"
 		android:layout_weight="@integer/web_list_weight_2"
 		android:padding="10dp"
-		android:fontFamily="monospace"
 		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:singleLine="true" />
+
+
+	<TextView 
+		android:id="@+id/webDay"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="@integer/web_list_weight_3"
+		android:padding="10dp"
+		android:textAppearance="?android:attr/textAppearanceLarge"
+		android:singleLine="false" />
 
 	<TextView 
 		android:id="@+id/webDate"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
-		android:layout_weight="@integer/web_list_weight_3"
+		android:layout_weight="@integer/web_list_weight_4"
 		android:padding="10dp"
-		android:fontFamily="monospace"
 		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:singleLine="false" />
+	
 </LinearLayout>

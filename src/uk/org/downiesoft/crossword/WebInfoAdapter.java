@@ -44,10 +44,13 @@ public class WebInfoAdapter extends ArrayAdapter<WebInfo>
 
 		ImageView imageView = (ImageView) infoItemView.findViewById(R.id.webImage);
 		TextView idView = (TextView) infoItemView.findViewById(R.id.webId);
+		TextView dayView = (TextView) infoItemView.findViewById(R.id.webDay);
 		TextView dateView = (TextView) infoItemView.findViewById(R.id.webDate);
-
+		
 		idView.setText(Integer.toString(item.crosswordId()));
-		dateView.setText(item.dateString());
+		String[] dateStr=item.dateString().split(" ");
+		dayView.setText(dateStr[0]);
+		dateView.setText(dateStr[1]);
 		if (item.isOnDevice()) {
 			imageView.setImageResource(R.drawable.ic_launcher);
 		} else {
