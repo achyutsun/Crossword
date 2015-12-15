@@ -556,8 +556,7 @@ WebManager.WebManagerListener {
 					}
 				} else {
 					// User did not enable Bluetooth or an error occurred
-					Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-					finish();
+					Toast.makeText(this, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
 				}
 				break;
 			case SpellActivity.REQUEST_CROSSWORD:

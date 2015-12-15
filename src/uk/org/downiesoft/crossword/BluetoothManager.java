@@ -282,8 +282,7 @@ public class BluetoothManager
 				{
 					// User did not enable Bluetooth or an error occurred
 					MainActivity.debug(1, TAG, "BT not enabled");
-					Toast.makeText(mActivity, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-					mActivity.finish();
+					Toast.makeText(mActivity, R.string.bt_not_enabled, Toast.LENGTH_SHORT).show();
 				}
 		}
 	}
