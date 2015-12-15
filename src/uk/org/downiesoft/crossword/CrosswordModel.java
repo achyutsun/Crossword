@@ -1,10 +1,7 @@
 package uk.org.downiesoft.crossword;
 
-import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Environment;
-import android.widget.Toast;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

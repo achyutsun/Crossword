@@ -25,7 +25,8 @@ import java.io.IOException;
 import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
 import uk.org.downiesoft.spell.SpellActivity;
 
-public class MainActivity extends FragmentActivity implements BluetoothListener, ClueListFragment.ClueListListener {
+public class MainActivity extends FragmentActivity implements BluetoothListener, ClueListFragment.ClueListListener,
+WebManager.WebManagerListener {
 
 	public static final String TAG = MainActivity.class.getName();
 	public static final String CROSSWORD_DIR = "Crossword";
@@ -38,7 +39,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 	public static final int REQUEST_PUZZLE   = 4098;
 	public static final int REQUEST_SOLUTION = 4099;
 	
-	private static final int sDebug = 0;
+	private static final int sDebug = 1;
 
 	private static File sCrosswordRoot;
 	
@@ -152,6 +153,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		}
 		setContentView(R.layout.activity_crossword);
 		mCrossword = CrosswordModel.getInstance();
+		mWebManager = WebManager.getInstance();
 		restore();
 		if (mGridFragment == null)
 			mGridFragment = new GridFragment();
@@ -161,6 +163,7 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(R.id.fragmentContainer, mGridFragment, GridFragment.TAG).commit();
 		fm.beginTransaction().replace(R.id.cluesContainer, mCluesFragment, CluesFragment.TAG).commit();
+		fm.beginTransaction().add(mWebManager,WebManager.TAG).commit();
 	}
 
 	@Override
@@ -301,6 +304,11 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 		return false;
 	}
 
+	@Override
+	public void onWebManagerReady(WebManager aWebManager) {
+		setCrosswordTitle();
+	}
+	
 	void setCrosswordTitle() {
 		String title = getString(R.string.crossword_app_name);
 		String subtitle = null;
@@ -358,17 +366,16 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 				os.close();
 				mGridFragment.setCrossword(mCrossword);
 			} catch (IOException e) {
-
+				e.printStackTrace();
 			}
 		}
-		if (mWebManager != null)
+		if (mWebManager != null) {
 			mWebManager.store(this);
+		}
 	}
 
 	public void restore() {
-		mWebManager = WebManager.getInstance();
-		mWebManager.restore(this);
-
+		
 		try {
 			DataInputStream is = new DataInputStream(openFileInput("current.xwd"));
 			mCrossword.internalize(is);
@@ -577,7 +584,8 @@ public class MainActivity extends FragmentActivity implements BluetoothListener,
 				break;
 			case MainActivity.REQUEST_BROWSER:
 				if (resultCode == Activity.RESULT_OK) {
-					File file = new File(sCrosswordRoot,String.format("%s.xwd",data.getExtras().getInt("file")));
+					File file = new File(sCrosswordRoot,String.format("%s.xwd",data.getExtras().getInt(BrowserDialog.ARG_ID)));
+					MainActivity.debug(1,TAG,String.format("onActivityResult: %s",file));
 					onFileSelected(file);
 				}
 				break;				

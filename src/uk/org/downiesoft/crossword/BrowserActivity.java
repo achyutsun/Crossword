@@ -16,10 +16,7 @@ public class BrowserActivity extends FragmentActivity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.browser_activity);
-		File path = new File(Environment.getExternalStorageDirectory().toString(),MainActivity.CROSSWORD_DIR);
-		if (!path.exists())
-			path.mkdir();
-		Fragment browserFragment=BrowserDialog.getInstance(path, "*.*");
+		Fragment browserFragment=BrowserDialog.getInstance(MainActivity.getCrosswordDirectory(), CrosswordModel.getInstance().getCrosswordId());
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(R.id.browserContainer, browserFragment, BrowserDialog.TAG).commit();
 	}

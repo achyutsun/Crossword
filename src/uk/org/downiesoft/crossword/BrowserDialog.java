@@ -32,12 +32,16 @@ public class BrowserDialog extends DialogFragment
 {
 	public static final String TAG = BrowserDialog.class.getName();
 
-	public static BrowserDialog getInstance(File aFolder, String aName)
+	public static final String ARG_FOLDER = "arg_folder";
+	public static final String ARG_ID = "arg_id";
+	public static final String ARG_FILE = "arg_file";
+	
+	public static BrowserDialog getInstance(File aFolder, int aId)
 	{
 		BrowserDialog self=new BrowserDialog();
 		Bundle args = new Bundle();
-		args.putString("folder", aFolder.toString());
-		args.putString("name", aName);
+		args.putString(ARG_FOLDER, aFolder.toString());
+		args.putInt(ARG_ID, aId);
 		self.setArguments(args);
 		return self;
 	}
@@ -67,8 +71,9 @@ public class BrowserDialog extends DialogFragment
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 			{
 				WebInfo item=iBrowserAdapter.getItem(position);
+				MainActivity.debug(1,TAG,String.format("onItemClick(%s): %s",position,item));
 				Intent result = new Intent();
-				result.putExtra("file",item.crosswordId());
+				result.putExtra(ARG_ID,item.crosswordId());
 				getActivity().setResult(Activity.RESULT_OK, result);
 				getActivity().finish();
 			}
@@ -84,7 +89,7 @@ public class BrowserDialog extends DialogFragment
 				}
 			});
 		Bundle args=getArguments();
-		setRootDir(new File(args.getString("folder")),args.getInt("name"));
+		setRootDir(new File(args.getString(ARG_FOLDER)),args.getInt(ARG_ID));
 		return iView;
 	}
 	
@@ -115,7 +120,7 @@ public class BrowserDialog extends DialogFragment
 				return false;
 			}});
 		iFileList=new ArrayList<WebInfo>(files.length);
-		int selected=0;
+		WebInfo selected = null;
 		WebManager webManager = WebManager.getInstance();
 		for (int i=0; i<files.length; i++) {
 			File f = files[i];
@@ -127,14 +132,16 @@ public class BrowserDialog extends DialogFragment
 			}
 			info.setIsOnDevice(true);
 			iFileList.add(info);
-			if (id == aCrosswordId) { 
-				selected=i;
+			if (id == aCrosswordId) {
+				selected = info;
 			}
 		}
 		Collections.sort(iFileList);
 		iBrowserAdapter = new WebInfoAdapter(getActivity(), R.layout.web_info_item, iFileList);
 		iListView.setAdapter(iBrowserAdapter);
-		iListView.setSelection(selected);
+		if (selected != null) {
+			iListView.setSelection(iFileList.indexOf(selected));
+		}
 	}
 
 	private class ListViewMultiChoiceModeListener implements MultiChoiceModeListener {

@@ -12,15 +12,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.os.Bundle;
+import android.view.ViewGroup;
+import android.app.Activity;
 
-public class WebManager {
+public class WebManager extends Fragment {
 	
 	public static final String TAG = WebManager.class.getName();
 
+	public interface WebManagerListener {
+		public void onWebManagerReady(WebManager aWebManager)
+	}
+	
 	private static WebManager sManagerInstance;
 
 	private ArrayList<WebInfo> mWebInfoList;
 	private WebInfoAdapter mWebInfoAdapter;
+	private WebManagerListener mListener;
 	private boolean mModified = false;
 
 	public static WebManager getInstance() {
@@ -30,7 +41,22 @@ public class WebManager {
 		return sManagerInstance;
 	}
 
-	private WebManager() {
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			mListener = (WebManagerListener)activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(String.format("Activity %s must implement %s",activity.getClass().getName(),WebManagerListener.class.getName()));
+		}
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		MainActivity.debug(1, TAG, String.format("onCreate"));
+		setRetainInstance(true);
+		new WebInfoLoaderTask(getActivity(), "webinfo").execute();	
+		super.onCreate(savedInstanceState);
 	}
 
 	public int insert(WebInfo aInfo) {
@@ -88,10 +114,6 @@ public class WebManager {
 		mModified = false;
 	}
 
-	public void restore(Context aContext) {
-		new WebInfoLoaderTask(aContext, "webinfo").execute();	
-	}
-
 	public int insertInSeq(ArrayList<WebInfo> aWebInfoList, WebInfo aInfo) {
 		int index = Collections.binarySearch(aWebInfoList, aInfo);
 		if (index >= 0) {
@@ -116,6 +138,7 @@ public class WebManager {
 
 		@Override
 		protected ArrayList<WebInfo> doInBackground(Void... voids) {
+			MainActivity.debug(1, TAG, String.format(">doInBackground()"));
 			ArrayList<WebInfo> webInfoList = null;
 			File[] xwdFiles=MainActivity.getCrosswordDirectory().listFiles(new FileFilter(){
 					@Override
@@ -139,11 +162,14 @@ public class WebManager {
 				for (int i=0; i < size; i++) {
 					WebInfo info=new WebInfo(is);
 					info.setIsOnDevice(deviceFiles.get(info.crosswordId()));
+					MainActivity.debug(1,TAG,String.format("WebManager: on device %s",info.crosswordId()));
 					insertInSeq(webInfoList, info);
 				}
 				is.close();
+				MainActivity.debug(1, TAG, String.format(">doInBackground()"));
 				return webInfoList;
 			} catch (IOException e) {
+				e.printStackTrace();
 				if (webInfoList != null) {
 					webInfoList.clear();
 				}
@@ -154,6 +180,7 @@ public class WebManager {
 		@Override
 		protected void onPostExecute(ArrayList<WebInfo> result) {
 			WebManager.this.mWebInfoList = result;
+			mListener.onWebManagerReady(WebManager.this);
 			mModified = false;
 		}
 
