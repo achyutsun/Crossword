@@ -39,7 +39,7 @@ WebManager.WebManagerListener {
 	public static final int REQUEST_PUZZLE   = 4098;
 	public static final int REQUEST_SOLUTION = 4099;
 	
-	private static final int sDebug = 1;
+	private static final int sDebug = 0;
 
 	private static File sCrosswordRoot;
 	
