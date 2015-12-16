@@ -116,7 +116,7 @@ public class WebManager extends Fragment {
 
 	
 	public int insertInSeq(ArrayList<WebInfo> aWebInfoList, WebInfo aInfo) {
-		int index = Collections.binarySearch(aWebInfoList, aInfo, new WebInfo.WebInfoComparator());
+		int index = Collections.binarySearch(aWebInfoList, aInfo);
 		if (index >= 0) {
 			return index;
 		} else {
@@ -146,14 +146,16 @@ public class WebManager extends Fragment {
 					public boolean accept(File file) {
 						return (file.isDirectory() || file.getName().toLowerCase(Locale.ENGLISH).endsWith(".xwd"));
 					}});
-			SparseBooleanArray deviceFiles = new SparseBooleanArray(xwdFiles.length);
-			for (File f: xwdFiles) {
-				try {
-					String name = f.getName();
-					int id = Integer.parseInt(name.substring(0, name.lastIndexOf('.')));
-					deviceFiles.put(id, true);
-				} catch (NumberFormatException e) {
-					// ignore non-numeric file names
+			SparseBooleanArray deviceFiles = new SparseBooleanArray();
+			if (xwdFiles != null) {
+				for (File f: xwdFiles) {
+					try {
+						String name = f.getName();
+						int id = Integer.parseInt(name.substring(0, name.lastIndexOf('.')));
+						deviceFiles.put(id, true);
+					} catch (NumberFormatException e) {
+						// ignore non-numeric file names
+					}
 				}
 			}
 			try {

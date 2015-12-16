@@ -1,7 +1,5 @@
 package uk.org.downiesoft.crossword;
 
-
-import android.annotation.SuppressLint;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -11,9 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Comparator;
 
-public class WebInfo implements Comparable
+public class WebInfo implements Comparable<WebInfo>
 {
 	
 	private int mCrosswordId;
@@ -95,14 +92,14 @@ public class WebInfo implements Comparable
 		Calendar cal = Calendar.getInstance(Locale.UK);
 		final long oneDayMillis = 24 * 3600 * 1000;
 		if (aId>=10000) {
-			cal.set(2015,Calendar.DECEMBER,14);
+			cal.set(2015,Calendar.DECEMBER,14,0,0,0);
 			long time=cal.getTimeInMillis();
 			long weeks = (aId - 27984) / 6;
 			long days = (aId - 27984) % 6;
 			time = time + (7 * weeks + days) * oneDayMillis;
 			return new Date(time);
 		} else {
-			cal.set(2015,Calendar.DECEMBER,13);
+			cal.set(2015,Calendar.DECEMBER,13,0,0,0);
 			long time=cal.getTimeInMillis();
 			long weeks = (aId - 2826);
 			time = time + (7 * weeks) * oneDayMillis;
@@ -124,7 +121,6 @@ public class WebInfo implements Comparable
 		mIsOnDevice |= aInfo.mIsOnDevice;
 	}	
 
-	@SuppressLint("SimpleDateFormat")
 	public String dateString()
 	{
 		if (mDate!=null)
@@ -136,7 +132,7 @@ public class WebInfo implements Comparable
 			return "Unknown";
 	}
 	
-	void externalize(DataOutputStream aStream) throws IOException
+	public void externalize(DataOutputStream aStream) throws IOException
 	{
 		aStream.writeInt(mCrosswordId);
 		aStream.writeInt(mSearchId);
@@ -144,32 +140,18 @@ public class WebInfo implements Comparable
 	}
 	
 	@Override
-	public int compareTo(Object p1) {
-		try {
-			WebInfo info = (WebInfo)p1;
-			if (info.mCrosswordId == this.mCrosswordId) {
-				return 0;
-			} else if (mDate != null && info.mDate != null) {
-				return -this.mDate.compareTo(info.mDate);
-			} else if (mDate == null) {
-				return -WebInfo.estimatedDate(this.mCrosswordId).compareTo(info.mDate);
-			} else if (info.mDate == null) {
-				return -this.mDate.compareTo(estimatedDate(info.mCrosswordId));
-			} else {
-				return -WebInfo.estimatedDate(this.mCrosswordId).compareTo(estimatedDate(info.mCrosswordId));
-			}
-		} catch (ClassCastException e) {
-			throw new IllegalArgumentException(String.format("Object %s is not of type %s",p1.getClass().getName(),WebInfo.class.getName()));
+	public int compareTo(WebInfo info) {
+		if (info.mCrosswordId == this.mCrosswordId) {
+			return 0;
+		} else if (mDate != null && info.mDate != null) {
+			return -this.mDate.compareTo(info.mDate);
+		} else if (mDate == null) {
+			return -WebInfo.estimatedDate(this.mCrosswordId).compareTo(info.mDate);
+		} else if (info.mDate == null) {
+			return -this.mDate.compareTo(estimatedDate(info.mCrosswordId));
+		} else {
+			return -WebInfo.estimatedDate(this.mCrosswordId).compareTo(estimatedDate(info.mCrosswordId));
 		}
-	}
-
-	public static class WebInfoComparator implements Comparator<WebInfo> {
-
-		@Override
-		public int compare(WebInfo lhs, WebInfo rhs) {
-			return lhs.compareTo(rhs);
-		}
-		
 	}
 	
 	@Override
