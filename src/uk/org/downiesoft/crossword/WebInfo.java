@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Comparator;
 
 public class WebInfo implements Comparable
 {
@@ -162,6 +163,15 @@ public class WebInfo implements Comparable
 		}
 	}
 
+	public static class WebInfoComparator implements Comparator<WebInfo> {
+
+		@Override
+		public int compare(WebInfo lhs, WebInfo rhs) {
+			return lhs.compareTo(rhs);
+		}
+		
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("WebInfo{%s,%s,%s,%s}",mCrosswordId, mSearchId, dateString(), mIsOnDevice);

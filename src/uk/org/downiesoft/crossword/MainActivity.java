@@ -335,7 +335,6 @@ WebManager.WebManagerListener {
 	}
 
 
-	@Override
 	public void onFileSelected(final File aFile) {
 		CrosswordModel newCrossword = CrosswordModel.openCrossword(aFile);
 		MainActivity.debug(1, TAG, String.format("onFileSelected(%s):%s", aFile, newCrossword));
