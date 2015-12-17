@@ -8,6 +8,8 @@ import android.view.View;
 import android.content.Intent;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.app.Activity;
 
 public class WebActivity extends FragmentActivity implements WebViewFragment.WebViewListener {
 
@@ -50,8 +52,10 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 	@Override
 	public void onLogin(int aLoginStatus, int aMode) {
 		MainActivity.debug(1, TAG, String.format("onLogin(%s)", aLoginStatus));
-		mProgressDialog.dismiss();
-		mProgressDialog = null;
+		if (mProgressDialog != null) {
+			mProgressDialog.dismiss();
+			mProgressDialog = null;
+		}
 		doLogin(aLoginStatus, aMode);
 		invalidateOptionsMenu();
 	}
@@ -94,7 +98,7 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 						mProgressDialog.setTitle(R.string.text_getting_solution);
 						mProgressDialog.setMessage(getString(R.string.text_please_wait));
 						mProgressDialog.setIndeterminate(true);
-						mProgressDialog.setCancelable(false);
+						mProgressDialog.setCancelable(true);
 						mProgressDialog.show();
 						break;
 				}
@@ -115,7 +119,15 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 		mProgressDialog.setTitle(R.string.text_logging_in);
 		mProgressDialog.setMessage(getString(R.string.text_please_wait));
 		mProgressDialog.setIndeterminate(true);
-		mProgressDialog.setCancelable(false);
+		mProgressDialog.setCancelable(true);
+		mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface p1) {
+					mProgressDialog.dismiss();
+					setResult(Activity.RESULT_CANCELED);
+					finish();
+				}
+			});
 		mProgressDialog.show();
 	}
 
