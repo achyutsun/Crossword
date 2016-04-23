@@ -4,19 +4,16 @@
         android:id="@+id/action_check"
         android:orderInCategory="100"
         android:showAsAction="ifRoom|withText"
-		android:icon="@drawable/ic_action_search"
         android:title="@string/action_check"/>
     <item
         android:id="@+id/action_anagram"
         android:orderInCategory="105"
-		android:icon="@drawable/ic_action_anagram"
         android:showAsAction="ifRoom|withText"
         android:title="@string/action_anagram"/>
     <item
         android:id="@+id/action_crossword"
         android:orderInCategory="110"
         android:showAsAction="ifRoom|withText"
-		android:icon="@drawable/ic_action_crossword"
         android:title="@string/action_crossword"/>
     
 </menu>

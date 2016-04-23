@@ -4,7 +4,8 @@
     android:layout_height="fill_parent"
 	android:weightSum="100"
 	android:gravity="center_horizontal"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+	android:baselineAligned="false">
 
 	<LinearLayout
 		android:layout_width="0dp"
