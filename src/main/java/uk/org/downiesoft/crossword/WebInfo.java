@@ -50,7 +50,7 @@ public class WebInfo implements Comparable<WebInfo>
 					df = new SimpleDateFormat("E dd/MM/yyyy");
 					mDate = df.parse(aDateStr);
 				} else {
-					df = new SimpleDateFormat("E dd MMM yyyy");
+					df = new SimpleDateFormat("E dd MMM yy");
 					mDate = df.parse(aDateStr);
 				}
 			} else {

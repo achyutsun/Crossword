@@ -1,8 +1,12 @@
 package uk.org.downiesoft.crossword;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.SparseBooleanArray;
+import android.widget.Toast;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -12,10 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
-import android.support.v4.app.Fragment;
-import android.os.Bundle;
-import android.app.Activity;
-import android.widget.Toast;
 
 public class WebManager extends Fragment {
 	
@@ -162,7 +162,7 @@ public class WebManager extends Fragment {
 				for (int i=0; i < size; i++) {
 					WebInfo info=new WebInfo(is);
 					info.setIsOnDevice(deviceFiles.get(info.crosswordId()));
-					MainActivity.debug(1,TAG,String.format("WebManager: on device %s",info.crosswordId()));
+					MainActivity.debug(2, TAG, String.format("WebManager: on device %s", info.crosswordId()));
 					insertInSeq(webInfoList, info);
 				}
 				is.close();

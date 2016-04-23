@@ -23,10 +23,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import uk.org.downiesoft.crossword.BluetoothManager.BluetoothListener;
 import uk.org.downiesoft.spell.SpellActivity;
 
-public class MainActivity extends FragmentActivity implements BluetoothListener, ClueListFragment.ClueListListener,
+public class MainActivity extends FragmentActivity implements BluetoothManager.BluetoothListener, ClueListFragment.ClueListListener,
 WebManager.WebManagerListener {
 
 	public static final String TAG = MainActivity.class.getName();
