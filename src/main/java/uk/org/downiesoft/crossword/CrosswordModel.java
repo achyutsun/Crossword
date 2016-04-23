@@ -242,9 +242,8 @@ public class CrosswordModel {
 		if (info != null) {
 			mCrosswordDate = info.dateString();
 		} else {
-			int searchId = 0;
 			if (elements.length >= 3) {
-				searchId = Integer.parseInt(elements[2]);
+				int searchId = Integer.parseInt(elements[2]);
 				if (elements.length >= 4) {
 					mCrosswordDate = elements[3];
 					WebManager.getInstance().insert(new WebInfo(mCrosswordId, searchId, mCrosswordDate));
@@ -674,7 +673,6 @@ public class CrosswordModel {
 		version = aStream.readInt();
 		if (version < VERSION_ANDROID) {
 			mCrosswordId = version;
-			version = -1;
 		} else
 			mCrosswordId = aStream.readInt();
 		for (int x = 0; x < GRID_SIZE; x++) {

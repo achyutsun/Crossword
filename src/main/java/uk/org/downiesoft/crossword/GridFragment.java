@@ -67,8 +67,8 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 		iCrossword = CrosswordModel.getInstance();
 
 		if (iCrossword == null || !iCrossword.isValid()) {
-			iGridLayout.setVisibility(View.GONE);
-			iEmptyView.setVisibility(View.VISIBLE);
+			//iGridLayout.setVisibility(View.GONE);
+			//iEmptyView.setVisibility(View.VISIBLE);
 		} else {
 			iGridLayout.setVisibility(View.VISIBLE);
 			iEmptyView.setVisibility(View.GONE);
@@ -193,8 +193,8 @@ public class GridFragment extends Fragment implements GridView.GridViewListener 
 			iGridView.setCrossword(iCrossword);
 		}
 		if (iCrossword == null || !iCrossword.isValid()) {
-			iGridLayout.setVisibility(View.GONE);
-			iEmptyView.setVisibility(View.VISIBLE);
+			//iGridLayout.setVisibility(View.GONE);
+			//iEmptyView.setVisibility(View.VISIBLE);
 		} else {
 			iGridLayout.setVisibility(View.VISIBLE);
 			iEmptyView.setVisibility(View.GONE);

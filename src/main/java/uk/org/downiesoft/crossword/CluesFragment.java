@@ -36,11 +36,10 @@ public class CluesFragment extends Fragment
 	{
 		Bundle args=getArguments();
 		int direction=0;
-		int number=-1;
 		if (args!=null)
 		{
 			direction=args.getInt("direction",-1);
-			number=args.getInt("number",-1);
+			int number=args.getInt("number",-1);
 			if ((direction==CrosswordModel.CLUE_ACROSS || direction==CrosswordModel.CLUE_DOWN) && number>=0)
 				iClueBundle[direction].putInt("number",number);
 		}

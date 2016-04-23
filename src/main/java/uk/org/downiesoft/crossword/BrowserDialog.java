@@ -196,7 +196,7 @@ public class BrowserDialog extends DialogFragment
 										File f = new File(MainActivity.getCrosswordDirectory(),String.format("%s.xwd",info.crosswordId()));
 										if (f.exists() && f.delete()) {
 											deleted++;
-											iFileList.remove(f);
+											iFileList.remove(info);
 										}
 									}
 									if (deleted > 0) {

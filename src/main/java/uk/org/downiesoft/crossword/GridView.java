@@ -24,8 +24,8 @@ public class GridView extends View {
 	private static final String TAG="uk.org.downiesoft.crossword.GridView";
 
 	public interface GridViewListener {
-		public void onGridClueSelected(GridClueContext aClueContext);
-		public void onGridClueLongPress(GridClueContext aClueContext);
+		void onGridClueSelected(GridClueContext aClueContext);
+		void onGridClueLongPress(GridClueContext aClueContext);
 	}
 
 	private final Context iContext;
@@ -193,7 +193,7 @@ public class GridView extends View {
 
 	@Override
 	public int getMinimumHeight() {
-		return iWidth;
+		return iHeight;
 	}
 
 	private void drawNumber(int col, int row, Canvas canvas) {
@@ -289,11 +289,12 @@ public class GridView extends View {
 		MainActivity.debug(1, TAG,String.format("redraw start %s",iCrossword));
 		if (mBackCanvas != null) {
 			iPaint.reset();
-			if (iCrossword == null) {
+			if (iCrossword == null || !iCrossword.isValid()) {
 				String noFiles=iContext.getString(R.string.text_no_crossword);
-				mBackCanvas.drawColor(Color.BLACK);
+				mBackCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 				iPaint.setTypeface(Typeface.DEFAULT);
 				iPaint.setTextSize(50f);
+				iPaint.setColor(Color.WHITE);
 				iPaint.setTextAlign(Align.CENTER);
 				Rect bounds=new Rect();
 				iPaint.getTextBounds(noFiles, 0, 1, bounds);

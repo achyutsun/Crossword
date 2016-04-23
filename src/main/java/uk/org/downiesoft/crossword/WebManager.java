@@ -23,7 +23,7 @@ public class WebManager extends Fragment {
 	public static final String TAG = WebManager.class.getName();
 
 	public interface WebManagerListener {
-		public void onWebManagerReady(WebManager aWebManager);
+		void onWebManagerReady(WebManager aWebManager);
 	}
 	
 	private static WebManager sManagerInstance;
@@ -101,7 +101,7 @@ public class WebManager extends Fragment {
 				DataOutputStream os = new DataOutputStream(aContext.openFileOutput("webinfo", Context.MODE_PRIVATE));
 				os.writeInt(mWebInfoList.size());
 				Calendar cal = Calendar.getInstance();
-				cal.set(2000,0,1);
+				cal.set(2000, 0, 1);
 				for (WebInfo info: mWebInfoList) {
 					if (info.date().after(cal.getTime()))
 						info.externalize(os);

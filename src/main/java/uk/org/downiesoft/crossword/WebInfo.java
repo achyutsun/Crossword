@@ -43,7 +43,7 @@ public class WebInfo implements Comparable<WebInfo>
 	
 	public void setDate(String aDateStr)
 	{
-		DateFormat df = null;
+		DateFormat df;
 		try {
 			if (aDateStr != null) {
 				if (aDateStr.contains("/")) {

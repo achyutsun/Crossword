@@ -22,9 +22,9 @@ public class Lexicon {
     private static final int INDEX_VERSION = 0x10;
 
     public interface LexiconObserver {
-        public boolean reportMatch(String aMatch, int aDistance);
+        boolean reportMatch(String aMatch, int aDistance);
 
-        public void reportComplete();
+        void reportComplete();
     }
 
     public static final int MAX_LENGTH = 32;

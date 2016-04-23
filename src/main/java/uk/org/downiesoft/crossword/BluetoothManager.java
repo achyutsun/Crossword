@@ -18,8 +18,8 @@ public class BluetoothManager
 
 	public interface BluetoothListener
 	{
-		public void onCrosswordReceived(CrosswordModel aCrossword);
-		public void setBTStatus(String aSubtitle);
+		void onCrosswordReceived(CrosswordModel aCrossword);
+		void setBTStatus(String aSubtitle);
 	}
 
 	private static final String TAG = BluetoothManager.class.getName();
