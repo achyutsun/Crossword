@@ -166,7 +166,9 @@ WebManager.WebManagerListener {
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(R.id.fragmentContainer, mGridFragment, GridFragment.TAG).commit();
 		fm.beginTransaction().replace(R.id.cluesContainer, mCluesFragment, CluesFragment.TAG).commit();
-		fm.beginTransaction().add(mWebManager,WebManager.TAG).commit();
+		if (fm.findFragmentByTag(WebManager.TAG) == null) {
+			fm.beginTransaction().add(mWebManager,WebManager.TAG).commit();
+		}
 	}
 
 	@Override
