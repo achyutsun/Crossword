@@ -1,6 +1,5 @@
 package uk.org.downiesoft.crossword;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -8,11 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.util.Log;
-import android.graphics.Color;
 
 public class ClueListAdapter extends ArrayAdapter<Clue>
 {
@@ -23,13 +19,12 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 		TextView mTextView;
 	}
 	
-	private int resource;
-	private ArrayList<Clue> mItems;
+	private static final int CLUE_LIST_ITEM = R.layout.clue_list_item;
+	private final ArrayList<Clue> mItems;
 
-	public ClueListAdapter(Context context, int resource, ArrayList<Clue> items)
+	public ClueListAdapter(Context context, ArrayList<Clue> items)
 	{
-		super(context, resource, items);
-		this.resource = resource;
+		super(context, CLUE_LIST_ITEM, items);
 		mItems=items;
 	}
 	
@@ -47,7 +42,7 @@ public class ClueListAdapter extends ArrayAdapter<Clue>
 			clueItemView = new LinearLayout(getContext());
 			String inflater = Context.LAYOUT_INFLATER_SERVICE;
 			LayoutInflater li = (LayoutInflater) getContext().getSystemService(inflater);
-			li.inflate(resource, clueItemView, true);
+			li.inflate(CLUE_LIST_ITEM, clueItemView, true);
 			holder = new ViewHolder();
 			holder.mNumberView = (TextView) clueItemView.findViewById(R.id.rowNumber);
 			holder.mTextView = (TextView) clueItemView.findViewById(R.id.rowText);

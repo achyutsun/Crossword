@@ -5,26 +5,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.Toast;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+
 import uk.org.downiesoft.crossword.WebInfoList.WebInfoListListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import android.support.v4.content.IntentCompat;
 
 public class WebViewFragment extends Fragment implements WebInfoListListener
 {
@@ -65,8 +60,8 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 	private int mMode = MODE_PUZZLE;
 	private int mLoginStatus = LOGIN_UNDEFINED;
 	private WebViewListener mListener;
-	private Handler mWebViewClientHandler = new Handler();
-	private Runnable mWebViewClientSetter = new Runnable()
+	private final Handler mWebViewClientHandler = new Handler();
+	private final Runnable mWebViewClientSetter = new Runnable()
 	{
 		@Override
 		public void run()
@@ -75,7 +70,7 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		}
 	};
 
-	private Runnable mWebViewLogin = new Runnable()
+	private final Runnable mWebViewLogin = new Runnable()
 	{
 		@Override
 		public void run()
@@ -130,9 +125,9 @@ public class WebViewFragment extends Fragment implements WebInfoListListener
 		}
 	}
 	
-	private WebViewClient iDefaultWebViewClient = new WebViewClient();
+	private final WebViewClient iDefaultWebViewClient = new WebViewClient();
 
-	private WebViewClient iWebViewClient = new WebViewClient()
+	private final WebViewClient iWebViewClient = new WebViewClient()
 	{
 		@Override
 		public void onPageFinished(WebView view, String url)

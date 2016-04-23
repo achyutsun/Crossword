@@ -36,10 +36,10 @@ public class CrosswordModel {
 	private int mCrosswordId;
 	private String mCrosswordDate;
 	private int mSearchId;
-	private ClueLists mClues;
+	private final ClueLists mClues;
 	private boolean mCrosswordValid;
 	private boolean mModified;
-	private int mGrid[][] = new int[GRID_SIZE][GRID_SIZE];
+	private final int[][] mGrid = new int[GRID_SIZE][GRID_SIZE];
 	private int mSolution[][] = new int[GRID_SIZE][GRID_SIZE];
 
 	public static CrosswordModel getInstance() {
@@ -298,7 +298,6 @@ public class CrosswordModel {
 			InputStream is = new FileInputStream(aFile);
 			crossword = CrosswordModel.openCrossword(is);
 			is.close();
-			crossword.mCrosswordValid = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

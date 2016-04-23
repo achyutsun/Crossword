@@ -246,7 +246,7 @@ public class BluetoothService {
     private class AcceptThread extends Thread {
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
-        private String mSocketType;
+        private final String mSocketType;
 
         public AcceptThread() {
             BluetoothServerSocket tmp = null;
@@ -326,7 +326,7 @@ public class BluetoothService {
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
-        private String mSocketType;
+        private final String mSocketType;
         private boolean mCancelled=false;
 
         public ConnectThread(BluetoothDevice device) {

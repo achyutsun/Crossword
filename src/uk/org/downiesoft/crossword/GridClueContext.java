@@ -6,7 +6,7 @@ import android.graphics.Rect;
 public class GridClueContext {
 
 	private int mDirection;
-	private Point mPosition;
+	private final Point mPosition;
 	private Rect mExtent;
 	private Clue mClue;
 

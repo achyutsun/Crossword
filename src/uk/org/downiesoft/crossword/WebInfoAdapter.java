@@ -15,7 +15,7 @@ public class WebInfoAdapter extends ArrayAdapter<WebInfo>
 	
 	public static final String TAG = WebInfoAdapter.class.getName();
 	
-	private int mResource;
+	private final int mResource;
 
 	public WebInfoAdapter(Context context, int resource, ArrayList<WebInfo> items)
 	{

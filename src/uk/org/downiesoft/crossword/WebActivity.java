@@ -1,11 +1,9 @@
 package uk.org.downiesoft.crossword;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
-import android.content.Intent;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -87,10 +85,10 @@ public class WebActivity extends FragmentActivity implements WebViewFragment.Web
 						break;
 					case WebViewFragment.MODE_PUZZLE: 
 						if (webview != null) {
-							webview.setVisibility(aLoginStatus == WebViewFragment.LOGIN_SUCCESSFUL ? View.GONE: View.VISIBLE);
+							webview.setVisibility(View.GONE);
 						}
 						if (weblist != null) {
-							weblist.setVisibility(aLoginStatus == WebViewFragment.LOGIN_FAILED ? View.GONE: View.VISIBLE);
+							weblist.setVisibility(View.VISIBLE);
 						}
 						break;
 					case WebViewFragment.MODE_SOLUTION:

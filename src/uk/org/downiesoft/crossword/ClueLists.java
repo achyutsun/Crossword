@@ -4,12 +4,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import android.util.SparseArray;
 
 public class ClueLists
 {
 
-	private ClueList[] iClues;
+	private final ClueList[] iClues;
 	private int mSelectedDirection;
 	private int mSelectedIndex;
 	

@@ -1,10 +1,9 @@
 package uk.org.downiesoft.crossword;
+
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import java.io.File;
 
 public class BrowserActivity extends FragmentActivity
 {

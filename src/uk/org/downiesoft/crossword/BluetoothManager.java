@@ -40,7 +40,7 @@ public class BluetoothManager
 	private static BluetoothManager sManagerInstance;
 	
 	// Layout Views
-	private Activity mActivity;
+	private final Activity mActivity;
 
 	// Name of the connected device
 	private String mConnectedDeviceName = null;
@@ -48,13 +48,13 @@ public class BluetoothManager
 	private BluetoothAdapter mBluetoothAdapter = null;
 	// Member object for the chat services
 	private BluetoothService mBTService = null;
-	private BluetoothListener mListener;
+	private final BluetoothListener mListener;
 	// The Handler that gets information back from the BluetoothService
 	private final MessageHandler mHandler = new MessageHandler();
 	private boolean mIsServer;
 	private String mBTStatus;
 
-	private class MessageHandler extends Handler 
+	private class MessageHandler extends Handler
 	{
 		@Override
 		public void handleMessage(Message msg)
@@ -177,12 +177,6 @@ public class BluetoothManager
 		return (mBluetoothAdapter!=null && mBluetoothAdapter.isEnabled());
 	}
 
-	/**
-	 * Sends a message.
-	 * 
-	 * @param message
-	 *            A string of text to send.
-	 */
 	public void sendCrossword(CrosswordModel aCrossword)
 	{
 		// Check that we're actually connected before trying anything
@@ -219,7 +213,7 @@ public class BluetoothManager
 		{
 			CrosswordModel crossword = CrosswordModel.openCrossword(bais);
 			bais.close();
-			MainActivity.debug(1,TAG, String.format("<receiveCrossword: %s",crossword.getCrosswordId()));
+			MainActivity.debug(1,TAG, String.format("<receiveCrossword: %s",crossword));
 			return crossword;
 		}
 		catch (IOException e)

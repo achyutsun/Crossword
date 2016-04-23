@@ -145,9 +145,9 @@ public class WebInfo implements Comparable<WebInfo>
 			return 0;
 		} else if (mDate != null && info.mDate != null) {
 			return -this.mDate.compareTo(info.mDate);
-		} else if (mDate == null) {
+		} else if (mDate == null && info.mDate != null) {
 			return -WebInfo.estimatedDate(this.mCrosswordId).compareTo(info.mDate);
-		} else if (info.mDate == null) {
+		} else if (mDate != null) {
 			return -this.mDate.compareTo(estimatedDate(info.mCrosswordId));
 		} else {
 			return -WebInfo.estimatedDate(this.mCrosswordId).compareTo(estimatedDate(info.mCrosswordId));

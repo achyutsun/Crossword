@@ -1,6 +1,5 @@
 package uk.org.downiesoft.crossword;
 
-import android.util.SparseArray;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,8 +8,8 @@ import android.util.SparseIntArray;
 
 public class ClueList {
 
-	private ArrayList<Clue> iClues;
-	private SparseIntArray iIndex;
+	private final ArrayList<Clue> iClues;
+	private final SparseIntArray iIndex;
 
 	public ClueList() {
 		iClues = new ArrayList<Clue>(15);
@@ -23,8 +22,8 @@ public class ClueList {
 	}
 
 	public Clue getClueByNumber(int aNum) {
-		Integer index = iIndex.get(aNum);
-		if (index != null) {
+		int index = iIndex.get(aNum,-1);
+		if (index != -1) {
 			return iClues.get(index);
 		}
 		return null;

@@ -28,38 +28,38 @@ public class GridView extends View {
 		public void onGridClueLongPress(GridClueContext aClueContext);
 	}
 
-	private Context iContext;
-	private Paint iPaint;
-	private Paint mLetterPaint;
-	private Paint mNumberPaint;
+	private final Context iContext;
+	private final Paint iPaint;
+	private final Paint mLetterPaint;
+	private final Paint mNumberPaint;
 	private int iWidth;
 	private int iHeight;
 	private int iVSize;
 	private int iHSize;
 	private int iHMargin;
 	private int iVMargin;
-	private GridClueContext mCursor;
+	private final GridClueContext mCursor;
 	private GridClueContext mPressedCursor;
 	private Point iAnchor;
 	private PointF iTouchAnchor;
 	private CrosswordModel iCrossword;
 	private GridViewListener iObserver;
-	private Rect r = new Rect();
-	private Rect iNumberBounds = new Rect();
-	private Rect iLetterBounds = new Rect();
+	private final Rect r = new Rect();
+	private final Rect iNumberBounds = new Rect();
+	private final Rect iLetterBounds = new Rect();
 	private float mTextSize;
 	private float mNumberSize;
 	private Bitmap mBackBmp;
 	private Canvas mBackCanvas;
 	private Matrix mMatrix;
-	private int mHighlight;
-	private int mHighlightAlt;
-	private int mPressed;
-	private int mPressedAlt;
-	private GestureDetector mGestureDetector;
+	private final int mHighlight;
+	private final int mHighlightAlt;
+	private final int mPressed;
+	private final int mPressedAlt;
+	private final GestureDetector mGestureDetector;
 	private boolean mLongPressTriggered;
 	private boolean mDoubleTapTriggered;
-	private CluePressRunnable mCluePressRunnable = new CluePressRunnable();
+	private final CluePressRunnable mCluePressRunnable = new CluePressRunnable();
 
 	private class CluePressRunnable implements Runnable {
 
@@ -305,7 +305,7 @@ public class GridView extends View {
 			}
 			highlightCurrentClue(true, false);		
 		} else {
-			MainActivity.debug(1, TAG,String.format("redraw - no back canvas"));			
+			MainActivity.debug(1, TAG, "redraw - no back canvas");
 		}
 	}
 

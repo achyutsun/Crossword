@@ -13,11 +13,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.os.Bundle;
-import android.view.ViewGroup;
 import android.app.Activity;
+import android.widget.Toast;
 
 public class WebManager extends Fragment {
 	
@@ -53,7 +51,7 @@ public class WebManager extends Fragment {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		MainActivity.debug(1, TAG, String.format("onCreate"));
+		MainActivity.debug(1, TAG, "onCreate");
 		setRetainInstance(true);
 		new WebInfoLoaderTask(getActivity(), "webinfo").execute();	
 		super.onCreate(savedInstanceState);
@@ -107,8 +105,7 @@ public class WebManager extends Fragment {
 				os.flush();
 				os.close();
 			} catch (IOException e) {
-				File file = new File(aContext.getFilesDir(), "webinfo");
-				file.delete();
+				Toast.makeText(aContext,R.string.save_failed,Toast.LENGTH_SHORT).show();
 			}
 		}
 		mModified = false;
@@ -129,8 +126,8 @@ public class WebManager extends Fragment {
 
 	private class WebInfoLoaderTask extends AsyncTask<Void, Void, ArrayList<WebInfo>> {
 
-		private Context mContext;
-		private String mFileName;
+		private final Context mContext;
+		private final String mFileName;
 
 		WebInfoLoaderTask(Context aContext, String aFileName) {
 			mContext = aContext;
@@ -139,7 +136,7 @@ public class WebManager extends Fragment {
 
 		@Override
 		protected ArrayList<WebInfo> doInBackground(Void... voids) {
-			MainActivity.debug(1, TAG, String.format(">doInBackground()"));
+			MainActivity.debug(1, TAG, ">doInBackground()");
 			ArrayList<WebInfo> webInfoList = null;
 			File[] xwdFiles=MainActivity.getCrosswordDirectory().listFiles(new FileFilter(){
 					@Override
@@ -169,7 +166,7 @@ public class WebManager extends Fragment {
 					insertInSeq(webInfoList, info);
 				}
 				is.close();
-				MainActivity.debug(1, TAG, String.format(">doInBackground()"));
+				MainActivity.debug(1, TAG, ">doInBackground()");
 				return webInfoList;
 			} catch (IOException e) {
 				e.printStackTrace();

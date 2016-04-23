@@ -1,5 +1,6 @@
 package uk.org.downiesoft.crossword;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -147,9 +148,11 @@ WebManager.WebManagerListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		MainActivity.debug(1, TAG, String.format("onCreate(%s)", mCrossword));
 		super.onCreate(savedInstanceState);
-		MainActivity.sCrosswordRoot = new File(Environment.getExternalStorageDirectory().toString(),getString(R.string.crossword_app_name));
+		MainActivity.sCrosswordRoot = new File(Environment.getExternalStorageDirectory(),getString(R.string.crossword_app_name));
 		if (!MainActivity.sCrosswordRoot.exists()) {
-			MainActivity.sCrosswordRoot.mkdir();
+			if (!MainActivity.sCrosswordRoot.mkdir()) {
+				sCrosswordRoot = Environment.getExternalStorageDirectory();
+			}
 		}
 		setContentView(R.layout.activity_crossword);
 		mCrossword = CrosswordModel.getInstance();
@@ -194,7 +197,7 @@ WebManager.WebManagerListener {
 
 	@Override
 	public void onDestroy() {
-		super.onStop();
+		super.onDestroy();
 		if (mBluetoothManager != null)
 			mBluetoothManager.stop(false);
 	}
@@ -321,14 +324,18 @@ WebManager.WebManagerListener {
 				subtitle = info.dateString();
 			}
 		}
-		getActionBar().setTitle(title);
-		getActionBar().setSubtitle(subtitle);
+		ActionBar ab = getActionBar();
+		if (ab != null) {
+			ab.setTitle(title);
+			ab.setSubtitle(subtitle);
+		}
 	}
 
 	@Override
 	public void setBTStatus(String aSubtitle) {
-		if (aSubtitle != null) {
-			getActionBar().setSubtitle(aSubtitle);			
+		ActionBar ab = getActionBar();
+		if (ab != null) {
+			ab.setSubtitle(aSubtitle);
 		} else {
 			setCrosswordTitle();
 		}

@@ -10,14 +10,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -53,7 +49,7 @@ public class SpellActivity extends Activity implements LexiconObserver
 			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2)
 			{
 				String word = iEditText.getText().toString().toLowerCase();
-				if (word != null && word.length() > 1)
+				if (word.length() > 1)
 				{
 					iLexicon.check(word, Lexicon.DICT_ALL, Lexicon.DICT_ALL, false);
 				}
@@ -181,14 +177,14 @@ public class SpellActivity extends Activity implements LexiconObserver
 			{
 				iWordList.add(i, aWord);
 				//iWordList.add(i, String.format("%s (%d)",aWord,aMetric));
-				iMetric.add(i, Integer.valueOf(aMetric));
+				iMetric.add(i, aMetric);
 				return i;
 			}
 			i++;
 		}
 		iWordList.add(i, aWord);
 		//iWordList.add(i, String.format("%s (%d)",aWord,aMetric));
-		iMetric.add(i, Integer.valueOf(aMetric));
+		iMetric.add(i, aMetric);
 		return i;
 	}
 }
