@@ -100,11 +100,8 @@ public class WebManager extends Fragment {
 			try {
 				DataOutputStream os = new DataOutputStream(aContext.openFileOutput("webinfo", Context.MODE_PRIVATE));
 				os.writeInt(mWebInfoList.size());
-				Calendar cal = Calendar.getInstance();
-				cal.set(2000, 0, 1);
 				for (WebInfo info: mWebInfoList) {
-					if (info.date().after(cal.getTime()))
-						info.externalize(os);
+					info.externalize(os);
 				}
 				os.flush();
 				os.close();
@@ -187,7 +184,7 @@ public class WebManager extends Fragment {
 		protected void onPostExecute(ArrayList<WebInfo> result) {
 			WebManager.this.mWebInfoList = result;
 			mListener.onWebManagerReady(WebManager.this);
-//			mModified = false;
+			mModified = false;
 		}
 
 	}
