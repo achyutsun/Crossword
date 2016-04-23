@@ -42,11 +42,7 @@
             android:name="uk.org.downiesoft.spell.SpellActivity"
             android:icon="@drawable/ic_launcher_spell"
             android:label="@string/spell_app_name"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-			android:uiOptions="splitActionBarWhenNarrow" >
-			<meta-data
-				android:name="android.support.UI_OPTIONS"
-				android:value="splitActionBarWhenNarrow" />
+            android:windowSoftInputMode="stateHidden|adjustResize" >
 			<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
