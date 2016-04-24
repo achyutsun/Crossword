@@ -287,11 +287,11 @@ public class Lexicon {
                     found = (i + 1 > iIndex.size()) ? true : iIndex.get(i + 1).iPrefix.compareToIgnoreCase(aLetterSet) > 0;
                     break;
             }
+			if (found) {
+				return i;
+			}
         }
-        if (found)
-            return i;
-        else
-            return -1;
+		return -1;
     }
 
     int levenshtein(String aWord1, String aWord2) {
