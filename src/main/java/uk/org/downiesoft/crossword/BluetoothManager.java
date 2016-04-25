@@ -209,18 +209,9 @@ public class BluetoothManager
 	{
 		MainActivity.debug(1,TAG, String.format(">receiveCrossword: %s bytes",receive.length));
 		ByteArrayInputStream bais=new ByteArrayInputStream(receive);
-		try
-		{
-			CrosswordModel crossword = CrosswordModel.openCrossword(bais);
-			bais.close();
-			MainActivity.debug(1,TAG, String.format("<receiveCrossword: %s",crossword));
-			return crossword;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+		CrosswordModel crossword = CrosswordModel.openCrossword(bais);
+		MainActivity.debug(1, TAG, String.format("<receiveCrossword: %s", crossword));
+		return crossword;
 	}
 	
 	private final void setStatus(int resId)

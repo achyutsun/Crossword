@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.BufferedInputStream;
 
 public class CrosswordModel {
 	
@@ -242,65 +243,78 @@ public class CrosswordModel {
 		if (info != null) {
 			mCrosswordDate = info.dateString();
 		} else {
-			if (elements.length >= 3) {
-				int searchId = Integer.parseInt(elements[2]);
-				if (elements.length >= 4) {
-					mCrosswordDate = elements[3];
-					WebManager.getInstance().insert(new WebInfo(mCrosswordId, searchId, mCrosswordDate));
-					mModified = true;
-				}
-			}
+			info = new WebInfo(line);
+			mCrosswordId = info.crosswordId();
+			mCrosswordDate = info.dateString();
+			WebManager.getInstance().insert(info);
 		}
 	}
 
-	public static CrosswordModel openCrossword(InputStream is) throws IOException {
+	public static CrosswordModel openCrossword(InputStream is) {
 		CrosswordModel crossword=new CrosswordModel();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		crossword.readHeader(reader);
-		crossword.readGrid(reader, crossword);
-		String line = reader.readLine();
-		if (!line.equalsIgnoreCase("Across"))
-			return null;
-		int direction = CLUE_ACROSS;
-		line = reader.readLine();
+		BufferedReader reader = null;
 		try {
-			while (line != null && line.length() > 0) {
-				MainActivity.debug(2, TAG, String.format("OpenCrossword: clue=[%s]", line));
-				if (line.equalsIgnoreCase("Down")) {
-					direction = CLUE_DOWN;
-					line = reader.readLine();
-					if (line == null) {
-						return null;
+			reader = new BufferedReader(new InputStreamReader(is));
+			crossword.readHeader(reader);
+			crossword.readGrid(reader, crossword);
+			String line = reader.readLine();
+			if (!line.equalsIgnoreCase("Across"))
+				return null;
+			int direction = CLUE_ACROSS;
+			line = reader.readLine();
+			try {
+				while (line != null && line.length() > 0) {
+					MainActivity.debug(2, TAG, String.format("OpenCrossword: clue=[%s]", line));
+					if (line.equalsIgnoreCase("Down")) {
+						direction = CLUE_DOWN;
+						line = reader.readLine();
+						if (line == null) {
+							return null;
+						}
 					}
+					Clue clue = new Clue();
+					clue.setType(direction);
+					String[] words = line.split("\t");
+					words[0] = words[0].replaceFirst("[AD]:", "");
+					clue.setNumber(Integer.parseInt(words[0]));
+					clue.setText(words[1]);
+					crossword.mClues.addClue(clue, direction);
+					line = reader.readLine();
 				}
-				Clue clue = new Clue();
-				clue.setType(direction);
-				String[] words = line.split("\t");
-				words[0] = words[0].replaceFirst("[AD]:", "");
-				clue.setNumber(Integer.parseInt(words[0]));
-				clue.setText(words[1]);
-				crossword.mClues.addClue(clue, direction);
-				line = reader.readLine();
+				crossword.mCrosswordValid = true;
+				return crossword;
+			} catch (NumberFormatException e) {
+				crossword.mCrosswordValid = false;
+				return null;
 			}
-			crossword.mCrosswordValid = true;
-			reader.close();
-			return crossword;
-		} catch (NumberFormatException e) {
-			crossword.mCrosswordValid = false;
+		} catch (IOException e) {
 			return null;
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException ignored) {}
+			} else if (is != null) {
+				try {
+					is.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
 
 	public static CrosswordModel openCrossword(File aFile) {
-		CrosswordModel crossword=null;
+		BufferedInputStream is = null;
 		try {
-			InputStream is = new FileInputStream(aFile);
-			crossword = CrosswordModel.openCrossword(is);
-			is.close();
+			is = new BufferedInputStream(new FileInputStream(aFile));
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if (is != null) {
+				return CrosswordModel.openCrossword(is);
+			} else {
+				return null;
+			}
 		}
-		return crossword;
 	}
 
 	public static CrosswordModel importCrossword(InputStream aStream) {

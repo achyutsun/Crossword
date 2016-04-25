@@ -17,6 +17,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Calendar;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 
 public class WebManager extends Fragment {
 	
@@ -96,6 +99,7 @@ public class WebManager extends Fragment {
 	}
 
 	public void store(Context aContext) {
+		MainActivity.debug(2, TAG, String.format("store %s", mModified));
 		if (mModified) {
 			try {
 				DataOutputStream os = new DataOutputStream(aContext.openFileOutput("webinfo", Context.MODE_PRIVATE));
@@ -156,8 +160,9 @@ public class WebManager extends Fragment {
 					}
 				}
 			}
+			DataInputStream is = null;
 			try {
-				DataInputStream is = new DataInputStream(mContext.openFileInput(mFileName));
+				is = new DataInputStream(mContext.openFileInput(mFileName));
 				int size=is.readInt();
 				webInfoList = new ArrayList<WebInfo>(size);
 				for (int i=0; i < size; i++) {
@@ -166,15 +171,46 @@ public class WebManager extends Fragment {
 					MainActivity.debug(2, TAG, String.format("WebManager: on device %s", info.crosswordId()));
 					insertInSeq(webInfoList, info);
 				}
-				is.close();
+				mModified = false;
 				MainActivity.debug(1, TAG, ">doInBackground()");
 				return webInfoList;
 			} catch (IOException e) {
 				e.printStackTrace();
-				if (webInfoList != null) {
-					webInfoList.clear();
-				} else {
+				if (webInfoList == null) {
 					webInfoList = new ArrayList<WebInfo>();
+				}
+				// scavenge webinfo from files if possible
+				for (File xwdFile: xwdFiles) {
+					BufferedReader reader = null;
+					try {
+						reader = new BufferedReader(new InputStreamReader(new FileInputStream(xwdFile)));
+						String line = reader.readLine();
+						if (line != null && line.matches(CrosswordModel.CROSSWORD_HEADER+".*")) {
+							WebInfo info = new WebInfo(line);
+							info.setIsOnDevice(true);
+							MainActivity.debug(2, TAG, String.format("WebManager: scavenge %s %s", xwdFile.getName(), info));
+							if (info.crosswordId() > 0) {
+								insertInSeq(webInfoList, info);
+							}
+						}
+					} catch (IOException e2) {
+						e.printStackTrace();
+					} finally {
+						if (reader != null) {
+							try {
+								reader.close();
+							} catch (IOException ignored) {
+							}
+						}
+					}
+					
+				}
+				mModified = true;
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (IOException ignored) {}
 				}
 			}
 			return webInfoList;
@@ -184,7 +220,6 @@ public class WebManager extends Fragment {
 		protected void onPostExecute(ArrayList<WebInfo> result) {
 			WebManager.this.mWebInfoList = result;
 			mListener.onWebManagerReady(WebManager.this);
-			mModified = false;
 		}
 
 	}

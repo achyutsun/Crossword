@@ -126,17 +126,14 @@ public class Lexicon {
 
     private byte[] bufferLexicon(String aName) throws IOException {
         InputStream is = iContext.getAssets().open(aName);
-        ByteArrayOutputStream os = new ByteArrayOutputStream(2500000);
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-        int length = -1;
-        while ((length = is.read(buffer)) > 0) {
-            os.write(buffer, 0, length);
+        byte[] buffer = new byte[2256645];
+        int pos = 0;
+		int bytes;
+        while ((bytes = is.read(buffer, pos, buffer.length - pos)) > 0) {
+            pos += bytes;
         }
-        byte[] bytes = os.toByteArray();
         is.close();
-        os.close();
-        return bytes;
+        return buffer;
     }
 
     private boolean eof() {

@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.io.BufferedReader;
 
 public class WebInfo implements Comparable<WebInfo>
 {
@@ -17,6 +18,9 @@ public class WebInfo implements Comparable<WebInfo>
 	private int mSearchId;
 	private Date mDate;
 	private boolean mIsOnDevice;
+	
+	public WebInfo() {
+	}
 	
 	public WebInfo(int aCrosswordId, int aSearchId, String aDate)
 	{
@@ -29,6 +33,20 @@ public class WebInfo implements Comparable<WebInfo>
 		mCrosswordId = aStream.readInt();
 		mSearchId = aStream.readInt();
 		mDate = new Date(aStream.readLong());
+	}
+	
+	public WebInfo(String aHeaderLine) {
+		String[] elements = aHeaderLine.split("\t");
+		int id = Integer.parseInt(elements[1]);
+		mCrosswordId = id;
+		if (elements.length >= 3) {
+			mSearchId = Integer.parseInt(elements[2]);
+		}
+		if (elements.length >= 4) {
+			setDate(elements[3]);
+		} else {
+			mDate = estimatedDate(mCrosswordId);
+		}
 	}
 	
 	public void setCrosswordId(int aId)
