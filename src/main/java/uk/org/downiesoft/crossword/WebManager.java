@@ -32,7 +32,6 @@ public class WebManager extends Fragment {
 	private static WebManager sManagerInstance;
 
 	private ArrayList<WebInfo> mWebInfoList;
-	private WebInfoAdapter mWebInfoAdapter;
 	private WebManagerListener mListener;
 	private boolean mModified = false;
 
@@ -54,6 +53,13 @@ public class WebManager extends Fragment {
 	}
 
 	@Override
+	public void onDetach() {
+		super.onDetach();
+		mListener = null;
+	}
+
+	
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		MainActivity.debug(1, TAG, "onCreate");
 		setRetainInstance(true);
@@ -62,20 +68,13 @@ public class WebManager extends Fragment {
 	}
 
 	public int insert(WebInfo aInfo) {
-		int index = insertInSeq(mWebInfoList, aInfo);
-		if (mWebInfoAdapter != null) {
-			mWebInfoAdapter.notifyDataSetChanged();
-		}
-		return index;
+		return insertInSeq(mWebInfoList, aInfo);
 	}
 
-	public WebInfoAdapter getAdapter(Context aContext) {
-		if (mWebInfoAdapter == null) {
-			mWebInfoAdapter = new WebInfoAdapter(aContext, R.layout.web_info_item, mWebInfoList);
-		}
-		return mWebInfoAdapter;
+	public ArrayList<WebInfo> getWebInfoList() {
+		return mWebInfoList;
 	}
-
+	
 	public WebInfo getCrossword(int aCrosswordId) {
 		if (mWebInfoList != null) {
 			for (int i=0; i < mWebInfoList.size(); i++) {

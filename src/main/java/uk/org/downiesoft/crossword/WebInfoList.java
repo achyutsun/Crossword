@@ -40,7 +40,7 @@ public class WebInfoList extends Fragment
 					iListener.onWebInfoListItemSelected(item);
 			}
 		});
-		iAdapter = WebManager.getInstance().getAdapter(getActivity());
+		iAdapter = new WebInfoAdapter(getActivity(), R.layout.web_info_item, WebManager.getInstance().getWebInfoList());
 		iListView.setAdapter(iAdapter);
 		return iView;
 	}
